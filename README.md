@@ -2,7 +2,7 @@
 
 Sistem manajemen produksi garment yang komprehensif dengan tracking lengkap dari cutting hingga packing, termasuk pencatatan surat jalan dan log aktivitas produksi.
 
-## 🎯 Fitur Utama
+## Fitur Utama
 
 ### 1. **Order Management**
 - Create order dengan detail buyer, style, dan size breakdown
@@ -32,7 +32,7 @@ Sistem manajemen produksi garment yang komprehensif dengan tracking lengkap dari
 - Audit trail setiap perubahan status
 - Link ke surat jalan terkait
 
-## 📁 Struktur Folder
+## Struktur Folder
 
 ```
 garment-production-system/
@@ -72,7 +72,7 @@ garment-production-system/
 └── next.config.mjs
 ```
 
-## 🚀 Cara Install & Menjalankan
+## Cara Install & Menjalankan
 
 ### Prerequisites
 - Node.js 18+ 
@@ -108,7 +108,7 @@ npm run build
 npm start
 ```
 
-## 📊 Data Model Overview
+## Data Model Overview
 
 ### Order
 - Order number (auto-generated)
@@ -134,7 +134,7 @@ npm start
 - Duration per process
 - Link to transfer logs
 
-## 🎨 Fitur UI/UX
+## Fitur UI/UX
 
 ### Dashboard
 - Overview statistics (total orders, in progress, completed, WIP)
@@ -165,7 +165,7 @@ npm start
 - Date scheduling
 - Real-time validation
 
-## 🔧 Customization untuk Klien
+## Customization untuk Klien
 
 ### 1. **Tambah Department Baru**
 Edit `lib/constants.ts`:
@@ -194,7 +194,7 @@ Edit buyer creation di `lib/dummyData.ts` atau form input.
 ### 4. **Tambah Field Custom**
 Extend types di `lib/types.ts` dan update forms.
 
-## 💡 Skenario Penggunaan Demo
+## Skenario Penggunaan Demo
 
 ### Scenario 1: Create & Track Order Baru
 1. Klik "New Order" di dashboard
@@ -220,7 +220,7 @@ Extend types di `lib/types.ts` dan update forms.
 3. Setelah production selesai, leftover harus diretur
 4. Different workflow dari repeat buyer
 
-## 🎯 Keunggulan Sistem
+## Keunggulan Sistem
 
 ### 1. **Complete Traceability**
 - Setiap perpindahan tercatat dengan surat jalan
@@ -249,7 +249,7 @@ Extend types di `lib/types.ts` dan update forms.
 - Reject rate analytics
 - Completion rate tracking
 
-## 📈 Pengembangan ke Production System
+## Pengembangan ke Production System
 
 ### Phase 1: Backend Integration
 - Migrasi dari localStorage ke database (PostgreSQL/MySQL)
@@ -282,7 +282,7 @@ Extend types di `lib/types.ts` dan update forms.
 - Financial system integration
 - Customer portal
 
-## 🛠️ Tech Stack
+## Tech Stack
 
 - **Framework**: Next.js 14 (App Router)
 - **Language**: TypeScript
@@ -290,17 +290,17 @@ Extend types di `lib/types.ts` dan update forms.
 - **State Management**: React Hooks + localStorage
 - **Data Persistence**: localStorage (prototype only)
 
-## 📝 Notes untuk Presentasi Klien
+## Notes untuk Presentasi Klien
 
 ### Highlight Points:
-1. ✅ **Complete workflow tracking** dari cutting sampai packing
-2. ✅ **Surat jalan otomatis** setiap perpindahan proses
-3. ✅ **Buyer-specific policies** (repeat vs one-time)
-4. ✅ **Real-time progress monitoring**
-5. ✅ **Audit trail lengkap** untuk compliance
-6. ✅ **WIP monitoring** untuk capacity planning
-7. ✅ **Reject tracking** untuk quality control
-8. ✅ **Lead time analytics** untuk process improvement
+1. **Complete workflow tracking** dari cutting sampai packing
+2. **Surat jalan otomatis** setiap perpindahan proses
+3. **Buyer-specific policies** (repeat vs one-time)
+4. **Real-time progress monitoring**
+5. **Audit trail lengkap** untuk compliance
+6. **WIP monitoring** untuk capacity planning
+7. **Reject tracking** untuk quality control
+8. **Lead time analytics** untuk process improvement
 
 ### Demo Flow:
 1. Show dashboard overview
@@ -311,7 +311,7 @@ Extend types di `lib/types.ts` dan update forms.
 6. Explain buyer type differences
 7. Show analytics & metrics
 
-## 🤝 Support & Contact
+## Support & Contact
 
 Prototype ini dibuat untuk demo kepada klien. Untuk pengembangan lebih lanjut ke production system, silakan diskusikan requirements detail.
 
