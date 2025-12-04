@@ -40,6 +40,12 @@ export default function RootLayout({
                   Orders
                 </a>
                 <a
+                  href="/waiting-list"
+                  className="text-gray-700 hover:text-gray-900 font-medium transition-colors"
+                >
+                  Waiting List
+                </a>
+                <a
                   href="/orders/new"
                   className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors"
                 >

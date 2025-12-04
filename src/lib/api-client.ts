@@ -1,9 +1,18 @@
-// lib/api-client.ts
-// API Client untuk komunikasi dengan backend
+// lib/api-client-new.ts
+// Updated API Client for New Flow
 
-import { Order, Buyer, Style, TransferLog, ProcessHistoryLog } from './types';
+import { ProcessHistoryLog, TransferLog } from "./types";
+import {
+  Order,
+  ProcessStep,
+  ProcessTransition,
+  RejectLog,
+  ProcessState,
+  Buyer,
+  Style,
+} from "./types-new";
 
-const API_BASE = '/api';
+const API_BASE = "/api";
 
 class ApiClient {
   private async request<T>(
@@ -11,44 +20,42 @@ class ApiClient {
     options?: RequestInit
   ): Promise<T> {
     const url = `${API_BASE}${endpoint}`;
-    
+
     const config: RequestInit = {
       ...options,
       headers: {
-        'Content-Type': 'application/json',
+        "Content-Type": "application/json",
         ...options?.headers,
       },
     };
 
-    try {
-      const response = await fetch(url, config);
-      const data = await response.json();
+    const response = await fetch(url, config);
+    const data = await response.json();
 
-      if (!response.ok) {
-        throw new Error(data.error || 'API request failed');
-      }
-
-      return data;
-    } catch (error) {
-      console.error(`API Error (${endpoint}):`, error);
-      throw error;
+    if (!response.ok) {
+      throw new Error(data.error || "API request failed");
     }
+
+    return data;
   }
 
-  // Orders
+  // ==================== ORDERS ====================
+
   async getOrders(params?: {
-    status?: string;
-    buyerId?: string;
+    phase?: string;
+    process?: string;
+    state?: string;
     search?: string;
   }): Promise<Order[]> {
     const queryParams = new URLSearchParams();
-    if (params?.status) queryParams.append('status', params.status);
-    if (params?.buyerId) queryParams.append('buyerId', params.buyerId);
-    if (params?.search) queryParams.append('search', params.search);
+    if (params?.phase) queryParams.append("phase", params.phase);
+    if (params?.process) queryParams.append("process", params.process);
+    if (params?.state) queryParams.append("state", params.state);
+    if (params?.search) queryParams.append("search", params.search);
 
     const query = queryParams.toString();
-    const endpoint = query ? `/orders?${query}` : '/orders';
-    
+    const endpoint = query ? `/orders?${query}` : "/orders";
+
     const response = await this.request<{ success: boolean; data: Order[] }>(
       endpoint
     );
@@ -62,68 +69,285 @@ class ApiClient {
     return response.data;
   }
 
-  async createOrder(orderData: Partial<Order>): Promise<Order> {
+  async createOrder(orderData: {
+    buyerId: string;
+    styleId: string;
+    orderDate: string;
+    productionDeadline: string;
+    deliveryDeadline: string;
+    totalQuantity: number;
+    sizeBreakdown: any[];
+    createdBy: string;
+    notes?: string;
+  }): Promise<Order> {
     const response = await this.request<{ success: boolean; data: Order }>(
-      '/orders',
+      "/orders",
       {
-        method: 'POST',
+        method: "POST",
         body: JSON.stringify(orderData),
       }
     );
     return response.data;
   }
 
-  async updateOrder(id: string, orderData: Partial<Order>): Promise<Order> {
-    const response = await this.request<{ success: boolean; data: Order }>(
-      `/orders/${id}`,
-      {
-        method: 'PUT',
-        body: JSON.stringify(orderData),
-      }
-    );
+  // ==================== PROCESS STEPS ====================
+
+  async getProcessStepsByOrderId(orderId: string): Promise<ProcessStep[]> {
+    const response = await this.request<{
+      success: boolean;
+      data: ProcessStep[];
+    }>(`/orders/${orderId}/process-steps`);
     return response.data;
   }
 
-  async deleteOrder(id: string): Promise<void> {
-    await this.request(`/orders/${id}`, {
-      method: 'DELETE',
+  async getProcessStepById(id: string): Promise<ProcessStep> {
+    const response = await this.request<{
+      success: boolean;
+      data: ProcessStep;
+    }>(`/process-steps/${id}`);
+    return response.data;
+  }
+
+  async transitionProcessStep(
+    processStepId: string,
+    data: {
+      newState: ProcessState;
+      performedBy: string;
+      assignedTo?: string;
+      assignedLine?: string;
+      quantity?: number;
+      notes?: string;
+    }
+  ): Promise<{
+    processStep: ProcessStep;
+    transition: ProcessTransition;
+    nextProcessStep?: ProcessStep;
+  }> {
+    const response = await this.request<{
+      success: boolean;
+      data: {
+        processStep: ProcessStep;
+        transition: ProcessTransition;
+        nextProcessStep?: ProcessStep;
+      };
+    }>(`/process-steps/${processStepId}/transition`, {
+      method: "POST",
+      body: JSON.stringify(data),
     });
+    return response.data;
   }
 
-  // Buyers
+  // ==================== PROCESS TRANSITIONS ====================
+
+  async getTransitionsByOrderId(orderId: string): Promise<ProcessTransition[]> {
+    const response = await this.request<{
+      success: boolean;
+      data: ProcessTransition[];
+    }>(`/orders/${orderId}/transitions`);
+    return response.data;
+  }
+
+  async getTransitionsByProcessStepId(
+    processStepId: string
+  ): Promise<ProcessTransition[]> {
+    const response = await this.request<{
+      success: boolean;
+      data: ProcessTransition[];
+    }>(`/process-steps/${processStepId}/transitions`);
+    return response.data;
+  }
+
+  // ==================== REJECT LOGS ====================
+
+  async recordReject(
+    processStepId: string,
+    data: {
+      rejectType: string;
+      rejectCategory: string;
+      quantity: number;
+      size?: string;
+      bundleNumber?: string;
+      description: string;
+      rootCause?: string;
+      action: string;
+      reportedBy: string;
+      images?: string[];
+    }
+  ): Promise<RejectLog> {
+    const response = await this.request<{ success: boolean; data: RejectLog }>(
+      `/process-steps/${processStepId}/reject`,
+      {
+        method: "POST",
+        body: JSON.stringify(data),
+      }
+    );
+    return response.data;
+  }
+
+  async getRejectsByOrderId(orderId: string): Promise<RejectLog[]> {
+    const response = await this.request<{
+      success: boolean;
+      data: RejectLog[];
+    }>(`/orders/${orderId}/rejects`);
+    return response.data;
+  }
+
+  async getRejectsByProcessStepId(processStepId: string): Promise<RejectLog[]> {
+    const response = await this.request<{
+      success: boolean;
+      data: RejectLog[];
+    }>(`/process-steps/${processStepId}/rejects`);
+    return response.data;
+  }
+
+  async completeRework(
+    rejectLogId: string,
+    data: {
+      completedBy: string;
+      finalDisposition: "passed" | "scrapped";
+      notes?: string;
+    }
+  ): Promise<RejectLog> {
+    const response = await this.request<{ success: boolean; data: RejectLog }>(
+      `/reject-logs/${rejectLogId}/complete-rework`,
+      {
+        method: "PUT",
+        body: JSON.stringify(data),
+      }
+    );
+    return response.data;
+  }
+
+  // ==================== BUYERS & STYLES ====================
+
   async getBuyers(): Promise<Buyer[]> {
     const response = await this.request<{ success: boolean; data: Buyer[] }>(
-      '/buyers'
+      "/buyers"
     );
     return response.data;
   }
 
-  async createBuyer(buyerData: Partial<Buyer>): Promise<Buyer> {
-    const response = await this.request<{ success: boolean; data: Buyer }>(
-      '/buyers',
-      {
-        method: 'POST',
-        body: JSON.stringify(buyerData),
-      }
-    );
-    return response.data;
-  }
-
-  // Styles
   async getStyles(): Promise<Style[]> {
     const response = await this.request<{ success: boolean; data: Style[] }>(
-      '/styles'
+      "/styles"
     );
     return response.data;
   }
 
-  async createStyle(styleData: Partial<Style>): Promise<Style> {
-    const response = await this.request<{ success: boolean; data: Style }>(
-      '/styles',
+  // ==================== DASHBOARD ====================
+
+  async getDashboardStats(): Promise<any> {
+    const response = await this.request<{ success: boolean; data: any }>(
+      "/dashboard/stats"
+    );
+    return response.data;
+  }
+
+  async getProcessPerformance(): Promise<any> {
+    const response = await this.request<{ success: boolean; data: any }>(
+      "/reports/process-performance"
+    );
+    return response.data;
+  }
+
+  async getRejectAnalysis(params?: {
+    startDate?: string;
+    endDate?: string;
+    processName?: string;
+  }): Promise<any> {
+    const queryParams = new URLSearchParams();
+    if (params?.startDate) queryParams.append("startDate", params.startDate);
+    if (params?.endDate) queryParams.append("endDate", params.endDate);
+    if (params?.processName)
+      queryParams.append("processName", params.processName);
+
+    const query = queryParams.toString();
+    const endpoint = query
+      ? `/reports/reject-analysis?${query}`
+      : "/reports/reject-analysis";
+
+    const response = await this.request<{ success: boolean; data: any }>(
+      endpoint
+    );
+    return response.data;
+  }
+
+  // ==================== WAITING LIST ====================
+
+  async getWaitingList(department?: string): Promise<ProcessStep[]> {
+    const query = department ? `?department=${department}` : "";
+    const response = await this.request<{
+      success: boolean;
+      data: ProcessStep[];
+    }>(`/waiting-list${query}`);
+    return response.data;
+  }
+
+  async getMyAssignedTasks(userId: string): Promise<ProcessStep[]> {
+    const response = await this.request<{
+      success: boolean;
+      data: ProcessStep[];
+    }>(`/tasks/assigned?userId=${userId}`);
+    return response.data;
+  }
+
+  async generateOrderQR(orderId: string): Promise<any> {
+    const response = await this.request<{ success: boolean; data: any }>(
+      `/orders/${orderId}/generate-qr`,
+      { method: "POST" }
+    );
+    return response.data;
+  }
+
+  async scanQRCode(data: {
+    qrCode: string;
+    scannedBy: string;
+    location: string;
+    action: string;
+    notes?: string;
+    deviceInfo?: string;
+  }): Promise<any> {
+    const response = await this.request<{ success: boolean; data: any }>(
+      "/qr/scan",
       {
-        method: 'POST',
-        body: JSON.stringify(styleData),
+        method: "POST",
+        body: JSON.stringify(data),
       }
+    );
+    return response.data;
+  }
+
+  async getScanHistory(params?: {
+    qrCode?: string;
+    orderId?: string;
+    limit?: number;
+  }): Promise<any[]> {
+    const queryParams = new URLSearchParams();
+    if (params?.qrCode) queryParams.append("qrCode", params.qrCode);
+    if (params?.orderId) queryParams.append("orderId", params.orderId);
+    if (params?.limit) queryParams.append("limit", params.limit.toString());
+
+    const query = queryParams.toString();
+    const endpoint = query ? `/qr/scan-history?${query}` : "/qr/scan-history";
+
+    const response = await this.request<{ success: boolean; data: any[] }>(
+      endpoint
+    );
+    return response.data;
+  }
+
+  // Sewing Lines
+  async getSewingLines(): Promise<any[]> {
+    const response = await this.request<{ success: boolean; data: any[] }>(
+      "/sewing-lines"
+    );
+    return response.data;
+  }
+
+  // IDKKK
+  async getProcessHistoryByOrderId(orderId: string): Promise<ProcessHistoryLog[]> {
+    const response = await this.request<{ success: boolean; data: ProcessHistoryLog[] }>(
+      `/orders/${orderId}/history`
     );
     return response.data;
   }
@@ -146,109 +370,7 @@ class ApiClient {
     );
     return response.data;
   }
-
-  // Process History
-  async getProcessHistoryByOrderId(orderId: string): Promise<ProcessHistoryLog[]> {
-    const response = await this.request<{ success: boolean; data: ProcessHistoryLog[] }>(
-      `/orders/${orderId}/history`
-    );
-    return response.data;
-  }
-
-  async createProcessHistory(historyData: Partial<ProcessHistoryLog>): Promise<ProcessHistoryLog> {
-    const response = await this.request<{ success: boolean; data: ProcessHistoryLog }>(
-      '/process-history',
-      {
-        method: 'POST',
-        body: JSON.stringify(historyData),
-      }
-    );
-    return response.data;
-  }
-
-  // Update Order Status (combined operation)
-  async updateOrderStatus(
-    orderId: string,
-    statusData: {
-      newStatus: string;
-      performedBy: string;
-      notes?: string;
-      transferData?: any;
-    }
-  ): Promise<Order> {
-    const response = await this.request<{ success: boolean; data: Order }>(
-      `/orders/${orderId}/update-status`,
-      {
-        method: 'POST',
-        body: JSON.stringify(statusData),
-      }
-    );
-    return response.data;
-  }
-
-  // Dashboard Stats
-  async getDashboardStats(): Promise<any> {
-    const response = await this.request<{ success: boolean; data: any }>(
-      '/dashboard/stats'
-    );
-    return response.data;
-  }
-
-  // QR Code operations
-  async generateOrderQR(orderId: string): Promise<any> {
-    const response = await this.request<{ success: boolean; data: any }>(
-      `/orders/${orderId}/generate-qr`,
-      { method: 'POST' }
-    );
-    return response.data;
-  }
-
-  async scanQRCode(data: {
-    qrCode: string;
-    scannedBy: string;
-    location: string;
-    action: string;
-    notes?: string;
-    deviceInfo?: string;
-  }): Promise<any> {
-    const response = await this.request<{ success: boolean; data: any }>(
-      '/qr/scan',
-      {
-        method: 'POST',
-        body: JSON.stringify(data),
-      }
-    );
-    return response.data;
-  }
-
-  async getScanHistory(params?: {
-    qrCode?: string;
-    orderId?: string;
-    limit?: number;
-  }): Promise<any[]> {
-    const queryParams = new URLSearchParams();
-    if (params?.qrCode) queryParams.append('qrCode', params.qrCode);
-    if (params?.orderId) queryParams.append('orderId', params.orderId);
-    if (params?.limit) queryParams.append('limit', params.limit.toString());
-
-    const query = queryParams.toString();
-    const endpoint = query ? `/qr/scan-history?${query}` : '/qr/scan-history';
-    
-    const response = await this.request<{ success: boolean; data: any[] }>(
-      endpoint
-    );
-    return response.data;
-  }
-
-  // Sewing Lines
-  async getSewingLines(): Promise<any[]> {
-    const response = await this.request<{ success: boolean; data: any[] }>(
-      '/sewing-lines'
-    );
-    return response.data;
-  }
 }
 
-// Export singleton instance
 export const apiClient = new ApiClient();
 export default apiClient;

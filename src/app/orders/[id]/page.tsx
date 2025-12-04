@@ -12,6 +12,7 @@ import { ProcessTimeline } from "@/components/ProcessTimeline";
 import { TransferLogTable } from "@/components/TransferLogTable";
 import { StatusUpdateForm } from "@/components/StatusUpdateForm";
 import { QRCodeDisplay } from "@/components/QRCodeDisplay";
+import { ProcessStepCard } from "@/components/ProcessStepCards";
 import {
   PROCESS_STATUS_LABELS,
   STATUS_COLORS,
@@ -30,6 +31,7 @@ import {
   calculateTotalWIP,
 } from "@/lib/utils";
 import apiClient from "@/lib/api-client";
+import { ProcessStep } from "@/lib/types-new";
 
 export default function OrderDetailPage() {
   const router = useRouter();
@@ -46,6 +48,7 @@ export default function OrderDetailPage() {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string>("");
   const [isGeneratingQR, setIsGeneratingQR] = useState(false);
+  const [processSteps, setProcessSteps] = useState<ProcessStep[]>([]);
 
   useEffect(() => {
     loadOrderData();
@@ -85,6 +88,14 @@ export default function OrderDetailPage() {
       setIsLoading(false);
     }
   };
+
+  useEffect(() => {
+    const loadProcessSteps = async () => {
+      const steps = await apiClient.getProcessStepsByOrderId(orderId);
+      setProcessSteps(steps);
+    };
+    loadProcessSteps();
+  }, [orderId]);
 
   const handleUpdate = () => {
     loadOrderData();

@@ -25,6 +25,8 @@ export default function NewOrderPage() {
     targetDate: "",
     createdBy: "Admin",
     notes: "",
+    productionDeadline: "",
+    deliveryDeadline: "",
   });
 
   const [sizeBreakdown, setSizeBreakdown] = useState<{
@@ -475,6 +477,43 @@ export default function NewOrderPage() {
                     {errors.targetDate}
                   </p>
                 )}
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Production Deadline *
+                </label>
+                <input
+                  type="date"
+                  value={formData.productionDeadline}
+                  onChange={(e) =>
+                    setFormData({
+                      ...formData,
+                      productionDeadline: e.target.value,
+                    })
+                  }
+                  className={`w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent ${
+                    errors.targetDate ? "border-red-500" : "border-gray-300"
+                  }`}
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Delivery Deadline *
+                </label>
+                <input
+                  type="date"
+                  value={formData.deliveryDeadline}
+                  onChange={(e) =>
+                    setFormData({
+                      ...formData,
+                      deliveryDeadline: e.target.value,
+                    })
+                  }
+                  className={`w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent ${
+                    errors.targetDate ? "border-red-500" : "border-gray-300"
+                  }`}
+                />
               </div>
             </div>
           </CardContent>

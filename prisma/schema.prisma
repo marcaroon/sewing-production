@@ -13,129 +13,110 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-// Buyer Model
+// Buyer Model (unchanged)
 model Buyer {
-  id            String   @id @default(cuid())
-  name          String
-  type          String   // "repeat" or "one-time"
-  code          String   @unique
-  contactPerson String?
-  phone         String?
-  
-  // Leftover Policy (stored as JSON)
+  id                String   @id @default(cuid())
+  name              String
+  type              String
+  code              String   @unique
+  contactPerson     String?
+  phone             String?
   canReuse          Boolean  @default(false)
   returRequired     Boolean  @default(false)
   storageLocation   String?
-  
-  orders        Order[]
-  createdAt     DateTime @default(now())
-  updatedAt     DateTime @updatedAt
+  orders            Order[]
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
 
   @@index([type])
   @@map("buyers")
 }
 
-// Style Model
+// Style Model (unchanged)
 model Style {
   id                    String   @id @default(cuid())
   styleCode             String   @unique
   name                  String
-  category              String   // "shirt", "pants", "jacket", "dress", "other"
+  category              String
   description           String?  @db.Text
   imageUrl              String?
-  estimatedCuttingTime  Int?     // in minutes
-  estimatedSewingTime   Int?     // in minutes per piece
-  
-  orders        Order[]
-  createdAt     DateTime @default(now())
-  updatedAt     DateTime @updatedAt
+  estimatedCuttingTime  Int?
+  estimatedSewingTime   Int?
+  orders                Order[]
+  createdAt             DateTime @default(now())
+  updatedAt             DateTime @updatedAt
 
   @@index([category])
   @@map("styles")
 }
 
-// Order Model
+// Order Model - UPDATED
 model Order {
-  id                String   @id @default(cuid())
-  orderNumber       String   @unique
-  buyerId           String
-  styleId           String
-  orderDate         DateTime
-  targetDate        DateTime
-  totalQuantity     Int
-  currentStatus     String   @default("draft")
-  assignedLine      String?
-  materialsIssued   Boolean  @default(false)
-  totalRejected     Int      @default(0)
-  totalRework       Int      @default(0)
-  hasLeftover       Boolean  @default(false)
-  createdBy         String
-  notes             String?  @db.Text
+  id                    String   @id @default(cuid())
+  orderNumber           String   @unique
+  buyerId               String
+  styleId               String
+  orderDate             DateTime
+  
+  // TWO DEADLINES
+  productionDeadline    DateTime  // Deadline untuk selesai produksi
+  deliveryDeadline      DateTime  // Deadline untuk pengiriman ke buyer
+  
+  totalQuantity         Int
+  
+  // CURRENT STATE
+  currentPhase          String   @default("production") // "production" or "delivery"
+  currentProcess        String   @default("draft")      // process name
+  currentState          String   @default("at_ppic")    // "at_ppic", "waiting", "assigned", "in_progress", "completed"
+  
+  assignedLine          String?
+  assignedTo            String?   // operator/PIC yang sedang handle
+  materialsIssued       Boolean  @default(false)
+  
+  totalCompleted        Int      @default(0)
+  totalRejected         Int      @default(0)
+  totalRework           Int      @default(0)
+  
+  hasLeftover           Boolean  @default(false)
+  createdBy             String
+  notes                 String?  @db.Text
   
   // Relations
-  buyer             Buyer    @relation(fields: [buyerId], references: [id])
-  style             Style    @relation(fields: [styleId], references: [id])
+  buyer                 Buyer    @relation(fields: [buyerId], references: [id])
+  style                 Style    @relation(fields: [styleId], references: [id])
   
-  sizeBreakdowns    SizeBreakdown[]
-  transferLogs      TransferLog[]
-  processHistories  ProcessHistory[]
-  rejectLogs        RejectLog[]
-  leftoverMaterials LeftoverMaterial[]
-  bundles           Bundle[]
-  qrCode            OrderQRCode?
+  sizeBreakdowns        SizeBreakdown[]
+  processSteps          ProcessStep[]
+  processTransitions    ProcessTransition[]
+  rejectLogs            RejectLog[]
+  leftoverMaterials     LeftoverMaterial[]
+  bundles               Bundle[]
+  qrCode                OrderQRCode?
   
-  // Progress (stored as JSON)
-  progressCutting   Int      @default(0)
-  progressNumbering Int      @default(0)
-  progressShiwake   Int      @default(0)
-  progressSewing    Int      @default(0)
-  progressQc        Int      @default(0)
-  progressIroning   Int      @default(0)
-  progressFinalQc   Int      @default(0)
-  progressPacking   Int      @default(0)
-  
-  // WIP (Work In Progress)
-  wipAtCutting      Int      @default(0)
-  wipAtNumbering    Int      @default(0)
-  wipAtShiwake      Int      @default(0)
-  wipAtSewing       Int      @default(0)
-  wipAtQC           Int      @default(0)
-  wipAtIroning      Int      @default(0)
-  wipAtPacking      Int      @default(0)
-  
-  // Lead Time (stored as JSON for flexibility)
-  leadTimeCutting   Int?
-  leadTimeNumbering Int?
-  leadTimeShiwake   Int?
-  leadTimeSewing    Int?
-  leadTimeQc        Int?
-  leadTimeIroning   Int?
-  leadTimeFinalQc   Int?
-  leadTimePacking   Int?
-  
-  createdAt         DateTime @default(now())
-  updatedAt         DateTime @updatedAt
+  createdAt             DateTime @default(now())
+  updatedAt             DateTime @updatedAt
 
   @@index([buyerId])
   @@index([styleId])
-  @@index([currentStatus])
+  @@index([currentPhase])
+  @@index([currentProcess])
+  @@index([currentState])
   @@index([orderDate])
-  @@index([targetDate])
+  @@index([productionDeadline])
+  @@index([deliveryDeadline])
   @@map("orders")
 }
 
-// Size Breakdown Model
+// Size Breakdown Model (unchanged)
 model SizeBreakdown {
   id          String   @id @default(cuid())
   orderId     String
-  size        String   // "XS", "S", "M", "L", "XL", "XXL", "XXXL"
+  size        String
   quantity    Int
   completed   Int      @default(0)
   rejected    Int      @default(0)
   bundleCount Int      @default(0)
-  
   order       Order    @relation(fields: [orderId], references: [id], onDelete: Cascade)
-  
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 
@@ -144,116 +125,151 @@ model SizeBreakdown {
   @@map("size_breakdowns")
 }
 
-// Transfer Log Model (Surat Jalan)
-model TransferLog {
-  id              String   @id @default(cuid())
-  transferNumber  String   @unique
-  orderId         String
-  orderNumber     String
-  fromDepartment  String
-  toDepartment    String
-  transferDate    DateTime
-  handedOverBy    String
-  receivedBy      String
-  processStatus   String
-  notes           String?  @db.Text
-  isReceived      Boolean  @default(false)
-  receivedDate    DateTime?
+// NEW: Process Step Configuration
+// Defines each step in production and delivery
+model ProcessStep {
+  id                    String   @id @default(cuid())
+  orderId               String
+  processName           String   // "cutting", "numbering", "sewing", etc.
+  processPhase          String   // "production" or "delivery"
+  sequenceOrder         Int      // urutan process (1, 2, 3, dst)
+  department            String   // department yang handle
   
-  order           Order    @relation(fields: [orderId], references: [id], onDelete: Cascade)
-  items           TransferItem[]
-  processHistories ProcessHistory[]
+  // Status
+  status                String   @default("pending") // "pending", "in_progress", "completed", "on_hold"
   
-  createdAt       DateTime @default(now())
-  updatedAt       DateTime @updatedAt
+  // Assignment
+  assignedTo            String?  // PIC/Operator
+  assignedLine          String?  // untuk sewing
+  
+  // Timestamps - DETAIL
+  arrivedAtPpicTime     DateTime? // Kapan sampai di PPIC
+  addedToWaitingTime    DateTime? // Kapan masuk waiting list
+  assignedTime          DateTime? // Kapan di-assign ke operator
+  startedTime           DateTime? // Kapan mulai dikerjakan
+  completedTime         DateTime? // Kapan selesai
+  
+  // Quantities
+  quantityReceived      Int      @default(0)
+  quantityCompleted     Int      @default(0)
+  quantityRejected      Int      @default(0)
+  quantityRework        Int      @default(0)
+  
+  // Duration tracking (in minutes)
+  waitingDuration       Int?     // Lama di waiting list
+  processingDuration    Int?     // Lama dikerjakan
+  totalDuration         Int?     // Total waktu dari terima sampai selesai
+  
+  notes                 String?  @db.Text
+  
+  order                 Order    @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  transitions           ProcessTransition[]
+  rejects               RejectLog[]
+  
+  createdAt             DateTime @default(now())
+  updatedAt             DateTime @updatedAt
 
   @@index([orderId])
-  @@index([transferDate])
-  @@index([processStatus])
-  @@map("transfer_logs")
+  @@index([processName])
+  @@index([processPhase])
+  @@index([status])
+  @@index([sequenceOrder])
+  @@map("process_steps")
 }
 
-// Transfer Item Model
-model TransferItem {
-  id             String      @id @default(cuid())
-  transferLogId  String
-  description    String
-  bundleNumber   String?
-  quantity       Int
-  unit           String
-  condition      String      // "good", "defect", "rework"
-  remarks        String?     @db.Text
+// NEW: Process Transition Log
+// Records every state change with timestamp
+model ProcessTransition {
+  id                String   @id @default(cuid())
+  orderId           String
+  processStepId     String
   
-  transferLog    TransferLog @relation(fields: [transferLogId], references: [id], onDelete: Cascade)
+  fromState         String   // "at_ppic", "waiting", "assigned", "in_progress", "completed"
+  toState           String
   
-  createdAt      DateTime    @default(now())
-
-  @@index([transferLogId])
-  @@map("transfer_items")
-}
-
-// Process History Model
-model ProcessHistory {
-  id              String       @id @default(cuid())
-  orderId         String
-  timestamp       DateTime
-  processStatus   String
-  action          String       @db.Text
-  performedBy     String
-  department      String
-  duration        Int?
-  notes           String?      @db.Text
-  transferLogId   String?
+  transitionTime    DateTime @default(now())
+  performedBy       String   // Who performed the transition
   
-  order           Order        @relation(fields: [orderId], references: [id], onDelete: Cascade)
-  transferLog     TransferLog? @relation(fields: [transferLogId], references: [id])
+  // Context
+  processName       String   // untuk quick reference
+  department        String
   
-  createdAt       DateTime     @default(now())
+  // Additional data
+  quantity          Int?     // jumlah yang ditransfer
+  notes             String?  @db.Text
+  
+  order             Order    @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  processStep       ProcessStep @relation(fields: [processStepId], references: [id], onDelete: Cascade)
+  
+  createdAt         DateTime @default(now())
 
   @@index([orderId])
-  @@index([timestamp])
-  @@index([processStatus])
-  @@map("process_histories")
+  @@index([processStepId])
+  @@index([transitionTime])
+  @@index([fromState])
+  @@index([toState])
+  @@map("process_transitions")
 }
 
-// Reject Log Model
+// UPDATED: Reject Log - Per Process
 model RejectLog {
-  id            String   @id @default(cuid())
-  orderId       String
-  processStatus String
-  date          DateTime
-  reportedBy    String
-  rejectType    String   // "material_defect", "cutting_error", "sewing_defect", "other"
-  quantity      Int
-  size          String?
-  description   String   @db.Text
-  action        String   // "rework", "scrap", "pending"
-  images        String?  @db.Text // JSON array of image URLs
+  id                String   @id @default(cuid())
+  orderId           String
+  processStepId     String   // Which process step
   
-  order         Order    @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  processName       String   // "cutting", "sewing", etc
+  processPhase      String   // "production" or "delivery"
   
-  createdAt     DateTime @default(now())
-  updatedAt     DateTime @updatedAt
+  detectedTime      DateTime @default(now())
+  reportedBy        String
+  
+  rejectType        String   // "material_defect", "cutting_error", "sewing_defect", "measurement_error", etc
+  rejectCategory    String   // "reject" or "rework"
+  
+  quantity          Int
+  size              String?
+  bundleNumber      String?
+  
+  description       String   @db.Text
+  rootCause         String?  @db.Text
+  
+  // Action taken
+  action            String   // "rework", "scrap", "pending"
+  actionTakenBy     String?
+  actionTakenTime   DateTime?
+  
+  // Resolution
+  reworkCompleted   Boolean  @default(false)
+  reworkCompletedTime DateTime?
+  finalDisposition  String?  // "passed", "scrapped", "pending"
+  
+  images            String?  @db.Text // JSON array
+  
+  order             Order    @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  processStep       ProcessStep @relation(fields: [processStepId], references: [id], onDelete: Cascade)
+  
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
 
   @@index([orderId])
-  @@index([date])
+  @@index([processStepId])
+  @@index([detectedTime])
+  @@index([rejectCategory])
   @@map("reject_logs")
 }
 
-// Leftover Material Model
+// Leftover Material Model (unchanged)
 model LeftoverMaterial {
   id              String   @id @default(cuid())
   orderId         String
   orderNumber     String
   buyerId         String
-  buyerType       String   // "repeat" or "one-time"
-  status          String   // "stored", "reused", "returned", "disposed"
+  buyerType       String
+  status          String
   storageLocation String?
   notes           String?  @db.Text
-  materials       String   @db.Text // JSON array of MaterialItem
-  
+  materials       String   @db.Text
   order           Order    @relation(fields: [orderId], references: [id], onDelete: Cascade)
-  
   createdAt       DateTime @default(now())
   updatedAt       DateTime @updatedAt
 
@@ -262,17 +278,16 @@ model LeftoverMaterial {
   @@map("leftover_materials")
 }
 
-// Sewing Line Model
+// Sewing Line Model (unchanged)
 model SewingLine {
   id          String   @id @default(cuid())
   lineName    String
   lineCode    String   @unique
-  capacity    Int      // pieces per day
+  capacity    Int
   currentLoad Int      @default(0)
   operators   Int
   supervisor  String
-  status      String   @default("active") // "active", "maintenance", "inactive"
-  
+  status      String   @default("active")
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 
@@ -280,35 +295,32 @@ model SewingLine {
   @@map("sewing_lines")
 }
 
-// Bundle Model
+// Bundle Model (unchanged)
 model Bundle {
-  id             String   @id @default(cuid())
-  bundleNumber   String   @unique
-  orderId        String
-  size           String
-  quantity       Int
+  id              String   @id @default(cuid())
+  bundleNumber    String   @unique
+  orderId         String
+  size            String
+  quantity        Int
   currentLocation String
-  currentStatus  String
-  
-  order          Order    @relation(fields: [orderId], references: [id], onDelete: Cascade)
-  qrCode         BundleQRCode?
-  
-  createdAt      DateTime @default(now())
-  lastUpdated    DateTime @updatedAt
+  currentStatus   String
+  order           Order    @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  qrCode          BundleQRCode?
+  createdAt       DateTime @default(now())
+  lastUpdated     DateTime @updatedAt
 
   @@index([orderId])
   @@index([currentStatus])
   @@map("bundles")
 }
 
-// User Model
+// User Model (unchanged)
 model User {
   id         String   @id @default(cuid())
   name       String
   department String
-  role       String   // "admin", "ppic", "cutting", "sewing", "qc", "warehouse"
+  role       String
   email      String?  @unique
-  
   createdAt  DateTime @default(now())
   updatedAt  DateTime @updatedAt
 
@@ -317,58 +329,45 @@ model User {
   @@map("users")
 }
 
-// QR Code Model untuk Order Level
+// QR Code Models (unchanged)
 model OrderQRCode {
   id          String   @id @default(cuid())
   orderId     String   @unique
-  qrCode      String   @unique // Format: ORD-2024-00001
-  qrData      String   @db.Text // JSON data
-  
+  qrCode      String   @unique
+  qrData      String   @db.Text
   order       Order    @relation(fields: [orderId], references: [id], onDelete: Cascade)
   scans       QRScan[]
-  
   createdAt   DateTime @default(now())
   
   @@index([qrCode])
   @@map("order_qr_codes")
 }
 
-// QR Code Model untuk Bundle Level
 model BundleQRCode {
   id          String   @id @default(cuid())
   bundleId    String   @unique
-  qrCode      String   @unique // Format: ORD-2024-00001-M-001
-  qrData      String   @db.Text // JSON data
-  
+  qrCode      String   @unique
+  qrData      String   @db.Text
   bundle      Bundle   @relation(fields: [bundleId], references: [id], onDelete: Cascade)
   scans       QRScan[]
-  
   createdAt   DateTime @default(now())
   
   @@index([qrCode])
   @@map("bundle_qr_codes")
 }
 
-// QR Scan Log - untuk tracking setiap scan
 model QRScan {
   id            String   @id @default(cuid())
   qrCode        String
-  qrType        String   // "order", "bundle"
-  
-  // Relations (nullable)
+  qrType        String
   orderQRId     String?
   bundleQRId    String?
-  
-  // Scan details
   scannedBy     String
   scannedAt     DateTime @default(now())
-  location      String   // Department/Location saat scan
-  action        String   // "view", "transfer", "qc_check", "complete"
+  location      String
+  action        String
   notes         String?  @db.Text
-  
-  // Device info (optional)
   deviceInfo    String?
-  
   orderQR       OrderQRCode?  @relation(fields: [orderQRId], references: [id], onDelete: Cascade)
   bundleQR      BundleQRCode? @relation(fields: [bundleQRId], references: [id], onDelete: Cascade)
   
