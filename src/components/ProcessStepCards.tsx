@@ -2,7 +2,13 @@
 "use client";
 
 import React, { useState } from "react";
-import { ProcessStep } from "@/lib/types-new";
+import {
+  ProcessState,
+  ProcessStep,
+  ProductionPhase,
+  isProcessState,
+  isProductionPhase,
+} from "@/lib/types-new";
 import { Card, CardContent, CardHeader, CardTitle } from "./ui/Card";
 import { Badge } from "./ui/Badge";
 import { Button } from "./ui/Button";
@@ -43,10 +49,21 @@ export const ProcessStepCard: React.FC<ProcessStepCardProps> = ({
     currentState = "waiting";
   }
 
-  const validNextStates = VALID_STATE_TRANSITIONS[currentState as any] || [];
+  const currentStateTyped: ProcessState = isProcessState(currentState)
+    ? currentState
+    : "at_ppic";
 
-  const [transitionData, setTransitionData] = useState({
-    newState: validNextStates[0] || "",
+  const validNextStates = VALID_STATE_TRANSITIONS[currentStateTyped] || [];
+
+  const [transitionData, setTransitionData] = useState<{
+    newState: ProcessState | "";
+    performedBy: string;
+    assignedTo: string;
+    assignedLine: string;
+    quantity: number;
+    notes: string;
+  }>({
+    newState: (validNextStates[0] as ProcessState) || "",
     performedBy: "",
     assignedTo: "",
     assignedLine: "",
@@ -73,7 +90,7 @@ export const ProcessStepCard: React.FC<ProcessStepCardProps> = ({
 
     try {
       await apiClient.transitionProcessStep(processStep.id, {
-        newState: transitionData.newState as any,
+        newState: transitionData.newState as ProcessState,
         performedBy: transitionData.performedBy,
         assignedTo: transitionData.assignedTo || undefined,
         assignedLine: transitionData.assignedLine || undefined,
@@ -125,7 +142,7 @@ export const ProcessStepCard: React.FC<ProcessStepCardProps> = ({
           <div className="flex items-start justify-between">
             <div>
               <CardTitle className="text-lg">
-                {PROCESS_LABELS[processStep.processName as any]}
+                {PROCESS_LABELS[processStep.processName]}
               </CardTitle>
               <p className="text-sm text-gray-600 mt-1">
                 {processStep.department}
@@ -133,14 +150,14 @@ export const ProcessStepCard: React.FC<ProcessStepCardProps> = ({
             </div>
             <div className="flex flex-col items-end gap-2">
               <Badge variant="info">
-                {PHASE_LABELS[processStep.processPhase as any]}
+                {PHASE_LABELS[processStep.processPhase as ProductionPhase]}
               </Badge>
               <span
                 className={`px-2.5 py-0.5 rounded-full text-xs font-medium ${
-                  PROCESS_STATE_COLORS[currentState as any]
+                  PROCESS_STATE_COLORS[currentState as ProcessState]
                 }`}
               >
-                {PROCESS_STATE_LABELS[currentState as any]}
+                {PROCESS_STATE_LABELS[currentState as ProcessState]}
               </span>
             </div>
           </div>
@@ -317,7 +334,7 @@ export const ProcessStepCard: React.FC<ProcessStepCardProps> = ({
                 size="sm"
                 className="flex-1"
               >
-                Next: {PROCESS_STATE_LABELS[validNextStates[0] as any]}
+                Next:{PROCESS_STATE_LABELS[validNextStates[0]]}
               </Button>
               {currentState === "in_progress" && (
                 <Button
@@ -357,15 +374,15 @@ export const ProcessStepCard: React.FC<ProcessStepCardProps> = ({
                 onChange={(e) =>
                   setTransitionData({
                     ...transitionData,
-                    newState: e.target.value,
+                    newState: e.target.value as ProcessState,
                   })
                 }
                 className="w-full px-3 py-2 border rounded-lg"
                 required
               >
-                {validNextStates.map((state) => (
+                {validNextStates.map((state: ProcessState) => (
                   <option key={state} value={state}>
-                    {PROCESS_STATE_LABELS[state as any]}
+                    {PROCESS_STATE_LABELS[state]}
                   </option>
                 ))}
               </select>

@@ -170,7 +170,7 @@ export default function DashboardPage() {
               <div>
                 <p className="text-sm font-medium text-gray-600">Total WIP</p>
                 <p className="text-3xl font-bold text-purple-600 mt-2">
-                  {formatNumber(stats.totalWIP)}
+                {formatNumber(stats.totalWIP ?? 0)}
                 </p>
                 <p className="text-xs text-gray-500 mt-1">pieces</p>
               </div>

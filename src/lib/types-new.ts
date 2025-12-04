@@ -1,6 +1,8 @@
 // lib/types-new.ts
 // Updated Types for New Production Flow
 
+import { DELIVERY_PROCESSES, PRODUCTION_PROCESSES } from "./constants-new";
+
 // ==================== PHASE & STATE ====================
 
 export type ProductionPhase = "production" | "delivery";
@@ -349,4 +351,24 @@ export interface RejectLogCreate {
   action: RejectAction;
   reportedBy: string;
   images?: string[];
+}
+
+export function isProcessState(value: string): value is ProcessState {
+  return [
+    "at_ppic",
+    "waiting",
+    "assigned",
+    "in_progress",
+    "completed",
+  ].includes(value);
+}
+
+export function isProductionPhase(value: string): value is ProductionPhase {
+  return ["production", "delivery"].includes(value);
+}
+
+export function isProcessName(value: string): value is ProcessName {
+  return [...PRODUCTION_PROCESSES, ...DELIVERY_PROCESSES].includes(
+    value as any
+  );
 }

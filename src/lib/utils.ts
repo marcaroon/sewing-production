@@ -230,8 +230,10 @@ export function getDelayDays(order: Order): number {
   return daysDifference(target, today);
 }
 
-// Format Number with Thousands Separator
-export function formatNumber(num: number): string {
+export function formatNumber(num: number | null | undefined): string {
+  if (num === null || num === undefined || isNaN(num)) {
+    return "0";
+  }
   return num.toLocaleString("id-ID");
 }
 

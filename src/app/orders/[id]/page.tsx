@@ -59,14 +59,41 @@ export default function OrderDetailPage() {
     setError("");
 
     try {
-      // Fetch order data with all related data
       const [orderData, historyData, transfersData] = await Promise.all([
         apiClient.getOrderById(id),
         apiClient.getProcessHistoryByOrderId(id),
         apiClient.getTransferLogsByOrderId(id),
       ]);
 
-      setOrder(orderData);
+      // Transform orderData to match the full Order type with all required fields
+      const fullOrderData = {
+        ...orderData,
+        // Add missing fields with default values if they don't exist
+        targetDate: orderData.productionDeadline, // Map new field to old expected field
+        currentStatus: orderData.currentProcess as any, // Map to old field
+        progress: {
+          cutting: 0,
+          numbering: 0,
+          shiwake: 0,
+          sewing: 0,
+          qc: 0,
+          ironing: 0,
+          finalQc: 0,
+          packing: 0,
+        },
+        wip: {
+          atCutting: 0,
+          atNumbering: 0,
+          atShiwake: 0,
+          atSewing: 0,
+          atQC: 0,
+          atIroning: 0,
+          atPacking: 0,
+        },
+        leadTime: {},
+      };
+
+      setOrder(fullOrderData as any); // Use 'as any' temporarily
       setHistory(historyData);
       setTransfers(transfersData);
 
@@ -82,24 +109,25 @@ export default function OrderDetailPage() {
     } catch (err) {
       console.error("Error loading order:", err);
       setError("Failed to load order data. Please try again.");
-      // If order not found, redirect to orders page
       setTimeout(() => router.push("/orders"), 2000);
     } finally {
       setIsLoading(false);
     }
   };
 
-  useEffect(() => {
-    const loadProcessSteps = async () => {
-      const steps = await apiClient.getProcessStepsByOrderId(orderId);
-      setProcessSteps(steps);
-    };
-    loadProcessSteps();
-  }, [orderId]);
-
   const handleUpdate = () => {
     loadOrderData();
   };
+
+  useEffect(() => {
+    if (id) {
+      const loadProcessSteps = async () => {
+        const steps = await apiClient.getProcessStepsByOrderId(id);
+        setProcessSteps(steps);
+      };
+      loadProcessSteps();
+    }
+  }, [id]);
 
   const handleGenerateQR = async () => {
     if (!order) return;
@@ -108,7 +136,9 @@ export default function OrderDetailPage() {
     try {
       const result = await apiClient.generateOrderQR(order.id);
       alert(
-        `QR codes generated successfully!\nOrder QR: 1\nBundle QRs: ${result.bundleQRCodes?.length || 0}`
+        `QR codes generated successfully!\nOrder QR: 1\nBundle QRs: ${
+          result.bundleQRCodes?.length || 0
+        }`
       );
       // Reload to get QR codes
       await loadOrderData();
@@ -122,10 +152,7 @@ export default function OrderDetailPage() {
 
   const handlePrintQR = (type: "order" | "bundle" | "all") => {
     if (!order) return;
-    window.open(
-      `/api/orders/${order.id}/print-qr?type=${type}`,
-      "_blank"
-    );
+    window.open(`/api/orders/${order.id}/print-qr?type=${type}`, "_blank");
   };
 
   if (isLoading) {
@@ -262,25 +289,25 @@ export default function OrderDetailPage() {
       <div className="mb-6">
         <div className="border-b border-gray-200">
           <nav className="flex gap-8">
-            {(["overview", "timeline", "transfers", "details", "qr"] as const).map(
-              (tab) => (
-                <button
-                  key={tab}
-                  onClick={() => setActiveTab(tab)}
-                  className={`py-4 px-1 border-b-2 font-medium text-sm transition-colors ${
-                    activeTab === tab
-                      ? "border-blue-600 text-blue-600"
-                      : "border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300"
-                  }`}
-                >
-                  {tab === "overview" && "Overview"}
-                  {tab === "timeline" && "Timeline Process"}
-                  {tab === "transfers" && "Surat Jalan"}
-                  {tab === "details" && "Detail Order"}
-                  {tab === "qr" && "QR Codes"}
-                </button>
-              )
-            )}
+            {(
+              ["overview", "timeline", "transfers", "details", "qr"] as const
+            ).map((tab) => (
+              <button
+                key={tab}
+                onClick={() => setActiveTab(tab)}
+                className={`py-4 px-1 border-b-2 font-medium text-sm transition-colors ${
+                  activeTab === tab
+                    ? "border-blue-600 text-blue-600"
+                    : "border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300"
+                }`}
+              >
+                {tab === "overview" && "Overview"}
+                {tab === "timeline" && "Timeline Process"}
+                {tab === "transfers" && "Surat Jalan"}
+                {tab === "details" && "Detail Order"}
+                {tab === "qr" && "QR Codes"}
+              </button>
+            ))}
           </nav>
         </div>
       </div>
