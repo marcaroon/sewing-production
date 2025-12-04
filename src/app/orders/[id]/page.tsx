@@ -1,20 +1,17 @@
-// D:\Jobs\Total Quality\DMOS\tq-sewingproduction\src\app\orders\[id]\page.tsx
+// app/orders/[id]/page.tsx (Updated with API)
+
 "use client";
 
 import React, { useEffect, useState } from "react";
 import { useRouter, useParams } from "next/navigation";
 import { Order, ProcessHistoryLog, TransferLog } from "@/lib/types";
-import {
-  orderStorage,
-  processHistoryStorage,
-  transferLogStorage,
-} from "@/lib/storage";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/Card";
 import { Badge } from "@/components/ui/Badge";
 import { Button } from "@/components/ui/Button";
 import { ProcessTimeline } from "@/components/ProcessTimeline";
 import { TransferLogTable } from "@/components/TransferLogTable";
 import { StatusUpdateForm } from "@/components/StatusUpdateForm";
+import { QRCodeDisplay } from "@/components/QRCodeDisplay";
 import {
   PROCESS_STATUS_LABELS,
   STATUS_COLORS,
@@ -32,6 +29,7 @@ import {
   formatNumber,
   calculateTotalWIP,
 } from "@/lib/utils";
+import apiClient from "@/lib/api-client";
 
 export default function OrderDetailPage() {
   const router = useRouter();
@@ -41,35 +39,128 @@ export default function OrderDetailPage() {
   const [order, setOrder] = useState<Order | null>(null);
   const [history, setHistory] = useState<ProcessHistoryLog[]>([]);
   const [transfers, setTransfers] = useState<TransferLog[]>([]);
+  const [qrCodes, setQrCodes] = useState<any>(null);
   const [activeTab, setActiveTab] = useState<
-    "overview" | "timeline" | "transfers" | "details"
+    "overview" | "timeline" | "transfers" | "details" | "qr"
   >("overview");
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string>("");
+  const [isGeneratingQR, setIsGeneratingQR] = useState(false);
 
   useEffect(() => {
     loadOrderData();
   }, [id]);
 
-  const loadOrderData = () => {
-    const orderData = orderStorage.getById(id);
-    if (!orderData) {
-      router.push("/orders");
-      return;
-    }
+  const loadOrderData = async () => {
+    setIsLoading(true);
+    setError("");
 
-    setOrder(orderData);
-    setHistory(processHistoryStorage.getByOrderId(id));
-    setTransfers(transferLogStorage.getByOrderId(id));
+    try {
+      // Fetch order data with all related data
+      const [orderData, historyData, transfersData] = await Promise.all([
+        apiClient.getOrderById(id),
+        apiClient.getProcessHistoryByOrderId(id),
+        apiClient.getTransferLogsByOrderId(id),
+      ]);
+
+      setOrder(orderData);
+      setHistory(historyData);
+      setTransfers(transfersData);
+
+      // Check if order has QR codes
+      if ((orderData as any).qrCode) {
+        setQrCodes({
+          orderQR: (orderData as any).qrCode,
+          bundleQRs: (orderData as any).bundles
+            ?.filter((b: any) => b.qrCode)
+            .map((b: any) => b.qrCode),
+        });
+      }
+    } catch (err) {
+      console.error("Error loading order:", err);
+      setError("Failed to load order data. Please try again.");
+      // If order not found, redirect to orders page
+      setTimeout(() => router.push("/orders"), 2000);
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   const handleUpdate = () => {
     loadOrderData();
   };
 
-  if (!order) {
+  const handleGenerateQR = async () => {
+    if (!order) return;
+
+    setIsGeneratingQR(true);
+    try {
+      const result = await apiClient.generateOrderQR(order.id);
+      alert(
+        `QR codes generated successfully!\nOrder QR: 1\nBundle QRs: ${result.bundleQRCodes?.length || 0}`
+      );
+      // Reload to get QR codes
+      await loadOrderData();
+    } catch (err) {
+      console.error("Error generating QR codes:", err);
+      alert("Failed to generate QR codes. Please try again.");
+    } finally {
+      setIsGeneratingQR(false);
+    }
+  };
+
+  const handlePrintQR = (type: "order" | "bundle" | "all") => {
+    if (!order) return;
+    window.open(
+      `/api/orders/${order.id}/print-qr?type=${type}`,
+      "_blank"
+    );
+  };
+
+  if (isLoading) {
     return (
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <div className="text-center py-12">
-          <p className="text-gray-500">Loading...</p>
+        <div className="flex items-center justify-center min-h-[400px]">
+          <div className="text-center">
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
+            <p className="text-gray-600">Loading order details...</p>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  if (error || !order) {
+    return (
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <div className="bg-red-50 border border-red-200 rounded-lg p-6">
+          <div className="flex items-start">
+            <svg
+              className="w-6 h-6 text-red-600 mr-3 mt-0.5"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+              />
+            </svg>
+            <div>
+              <p className="text-sm font-medium text-red-800">Error</p>
+              <p className="text-sm text-red-700 mt-1">
+                {error || "Order not found"}
+              </p>
+              <button
+                onClick={() => router.push("/orders")}
+                className="mt-3 text-sm text-red-800 underline hover:text-red-900"
+              >
+                Back to Orders
+              </button>
+            </div>
+          </div>
         </div>
       </div>
     );
@@ -160,7 +251,7 @@ export default function OrderDetailPage() {
       <div className="mb-6">
         <div className="border-b border-gray-200">
           <nav className="flex gap-8">
-            {(["overview", "timeline", "transfers", "details"] as const).map(
+            {(["overview", "timeline", "transfers", "details", "qr"] as const).map(
               (tab) => (
                 <button
                   key={tab}
@@ -175,6 +266,7 @@ export default function OrderDetailPage() {
                   {tab === "timeline" && "Timeline Process"}
                   {tab === "transfers" && "Surat Jalan"}
                   {tab === "details" && "Detail Order"}
+                  {tab === "qr" && "QR Codes"}
                 </button>
               )
             )}
@@ -434,7 +526,7 @@ export default function OrderDetailPage() {
                 <div>
                   <p className="text-sm text-gray-600">Leftover Policy</p>
                   <p className="text-sm text-gray-900">
-                    {order.buyer.leftoverPolicy.canReuse
+                    {order.buyer.leftoverPolicy?.canReuse
                       ? "✓ Can be reused"
                       : "✗ Must be returned"}
                   </p>
@@ -539,7 +631,7 @@ export default function OrderDetailPage() {
                       {process.replace(/([A-Z])/g, " $1").trim()}
                     </span>
                     <span className="font-semibold text-gray-900">
-                      {hours} hours
+                      {hours || "-"} {hours ? "hours" : ""}
                     </span>
                   </div>
                 ))}
@@ -572,6 +664,127 @@ export default function OrderDetailPage() {
                     </div>
                   </div>
                 ))}
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+      )}
+
+      {activeTab === "qr" && (
+        <div className="space-y-6">
+          {/* QR Code Actions */}
+          <Card>
+            <CardHeader>
+              <CardTitle>QR Code Management</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-4">
+                {!qrCodes ? (
+                  <div className="text-center py-8">
+                    <svg
+                      className="w-16 h-16 mx-auto mb-4 text-gray-400"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M12 4v1m6 11h2m-6 0h-2v4m0-11v3m0 0h.01M12 12h4.01M16 20h4M4 12h4m12 0h.01M5 8h2a1 1 0 001-1V5a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1zm12 0h2a1 1 0 001-1V5a1 1 0 00-1-1h-2a1 1 0 00-1 1v2a1 1 0 001 1zM5 20h2a1 1 0 001-1v-2a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1z"
+                      />
+                    </svg>
+                    <p className="text-gray-600 mb-4">
+                      No QR codes generated yet
+                    </p>
+                    <Button
+                      onClick={handleGenerateQR}
+                      variant="primary"
+                      disabled={isGeneratingQR}
+                    >
+                      {isGeneratingQR ? (
+                        <>
+                          <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
+                          Generating...
+                        </>
+                      ) : (
+                        "Generate QR Codes"
+                      )}
+                    </Button>
+                  </div>
+                ) : (
+                  <div>
+                    <div className="flex items-center gap-3 mb-6">
+                      <Button
+                        onClick={handleGenerateQR}
+                        variant="outline"
+                        size="sm"
+                        disabled={isGeneratingQR}
+                      >
+                        {isGeneratingQR ? "Regenerating..." : "Regenerate QR"}
+                      </Button>
+                      <Button
+                        onClick={() => handlePrintQR("all")}
+                        variant="primary"
+                        size="sm"
+                      >
+                        Print All QR Codes
+                      </Button>
+                    </div>
+
+                    {/* Order QR Code */}
+                    <div className="mb-6">
+                      <h3 className="text-lg font-semibold text-gray-900 mb-4">
+                        Order QR Code
+                      </h3>
+                      <QRCodeDisplay
+                        qrCode={qrCodes.orderQR.qrCode}
+                        title={order.orderNumber}
+                        subtitle={`${order.buyer.name} - ${order.style.name}`}
+                        type="order"
+                      />
+                    </div>
+
+                    {/* Bundle QR Codes */}
+                    {qrCodes.bundleQRs && qrCodes.bundleQRs.length > 0 && (
+                      <div>
+                        <div className="flex items-center justify-between mb-4">
+                          <h3 className="text-lg font-semibold text-gray-900">
+                            Bundle QR Codes ({qrCodes.bundleQRs.length})
+                          </h3>
+                          <Button
+                            onClick={() => handlePrintQR("bundle")}
+                            variant="outline"
+                            size="sm"
+                          >
+                            Print Bundle QRs
+                          </Button>
+                        </div>
+                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                          {qrCodes.bundleQRs.map((bundleQR: any) => {
+                            const bundle = (order as any).bundles?.find(
+                              (b: any) => b.qrCode?.id === bundleQR.id
+                            );
+                            return (
+                              <QRCodeDisplay
+                                key={bundleQR.id}
+                                qrCode={bundleQR.qrCode}
+                                title={bundle?.bundleNumber || bundleQR.qrCode}
+                                subtitle={
+                                  bundle
+                                    ? `Size ${bundle.size} - ${bundle.quantity} pcs`
+                                    : undefined
+                                }
+                                type="bundle"
+                                size={150}
+                              />
+                            );
+                          })}
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                )}
               </div>
             </CardContent>
           </Card>

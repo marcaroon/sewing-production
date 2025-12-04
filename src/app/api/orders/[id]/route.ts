@@ -1,4 +1,4 @@
-// app/api/orders/[id]/route.ts
+// app/api/orders/[id]/route.ts (FIXED)
 
 import { NextRequest, NextResponse } from "next/server";
 import prisma from "@/lib/prisma";
@@ -33,7 +33,12 @@ export async function GET(
             date: "desc",
           },
         },
-        bundles: true,
+        bundles: {
+          include: {
+            qrCode: true,
+          },
+        },
+        qrCode: true,
       },
     });
 
@@ -47,11 +52,23 @@ export async function GET(
       );
     }
 
-    // Transform to match frontend format
+    // Transform to match frontend format with proper null checks
     const transformedOrder = {
       id: order.id,
       orderNumber: order.orderNumber,
-      buyer: order.buyer,
+      buyer: {
+        id: order.buyer.id,
+        name: order.buyer.name,
+        type: order.buyer.type,
+        code: order.buyer.code,
+        contactPerson: order.buyer.contactPerson || undefined,
+        phone: order.buyer.phone || undefined,
+        leftoverPolicy: {
+          canReuse: order.buyer.canReuse || false,
+          returRequired: order.buyer.returRequired || false,
+          storageLocation: order.buyer.storageLocation || undefined,
+        },
+      },
       style: order.style,
       orderDate: order.orderDate,
       targetDate: order.targetDate,
@@ -80,14 +97,14 @@ export async function GET(
         atPacking: order.wipAtPacking,
       },
       leadTime: {
-        cutting: order.leadTimeCutting,
-        numbering: order.leadTimeNumbering,
-        shiwake: order.leadTimeShiwake,
-        sewing: order.leadTimeSewing,
-        qc: order.leadTimeQc,
-        ironing: order.leadTimeIroning,
-        finalQc: order.leadTimeFinalQc,
-        packing: order.leadTimePacking,
+        cutting: order.leadTimeCutting || undefined,
+        numbering: order.leadTimeNumbering || undefined,
+        shiwake: order.leadTimeShiwake || undefined,
+        sewing: order.leadTimeSewing || undefined,
+        qc: order.leadTimeQc || undefined,
+        ironing: order.leadTimeIroning || undefined,
+        finalQc: order.leadTimeFinalQc || undefined,
+        packing: order.leadTimePacking || undefined,
       },
       totalRejected: order.totalRejected,
       totalRework: order.totalRework,
@@ -95,11 +112,12 @@ export async function GET(
       createdAt: order.createdAt,
       updatedAt: order.updatedAt,
       createdBy: order.createdBy,
-      notes: order.notes,
+      notes: order.notes || undefined,
       transferLogs: order.transferLogs,
       processHistories: order.processHistories,
       rejectLogs: order.rejectLogs,
       bundles: order.bundles,
+      qrCode: order.qrCode,
     };
 
     return NextResponse.json({
@@ -211,9 +229,30 @@ export async function PUT(
       },
     });
 
+    // Transform response
+    const transformedOrder = {
+      id: updatedOrder.id,
+      orderNumber: updatedOrder.orderNumber,
+      buyer: {
+        id: updatedOrder.buyer.id,
+        name: updatedOrder.buyer.name,
+        type: updatedOrder.buyer.type,
+        code: updatedOrder.buyer.code,
+        contactPerson: updatedOrder.buyer.contactPerson || undefined,
+        phone: updatedOrder.buyer.phone || undefined,
+        leftoverPolicy: {
+          canReuse: updatedOrder.buyer.canReuse || false,
+          returRequired: updatedOrder.buyer.returRequired || false,
+          storageLocation: updatedOrder.buyer.storageLocation || undefined,
+        },
+      },
+      style: updatedOrder.style,
+      // ... rest of the transformation
+    };
+
     return NextResponse.json({
       success: true,
-      data: updatedOrder,
+      data: transformedOrder,
     });
   } catch (error) {
     console.error("Error updating order:", error);

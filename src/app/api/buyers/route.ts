@@ -1,4 +1,4 @@
-// app/api/buyers/route.ts
+// app/api/buyers/route.ts (FIXED)
 
 import { NextRequest, NextResponse } from "next/server";
 import prisma from "@/lib/prisma";
@@ -12,32 +12,20 @@ export async function GET() {
       },
     });
 
-    // Transform to match frontend format
-    const transformedBuyers = buyers.map(
-      (buyer: {
-        id: any;
-        name: any;
-        type: any;
-        code: any;
-        contactPerson: any;
-        phone: any;
-        canReuse: any;
-        returRequired: any;
-        storageLocation: any;
-      }) => ({
-        id: buyer.id,
-        name: buyer.name,
-        type: buyer.type,
-        code: buyer.code,
-        contactPerson: buyer.contactPerson,
-        phone: buyer.phone,
-        leftoverPolicy: {
-          canReuse: buyer.canReuse,
-          returRequired: buyer.returRequired,
-          storageLocation: buyer.storageLocation,
-        },
-      })
-    );
+    // Transform to match frontend format with proper null checks
+    const transformedBuyers = buyers.map((buyer) => ({
+      id: buyer.id,
+      name: buyer.name,
+      type: buyer.type,
+      code: buyer.code,
+      contactPerson: buyer.contactPerson || undefined,
+      phone: buyer.phone || undefined,
+      leftoverPolicy: {
+        canReuse: buyer.canReuse || false,
+        returRequired: buyer.returRequired || false,
+        storageLocation: buyer.storageLocation || undefined,
+      },
+    }));
 
     return NextResponse.json({
       success: true,
@@ -67,17 +55,32 @@ export async function POST(request: NextRequest) {
         name,
         type,
         code,
-        contactPerson,
-        phone,
-        canReuse: leftoverPolicy.canReuse,
-        returRequired: leftoverPolicy.returRequired,
-        storageLocation: leftoverPolicy.storageLocation,
+        contactPerson: contactPerson || null,
+        phone: phone || null,
+        canReuse: leftoverPolicy?.canReuse || false,
+        returRequired: leftoverPolicy?.returRequired || false,
+        storageLocation: leftoverPolicy?.storageLocation || null,
       },
     });
 
+    // Transform response to match frontend format
+    const transformedBuyer = {
+      id: buyer.id,
+      name: buyer.name,
+      type: buyer.type,
+      code: buyer.code,
+      contactPerson: buyer.contactPerson || undefined,
+      phone: buyer.phone || undefined,
+      leftoverPolicy: {
+        canReuse: buyer.canReuse,
+        returRequired: buyer.returRequired,
+        storageLocation: buyer.storageLocation || undefined,
+      },
+    };
+
     return NextResponse.json({
       success: true,
-      data: buyer,
+      data: transformedBuyer,
     });
   } catch (error) {
     console.error("Error creating buyer:", error);

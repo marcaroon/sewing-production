@@ -1,17 +1,17 @@
-// components/StatusUpdateForm.tsx
+// components/StatusUpdateForm.tsx (Updated with API)
 
 "use client";
 
 import React, { useState } from "react";
-import { Order, ProcessStatus, TransferLog } from "@/lib/types";
+import { Order, ProcessStatus } from "@/lib/types";
 import { Button } from "./ui/Button";
 import { Modal } from "./ui/Modal";
 import {
   PROCESS_STATUS_LABELS,
-  DEPARTMENTS,
   STATUS_DEPARTMENT_MAP,
 } from "@/lib/constants";
-import { getNextProcessStatus, updateOrderStatus } from "@/lib/utils";
+import { getNextProcessStatus } from "@/lib/utils";
+import apiClient from "@/lib/api-client";
 
 interface StatusUpdateFormProps {
   order: Order;
@@ -23,6 +23,9 @@ export const StatusUpdateForm: React.FC<StatusUpdateFormProps> = ({
   onUpdate,
 }) => {
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [error, setError] = useState<string>("");
+  
   const [formData, setFormData] = useState({
     performedBy: "",
     receivedBy: "",
@@ -46,45 +49,56 @@ export const StatusUpdateForm: React.FC<StatusUpdateFormProps> = ({
   const currentDepartment = STATUS_DEPARTMENT_MAP[order.currentStatus];
   const nextDepartment = STATUS_DEPARTMENT_MAP[nextStatus];
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    setError("");
 
     if (!formData.performedBy || !formData.receivedBy) {
-      alert("Mohon lengkapi nama yang menyerahkan dan menerima");
+      setError("Mohon lengkapi nama yang menyerahkan dan menerima");
       return;
     }
 
-    // Update order status with transfer log
-    updateOrderStatus(
-      order.id,
-      nextStatus,
-      formData.performedBy,
-      formData.notes,
-      {
-        fromDepartment: currentDepartment,
-        toDepartment: nextDepartment,
-        receivedBy: formData.receivedBy,
-        items: formData.items,
-      }
-    );
+    setIsSubmitting(true);
 
-    // Reset form
-    setFormData({
-      performedBy: "",
-      receivedBy: "",
-      notes: "",
-      items: [
-        {
-          description: `${order.style.name} - All Sizes`,
-          quantity: order.totalQuantity,
-          unit: "pcs",
-          condition: "good",
+    try {
+      // Call API to update status with transfer log
+      await apiClient.updateOrderStatus(order.id, {
+        newStatus: nextStatus,
+        performedBy: formData.performedBy,
+        notes: formData.notes,
+        transferData: {
+          fromDepartment: currentDepartment,
+          toDepartment: nextDepartment,
+          receivedBy: formData.receivedBy,
+          items: formData.items,
         },
-      ],
-    });
+      });
 
-    setIsModalOpen(false);
-    onUpdate();
+      // Reset form
+      setFormData({
+        performedBy: "",
+        receivedBy: "",
+        notes: "",
+        items: [
+          {
+            description: `${order.style.name} - All Sizes`,
+            quantity: order.totalQuantity,
+            unit: "pcs",
+            condition: "good",
+          },
+        ],
+      });
+
+      setIsModalOpen(false);
+      
+      // Trigger parent refresh
+      onUpdate();
+    } catch (err) {
+      console.error("Error updating status:", err);
+      setError("Failed to update status. Please try again.");
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (
@@ -95,7 +109,7 @@ export const StatusUpdateForm: React.FC<StatusUpdateFormProps> = ({
 
       <Modal
         isOpen={isModalOpen}
-        onClose={() => setIsModalOpen(false)}
+        onClose={() => !isSubmitting && setIsModalOpen(false)}
         title="Update Status Produksi"
         size="lg"
       >
@@ -126,6 +140,31 @@ export const StatusUpdateForm: React.FC<StatusUpdateFormProps> = ({
             </div>
           </div>
 
+          {/* Error Display */}
+          {error && (
+            <div className="bg-red-50 border border-red-200 rounded-lg p-4">
+              <div className="flex items-start">
+                <svg
+                  className="w-5 h-5 text-red-600 mr-3 mt-0.5"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+                  />
+                </svg>
+                <div>
+                  <p className="text-sm font-medium text-red-800">Error</p>
+                  <p className="text-sm text-red-700 mt-1">{error}</p>
+                </div>
+              </div>
+            </div>
+          )}
+
           {/* Transfer Info */}
           <div className="grid grid-cols-2 gap-4">
             <div>
@@ -141,6 +180,7 @@ export const StatusUpdateForm: React.FC<StatusUpdateFormProps> = ({
                 className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                 placeholder="Nama staff yang menyerahkan"
                 required
+                disabled={isSubmitting}
               />
               <p className="text-xs text-gray-500 mt-1">
                 Department: {currentDepartment}
@@ -159,6 +199,7 @@ export const StatusUpdateForm: React.FC<StatusUpdateFormProps> = ({
                 className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                 placeholder="Nama staff yang menerima"
                 required
+                disabled={isSubmitting}
               />
               <p className="text-xs text-gray-500 mt-1">
                 Department: {nextDepartment}
@@ -199,6 +240,7 @@ export const StatusUpdateForm: React.FC<StatusUpdateFormProps> = ({
               rows={3}
               className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
               placeholder="Tambahkan catatan jika ada reject, kurang, atau informasi penting lainnya"
+              disabled={isSubmitting}
             />
           </div>
 
@@ -208,11 +250,19 @@ export const StatusUpdateForm: React.FC<StatusUpdateFormProps> = ({
               type="button"
               variant="outline"
               onClick={() => setIsModalOpen(false)}
+              disabled={isSubmitting}
             >
               Batal
             </Button>
-            <Button type="submit" variant="primary">
-              Update Status & Buat Surat Jalan
+            <Button type="submit" variant="primary" disabled={isSubmitting}>
+              {isSubmitting ? (
+                <>
+                  <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
+                  Processing...
+                </>
+              ) : (
+                "Update Status & Buat Surat Jalan"
+              )}
             </Button>
           </div>
         </form>
