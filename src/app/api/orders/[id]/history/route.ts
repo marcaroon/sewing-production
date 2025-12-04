@@ -9,12 +9,15 @@ export async function GET(
   { params }: { params: Promise <{ id: string }> }
 ) {
   try {
-    const history = await prisma.processHistory.findMany({
+    const history = await prisma.processTransition.findMany({
       where: {
         orderId: (await params).id,
       },
+      include: {
+        processStep: true
+      },
       orderBy: {
-        timestamp: "desc",
+        transitionTime: "desc",
       },
     });
 

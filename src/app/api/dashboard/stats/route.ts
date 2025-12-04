@@ -3,111 +3,88 @@
 import { NextResponse } from "next/server";
 import prisma from "@/lib/prisma";
 
-// GET /api/dashboard/stats
 export async function GET() {
   try {
-    // Get all orders for calculations
+    // Get all orders with processSteps
     const orders = await prisma.order.findMany({
       include: {
         sizeBreakdowns: true,
+        processSteps: true,
       },
     });
 
-    // Calculate stats
     const totalOrders = orders.length;
 
-    const ordersInProgress = orders.filter(
-      (o: { currentStatus: string }) =>
-        o.currentStatus !== "completed" &&
-        o.currentStatus !== "on_hold" &&
-        o.currentStatus !== "rejected"
+    // Use NEW fields: currentPhase, currentProcess, currentState
+    const ordersInProduction = orders.filter(
+      (o) => o.currentPhase === "production" && o.currentProcess !== "delivered"
+    ).length;
+
+    const ordersInDelivery = orders.filter(
+      (o) => o.currentPhase === "delivery" && o.currentProcess !== "delivered"
     ).length;
 
     const ordersCompleted = orders.filter(
-      (o: { currentStatus: string }) => o.currentStatus === "completed"
+      (o) => o.currentProcess === "delivered"
     ).length;
 
     const ordersOnHold = orders.filter(
-      (o: { currentStatus: string }) => o.currentStatus === "on_hold"
+      (o) => o.currentState === "on_hold"
     ).length;
 
-    // Calculate total WIP
-    const totalWIP = orders.reduce(
-      (
-        sum: any,
-        order: {
-          wipAtCutting: any;
-          wipAtNumbering: any;
-          wipAtShiwake: any;
-          wipAtSewing: any;
-          wipAtQC: any;
-          wipAtIroning: any;
-          wipAtPacking: any;
-        }
-      ) => {
-        return (
-          sum +
-          order.wipAtCutting +
-          order.wipAtNumbering +
-          order.wipAtShiwake +
-          order.wipAtSewing +
-          order.wipAtQC +
-          order.wipAtIroning +
-          order.wipAtPacking
-        );
-      },
-      0
-    );
+    // Calculate WIP from totalQuantity - totalCompleted
+    const wipProduction = orders
+      .filter(o => o.currentPhase === "production")
+      .reduce((sum, order) => sum + (order.totalQuantity - order.totalCompleted), 0);
 
-    // Calculate average lead time (for completed orders)
+    const wipDelivery = orders
+      .filter(o => o.currentPhase === "delivery")
+      .reduce((sum, order) => sum + (order.totalQuantity - order.totalCompleted), 0);
+
+    // Calculate average production time (completed orders only)
     const completedOrders = orders.filter(
-      (o: { currentStatus: string }) => o.currentStatus === "completed"
+      (o) => o.currentProcess === "delivered"
     );
-    let avgLeadTime = 0;
-
+    
+    let avgProductionTime = 0;
     if (completedOrders.length > 0) {
-      const totalLeadTime = completedOrders.reduce(
-        (
-          sum: number,
-          order: {
-            createdAt: string | number | Date;
-            updatedAt: string | number | Date;
-          }
-        ) => {
-          const created = new Date(order.createdAt);
-          const updated = new Date(order.updatedAt);
-          const days = Math.ceil(
-            (updated.getTime() - created.getTime()) / (1000 * 60 * 60 * 24)
-          );
-          return sum + days;
-        },
-        0
-      );
-      avgLeadTime = Math.round(totalLeadTime / completedOrders.length);
+      const totalDays = completedOrders.reduce((sum, order) => {
+        const created = new Date(order.createdAt);
+        const completed = new Date(order.updatedAt);
+        const days = Math.ceil(
+          (completed.getTime() - created.getTime()) / (1000 * 60 * 60 * 24)
+        );
+        return sum + days;
+      }, 0);
+      avgProductionTime = Math.round(totalDays / completedOrders.length);
     }
 
     // Calculate reject rate
     const totalQuantity = orders.reduce(
-      (sum: any, order: { totalQuantity: any }) => sum + order.totalQuantity,
+      (sum, order) => sum + order.totalQuantity,
       0
     );
     const totalRejected = orders.reduce(
-      (sum: any, order: { totalRejected: any }) => sum + order.totalRejected,
+      (sum, order) => sum + order.totalRejected,
       0
     );
-    const rejectRate =
+    const totalRejectRate =
       totalQuantity > 0
         ? Math.round((totalRejected / totalQuantity) * 100 * 10) / 10
         : 0;
 
+    // Return NEW format (will be adapted by api-client)
     const stats = {
       totalOrders,
-      ordersInProgress,
+      ordersInProduction,
+      ordersInDelivery,
       ordersCompleted,
       ordersOnHold,
-      totalWIP,
-      avgLeadTime,
-      rejectRate,
+      wipProduction,
+      wipDelivery,
+      avgProductionTime,
+      avgDeliveryTime: 0, // TODO: Calculate if needed
+      totalRejectRate,
     };
 
     return NextResponse.json({

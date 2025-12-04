@@ -49,57 +49,38 @@ export const StatusUpdateForm: React.FC<StatusUpdateFormProps> = ({
   const currentDepartment = STATUS_DEPARTMENT_MAP[order.currentStatus];
   const nextDepartment = STATUS_DEPARTMENT_MAP[nextStatus];
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setError("");
+  // Ganti handleSubmit dengan:
+const handleSubmit = async (e: React.FormEvent) => {
+  e.preventDefault();
+  setError("");
+  setIsSubmitting(true);
 
-    if (!formData.performedBy || !formData.receivedBy) {
-      setError("Mohon lengkapi nama yang menyerahkan dan menerima");
-      return;
+  try {
+    // Get current process step
+    const processSteps = await apiClient.getProcessStepsByOrderId(order.id);
+    const currentStep = processSteps.find(s => 
+      s.status === "in_progress" || s.status === "pending"
+    );
+
+    if (!currentStep) {
+      throw new Error("No active process step");
     }
 
-    setIsSubmitting(true);
+    // Transition to completed
+    await apiClient.transitionProcessStep(currentStep.id, {
+      newState: "completed",
+      performedBy: formData.performedBy,
+      notes: formData.notes,
+      quantity: order.totalQuantity
+    });
 
-    try {
-      // Call API to update status with transfer log
-      await apiClient.updateOrderStatus(order.id, {
-        newStatus: nextStatus,
-        performedBy: formData.performedBy,
-        notes: formData.notes,
-        transferData: {
-          fromDepartment: currentDepartment,
-          toDepartment: nextDepartment,
-          receivedBy: formData.receivedBy,
-          items: formData.items,
-        },
-      });
-
-      // Reset form
-      setFormData({
-        performedBy: "",
-        receivedBy: "",
-        notes: "",
-        items: [
-          {
-            description: `${order.style.name} - All Sizes`,
-            quantity: order.totalQuantity,
-            unit: "pcs",
-            condition: "good",
-          },
-        ],
-      });
-
-      setIsModalOpen(false);
-      
-      // Trigger parent refresh
-      onUpdate();
-    } catch (err) {
-      console.error("Error updating status:", err);
-      setError("Failed to update status. Please try again.");
-    } finally {
-      setIsSubmitting(false);
-    }
-  };
+    onUpdate();
+  } catch (err) {
+    setError("Failed to update status");
+  } finally {
+    setIsSubmitting(false);
+  }
+};
 
   return (
     <>

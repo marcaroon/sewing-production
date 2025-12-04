@@ -4,7 +4,9 @@
 
 import React, { useEffect, useState } from "react";
 import Link from "next/link";
-import { Order, ProcessStatus } from "@/lib/types";
+import { adaptNewOrderToOld } from "@/lib/order-adapter";
+import { Order as OldOrder, ProcessStatus } from "@/lib/types"; // Use old Order type
+import { ProcessStatus as OldProcessStatus } from "@/lib/types";
 import { OrderCard } from "@/components/OrderCard";
 import { Card, CardContent } from "@/components/ui/Card";
 import { Badge } from "@/components/ui/Badge";
@@ -12,10 +14,13 @@ import { PROCESS_STATUS_LABELS } from "@/lib/constants";
 import apiClient from "@/lib/api-client";
 
 export default function OrdersPage() {
-  const [orders, setOrders] = useState<Order[]>([]);
-  const [filteredOrders, setFilteredOrders] = useState<Order[]>([]);
+  const [orders, setOrders] = useState<OldOrder[]>([]);
+  const [filteredOrders, setFilteredOrders] = useState<OldOrder[]>([]);
   const [searchTerm, setSearchTerm] = useState("");
-  const [statusFilter, setStatusFilter] = useState<ProcessStatus | "all">("all");
+  const [statusFilter, setStatusFilter] = useState<OldProcessStatus | "all">(
+    "all"
+  );
+
   const [sortBy, setSortBy] = useState<"date" | "status" | "buyer">("date");
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string>("");
@@ -31,13 +36,15 @@ export default function OrdersPage() {
   const loadOrders = async () => {
     setIsLoading(true);
     setError("");
-
+  
     try {
       const data = await apiClient.getOrders({
-        status: statusFilter !== "all" ? statusFilter : undefined,
         search: searchTerm || undefined,
       });
-      setOrders(data);
+      
+      // Convert new orders to old format
+      const adaptedOrders = data.map(adaptNewOrderToOld);
+      setOrders(adaptedOrders);
     } catch (err) {
       console.error("Error loading orders:", err);
       setError("Failed to load orders. Please try again.");
@@ -85,7 +92,7 @@ export default function OrdersPage() {
     setFilteredOrders(filtered);
   };
 
-  const statusOptions: (ProcessStatus | "all")[] = [
+  const statusOptions: (OldProcessStatus | "all")[] = [
     "all",
     "cutting",
     "numbering",
@@ -106,7 +113,9 @@ export default function OrdersPage() {
       o.currentStatus !== "on_hold" &&
       o.currentStatus !== "rejected"
   ).length;
-  const completed = orders.filter((o) => o.currentStatus === "completed").length;
+  const completed = orders.filter(
+    (o) => o.currentStatus === "completed"
+  ).length;
   const onHold = orders.filter((o) => o.currentStatus === "on_hold").length;
 
   if (isLoading) {
@@ -127,8 +136,18 @@ export default function OrdersPage() {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <div className="bg-red-50 border border-red-200 rounded-lg p-6">
           <div className="flex items-start">
-            <svg className="w-6 h-6 text-red-600 mr-3 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+            <svg
+              className="w-6 h-6 text-red-600 mr-3 mt-0.5"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+              />
             </svg>
             <div>
               <p className="text-sm font-medium text-red-800">Error</p>

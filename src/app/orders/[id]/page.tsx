@@ -4,7 +4,7 @@
 
 import React, { useEffect, useState } from "react";
 import { useRouter, useParams } from "next/navigation";
-import { Order, ProcessHistoryLog, TransferLog } from "@/lib/types";
+import { Order as OldOrder, ProcessHistoryLog, TransferLog } from "@/lib/types";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/Card";
 import { Badge } from "@/components/ui/Badge";
 import { Button } from "@/components/ui/Button";
@@ -38,7 +38,7 @@ export default function OrderDetailPage() {
   const params = useParams();
   const id = params.id as string;
 
-  const [order, setOrder] = useState<Order | null>(null);
+  const [order, setOrder] = useState<OldOrder | null>(null);
   const [history, setHistory] = useState<ProcessHistoryLog[]>([]);
   const [transfers, setTransfers] = useState<TransferLog[]>([]);
   const [qrCodes, setQrCodes] = useState<any>(null);
@@ -60,7 +60,7 @@ export default function OrderDetailPage() {
 
     try {
       const [orderData, historyData, transfersData] = await Promise.all([
-        apiClient.getOrderById(id),
+        apiClient.getOrderById(id), 
         apiClient.getProcessHistoryByOrderId(id),
         apiClient.getTransferLogsByOrderId(id),
       ]);
@@ -93,7 +93,7 @@ export default function OrderDetailPage() {
         leadTime: {},
       };
 
-      setOrder(fullOrderData as any); // Use 'as any' temporarily
+      setOrder(orderData); // Already OLD format
       setHistory(historyData);
       setTransfers(transfersData);
 

@@ -153,6 +153,8 @@ export interface LeftoverMaterial {
 
 // Order Utama
 export interface Order {
+  currentProcess: any;
+  productionDeadline: any;
   id: string;
   orderNumber: string; // auto-generated (ORD-YYYY-XXXXX)
   buyer: Buyer;

@@ -1,16 +1,26 @@
 // lib/api-client-new.ts
 // Updated API Client for New Flow
 
-import { ProcessHistoryLog, TransferLog } from "./types";
 import {
-  Order,
+  Order as NewOrder,
   ProcessStep,
   ProcessTransition,
   RejectLog,
   ProcessState,
   Buyer,
   Style,
+  DashboardStats as NewDashboardStats,
 } from "./types-new";
+
+import {
+  Order as OldOrder,
+  DashboardStats as OldDashboardStats,
+  ProcessHistoryLog,
+  TransferLog,
+  Order,
+} from "./types";
+
+import { adaptNewOrderToOld, adaptNewStatsToOld } from "./order-adapter";
 
 const API_BASE = "/api";
 
@@ -41,12 +51,16 @@ class ApiClient {
 
   // ==================== ORDERS ====================
 
+  /**
+   * Get all orders - returns OLD format for frontend compatibility
+   */
   async getOrders(params?: {
     phase?: string;
     process?: string;
     state?: string;
     search?: string;
-  }): Promise<Order[]> {
+  }): Promise<OldOrder[]> {
+    // ← EXPLICIT OLD ORDER TYPE
     const queryParams = new URLSearchParams();
     if (params?.phase) queryParams.append("phase", params.phase);
     if (params?.process) queryParams.append("process", params.process);
@@ -56,17 +70,26 @@ class ApiClient {
     const query = queryParams.toString();
     const endpoint = query ? `/orders?${query}` : "/orders";
 
-    const response = await this.request<{ success: boolean; data: Order[] }>(
+    const response = await this.request<{ success: boolean; data: NewOrder[] }>(
       endpoint
     );
-    return response.data;
+
+    // Adapt NEW orders to OLD format
+    return response.data.map((newOrder: NewOrder) =>
+      adaptNewOrderToOld(newOrder)
+    );
   }
 
-  async getOrderById(id: string): Promise<Order> {
-    const response = await this.request<{ success: boolean; data: Order }>(
+  /**
+   * Get order by ID - returns OLD format
+   */
+  async getOrderById(id: string): Promise<OldOrder> {
+    // ← EXPLICIT OLD ORDER TYPE
+    const response = await this.request<{ success: boolean; data: NewOrder }>(
       `/orders/${id}`
     );
-    return response.data;
+
+    return adaptNewOrderToOld(response.data);
   }
 
   async createOrder(orderData: {
@@ -236,11 +259,17 @@ class ApiClient {
 
   // ==================== DASHBOARD ====================
 
-  async getDashboardStats(): Promise<any> {
-    const response = await this.request<{ success: boolean; data: any }>(
-      "/dashboard/stats"
-    );
-    return response.data;
+  /**
+   * Get dashboard stats - returns OLD format
+   */
+  async getDashboardStats(): Promise<OldDashboardStats> {
+    // ← EXPLICIT OLD STATS TYPE
+    const response = await this.request<{
+      success: boolean;
+      data: NewDashboardStats;
+    }>("/dashboard/stats");
+
+    return adaptNewStatsToOld(response.data);
   }
 
   async getProcessPerformance(): Promise<any> {
@@ -345,29 +374,35 @@ class ApiClient {
   }
 
   // IDKKK
-  async getProcessHistoryByOrderId(orderId: string): Promise<ProcessHistoryLog[]> {
-    const response = await this.request<{ success: boolean; data: ProcessHistoryLog[] }>(
-      `/orders/${orderId}/history`
-    );
+  async getProcessHistoryByOrderId(
+    orderId: string
+  ): Promise<ProcessHistoryLog[]> {
+    const response = await this.request<{
+      success: boolean;
+      data: ProcessHistoryLog[];
+    }>(`/orders/${orderId}/history`);
     return response.data;
   }
 
   // Transfer Logs
   async getTransferLogsByOrderId(orderId: string): Promise<TransferLog[]> {
-    const response = await this.request<{ success: boolean; data: TransferLog[] }>(
-      `/orders/${orderId}/transfers`
-    );
+    const response = await this.request<{
+      success: boolean;
+      data: TransferLog[];
+    }>(`/orders/${orderId}/transfers`);
     return response.data;
   }
 
-  async createTransferLog(transferData: Partial<TransferLog>): Promise<TransferLog> {
-    const response = await this.request<{ success: boolean; data: TransferLog }>(
-      '/transfers',
-      {
-        method: 'POST',
-        body: JSON.stringify(transferData),
-      }
-    );
+  async createTransferLog(
+    transferData: Partial<TransferLog>
+  ): Promise<TransferLog> {
+    const response = await this.request<{
+      success: boolean;
+      data: TransferLog;
+    }>("/transfers", {
+      method: "POST",
+      body: JSON.stringify(transferData),
+    });
     return response.data;
   }
 }

@@ -309,15 +309,11 @@ export interface DashboardStats {
   ordersInDelivery: number;
   ordersCompleted: number;
   ordersOnHold: number;
-
-  // Production metrics
-  avgProductionTime: number; // days
-  avgDeliveryTime: number; // days
-  totalRejectRate: number; // percentage
-
-  // Current WIP by phase
   wipProduction: number;
   wipDelivery: number;
+  avgProductionTime: number;
+  avgDeliveryTime: number;
+  totalRejectRate: number;
 }
 
 // ==================== API RESPONSE TYPES ====================

@@ -78,7 +78,7 @@ export async function POST(
           size,
           bundleNumber,
           description,
-          rootCause,
+          rootCause: rootCause || null, // Ensure null instead of undefined
           action,
           images: images ? JSON.stringify(images) : null,
           reworkCompleted: false,
@@ -267,7 +267,6 @@ export async function PUT_CompleteRework(
           finalDisposition,
           actionTakenBy: completedBy,
           actionTakenTime: now,
-          notes: notes || rejectLog.notes,
         },
       });
 
