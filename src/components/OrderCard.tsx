@@ -1,5 +1,3 @@
-// components/OrderCard.tsx
-
 "use client";
 
 import React from "react";

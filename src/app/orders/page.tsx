@@ -1,24 +1,24 @@
-// app/orders/page.tsx
+// app/orders/page.tsx (Updated with API)
 
 "use client";
 
 import React, { useEffect, useState } from "react";
 import Link from "next/link";
 import { Order, ProcessStatus } from "@/lib/types";
-import { orderStorage } from "@/lib/storage";
 import { OrderCard } from "@/components/OrderCard";
 import { Card, CardContent } from "@/components/ui/Card";
 import { Badge } from "@/components/ui/Badge";
 import { PROCESS_STATUS_LABELS } from "@/lib/constants";
+import apiClient from "@/lib/api-client";
 
 export default function OrdersPage() {
   const [orders, setOrders] = useState<Order[]>([]);
   const [filteredOrders, setFilteredOrders] = useState<Order[]>([]);
   const [searchTerm, setSearchTerm] = useState("");
-  const [statusFilter, setStatusFilter] = useState<ProcessStatus | "all">(
-    "all"
-  );
+  const [statusFilter, setStatusFilter] = useState<ProcessStatus | "all">("all");
   const [sortBy, setSortBy] = useState<"date" | "status" | "buyer">("date");
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string>("");
 
   useEffect(() => {
     loadOrders();
@@ -28,15 +28,28 @@ export default function OrdersPage() {
     filterAndSortOrders();
   }, [orders, searchTerm, statusFilter, sortBy]);
 
-  const loadOrders = () => {
-    const allOrders = orderStorage.getAll();
-    setOrders(allOrders);
+  const loadOrders = async () => {
+    setIsLoading(true);
+    setError("");
+
+    try {
+      const data = await apiClient.getOrders({
+        status: statusFilter !== "all" ? statusFilter : undefined,
+        search: searchTerm || undefined,
+      });
+      setOrders(data);
+    } catch (err) {
+      console.error("Error loading orders:", err);
+      setError("Failed to load orders. Please try again.");
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   const filterAndSortOrders = () => {
     let filtered = [...orders];
 
-    // Search filter
+    // Search filter (client-side untuk additional filtering)
     if (searchTerm) {
       filtered = filtered.filter(
         (order) =>
@@ -85,6 +98,54 @@ export default function OrdersPage() {
     "completed",
   ];
 
+  // Calculate stats from filtered orders
+  const totalOrders = orders.length;
+  const inProgress = orders.filter(
+    (o) =>
+      o.currentStatus !== "completed" &&
+      o.currentStatus !== "on_hold" &&
+      o.currentStatus !== "rejected"
+  ).length;
+  const completed = orders.filter((o) => o.currentStatus === "completed").length;
+  const onHold = orders.filter((o) => o.currentStatus === "on_hold").length;
+
+  if (isLoading) {
+    return (
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <div className="flex items-center justify-center min-h-[400px]">
+          <div className="text-center">
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
+            <p className="text-gray-600">Loading orders...</p>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <div className="bg-red-50 border border-red-200 rounded-lg p-6">
+          <div className="flex items-start">
+            <svg className="w-6 h-6 text-red-600 mr-3 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+            </svg>
+            <div>
+              <p className="text-sm font-medium text-red-800">Error</p>
+              <p className="text-sm text-red-700 mt-1">{error}</p>
+              <button
+                onClick={loadOrders}
+                className="mt-3 text-sm text-red-800 underline hover:text-red-900"
+              >
+                Try Again
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
       {/* Page Header */}
@@ -110,39 +171,25 @@ export default function OrdersPage() {
           <Card>
             <CardContent className="pt-4 pb-4">
               <p className="text-sm text-gray-600">Total Orders</p>
-              <p className="text-2xl font-bold text-gray-900">
-                {orders.length}
-              </p>
+              <p className="text-2xl font-bold text-gray-900">{totalOrders}</p>
             </CardContent>
           </Card>
           <Card>
             <CardContent className="pt-4 pb-4">
               <p className="text-sm text-gray-600">In Progress</p>
-              <p className="text-2xl font-bold text-orange-600">
-                {
-                  orders.filter(
-                    (o) =>
-                      o.currentStatus !== "completed" &&
-                      o.currentStatus !== "on_hold"
-                  ).length
-                }
-              </p>
+              <p className="text-2xl font-bold text-orange-600">{inProgress}</p>
             </CardContent>
           </Card>
           <Card>
             <CardContent className="pt-4 pb-4">
               <p className="text-sm text-gray-600">Completed</p>
-              <p className="text-2xl font-bold text-green-600">
-                {orders.filter((o) => o.currentStatus === "completed").length}
-              </p>
+              <p className="text-2xl font-bold text-green-600">{completed}</p>
             </CardContent>
           </Card>
           <Card>
             <CardContent className="pt-4 pb-4">
               <p className="text-sm text-gray-600">On Hold</p>
-              <p className="text-2xl font-bold text-red-600">
-                {orders.filter((o) => o.currentStatus === "on_hold").length}
-              </p>
+              <p className="text-2xl font-bold text-red-600">{onHold}</p>
             </CardContent>
           </Card>
         </div>

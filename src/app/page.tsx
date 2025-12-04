@@ -1,16 +1,14 @@
-// app/page.tsx
+// app/page.tsx (Updated with API)
 
 'use client';
 
 import React, { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { Order, DashboardStats } from '@/lib/types';
-import { orderStorage } from '@/lib/storage';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/Card';
 import { OrderCard } from '@/components/OrderCard';
-import { Badge } from '@/components/ui/Badge';
-import { initializeDummyData } from '@/lib/dummyData';
-import { calculateAverageLeadTime, formatNumber } from '@/lib/utils';
+import { formatNumber } from '@/lib/utils';
+import apiClient from '@/lib/api-client';
 
 export default function DashboardPage() {
   const [orders, setOrders] = useState<Order[]>([]);
@@ -23,49 +21,32 @@ export default function DashboardPage() {
     avgLeadTime: 0,
     rejectRate: 0,
   });
-  const [isInitialized, setIsInitialized] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string>('');
 
   useEffect(() => {
-    // Check if data exists, if not initialize dummy data
-    const existingOrders = orderStorage.getAll();
-    if (existingOrders.length === 0 && !isInitialized) {
-      initializeDummyData();
-      setIsInitialized(true);
-    }
     loadData();
-  }, [isInitialized]);
+  }, []);
 
-  const loadData = () => {
-    const allOrders = orderStorage.getAll();
-    setOrders(allOrders);
+  const loadData = async () => {
+    setIsLoading(true);
+    setError('');
+    
+    try {
+      // Fetch orders and stats in parallel
+      const [ordersData, statsData] = await Promise.all([
+        apiClient.getOrders(),
+        apiClient.getDashboardStats(),
+      ]);
 
-    // Calculate stats
-    const inProgress = allOrders.filter(o => 
-      o.currentStatus !== 'completed' && 
-      o.currentStatus !== 'on_hold' && 
-      o.currentStatus !== 'rejected'
-    ).length;
-
-    const completed = allOrders.filter(o => o.currentStatus === 'completed').length;
-    const onHold = allOrders.filter(o => o.currentStatus === 'on_hold').length;
-
-    const totalWIP = allOrders.reduce((sum, order) => {
-      return sum + Object.values(order.wip).reduce((wipSum, val) => wipSum + val, 0);
-    }, 0);
-
-    const totalRejected = allOrders.reduce((sum, order) => sum + order.totalRejected, 0);
-    const totalQuantity = allOrders.reduce((sum, order) => sum + order.totalQuantity, 0);
-    const rejectRate = totalQuantity > 0 ? (totalRejected / totalQuantity) * 100 : 0;
-
-    setStats({
-      totalOrders: allOrders.length,
-      ordersInProgress: inProgress,
-      ordersCompleted: completed,
-      ordersOnHold: onHold,
-      totalWIP,
-      avgLeadTime: calculateAverageLeadTime(allOrders),
-      rejectRate: Math.round(rejectRate * 10) / 10,
-    });
+      setOrders(ordersData);
+      setStats(statsData);
+    } catch (err) {
+      console.error('Error loading dashboard:', err);
+      setError('Failed to load dashboard data. Please try again.');
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   // Get active orders (not completed)
@@ -79,6 +60,43 @@ export default function DashboardPage() {
     .filter(o => o.currentStatus === 'completed')
     .sort((a, b) => new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime())
     .slice(0, 3);
+
+  if (isLoading) {
+    return (
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <div className="flex items-center justify-center min-h-[400px]">
+          <div className="text-center">
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
+            <p className="text-gray-600">Loading dashboard...</p>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <div className="bg-red-50 border border-red-200 rounded-lg p-6">
+          <div className="flex items-start">
+            <svg className="w-6 h-6 text-red-600 mr-3 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+            </svg>
+            <div>
+              <p className="text-sm font-medium text-red-800">Error</p>
+              <p className="text-sm text-red-700 mt-1">{error}</p>
+              <button 
+                onClick={loadData}
+                className="mt-3 text-sm text-red-800 underline hover:text-red-900"
+              >
+                Try Again
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
@@ -212,17 +230,11 @@ export default function DashboardPage() {
                   📋 View All Orders
                 </button>
               </Link>
-              <button 
-                onClick={() => {
-                  if (confirm('Reset semua data dan load dummy data baru?')) {
-                    initializeDummyData();
-                    loadData();
-                  }
-                }}
-                className="w-full bg-white border-2 border-gray-300 text-gray-700 px-4 py-3 rounded-lg hover:bg-gray-50 transition-colors text-left font-medium"
-              >
-                🔄 Reset Demo Data
-              </button>
+              <Link href="/qr/scanner">
+                <button className="w-full bg-white border-2 border-gray-300 text-gray-700 px-4 py-3 rounded-lg hover:bg-gray-50 transition-colors text-left font-medium">
+                  📱 QR Scanner
+                </button>
+              </Link>
             </div>
           </CardContent>
         </Card>

@@ -1,0 +1,378 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+// Buyer Model
+model Buyer {
+  id            String   @id @default(cuid())
+  name          String
+  type          String   // "repeat" or "one-time"
+  code          String   @unique
+  contactPerson String?
+  phone         String?
+  
+  // Leftover Policy (stored as JSON)
+  canReuse          Boolean  @default(false)
+  returRequired     Boolean  @default(false)
+  storageLocation   String?
+  
+  orders        Order[]
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  @@index([type])
+  @@map("buyers")
+}
+
+// Style Model
+model Style {
+  id                    String   @id @default(cuid())
+  styleCode             String   @unique
+  name                  String
+  category              String   // "shirt", "pants", "jacket", "dress", "other"
+  description           String?  @db.Text
+  imageUrl              String?
+  estimatedCuttingTime  Int?     // in minutes
+  estimatedSewingTime   Int?     // in minutes per piece
+  
+  orders        Order[]
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  @@index([category])
+  @@map("styles")
+}
+
+// Order Model
+model Order {
+  id                String   @id @default(cuid())
+  orderNumber       String   @unique
+  buyerId           String
+  styleId           String
+  orderDate         DateTime
+  targetDate        DateTime
+  totalQuantity     Int
+  currentStatus     String   @default("draft")
+  assignedLine      String?
+  materialsIssued   Boolean  @default(false)
+  totalRejected     Int      @default(0)
+  totalRework       Int      @default(0)
+  hasLeftover       Boolean  @default(false)
+  createdBy         String
+  notes             String?  @db.Text
+  
+  // Relations
+  buyer             Buyer    @relation(fields: [buyerId], references: [id])
+  style             Style    @relation(fields: [styleId], references: [id])
+  
+  sizeBreakdowns    SizeBreakdown[]
+  transferLogs      TransferLog[]
+  processHistories  ProcessHistory[]
+  rejectLogs        RejectLog[]
+  leftoverMaterials LeftoverMaterial[]
+  bundles           Bundle[]
+  qrCode            OrderQRCode?
+  
+  // Progress (stored as JSON)
+  progressCutting   Int      @default(0)
+  progressNumbering Int      @default(0)
+  progressShiwake   Int      @default(0)
+  progressSewing    Int      @default(0)
+  progressQc        Int      @default(0)
+  progressIroning   Int      @default(0)
+  progressFinalQc   Int      @default(0)
+  progressPacking   Int      @default(0)
+  
+  // WIP (Work In Progress)
+  wipAtCutting      Int      @default(0)
+  wipAtNumbering    Int      @default(0)
+  wipAtShiwake      Int      @default(0)
+  wipAtSewing       Int      @default(0)
+  wipAtQC           Int      @default(0)
+  wipAtIroning      Int      @default(0)
+  wipAtPacking      Int      @default(0)
+  
+  // Lead Time (stored as JSON for flexibility)
+  leadTimeCutting   Int?
+  leadTimeNumbering Int?
+  leadTimeShiwake   Int?
+  leadTimeSewing    Int?
+  leadTimeQc        Int?
+  leadTimeIroning   Int?
+  leadTimeFinalQc   Int?
+  leadTimePacking   Int?
+  
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+
+  @@index([buyerId])
+  @@index([styleId])
+  @@index([currentStatus])
+  @@index([orderDate])
+  @@index([targetDate])
+  @@map("orders")
+}
+
+// Size Breakdown Model
+model SizeBreakdown {
+  id          String   @id @default(cuid())
+  orderId     String
+  size        String   // "XS", "S", "M", "L", "XL", "XXL", "XXXL"
+  quantity    Int
+  completed   Int      @default(0)
+  rejected    Int      @default(0)
+  bundleCount Int      @default(0)
+  
+  order       Order    @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([orderId])
+  @@index([size])
+  @@map("size_breakdowns")
+}
+
+// Transfer Log Model (Surat Jalan)
+model TransferLog {
+  id              String   @id @default(cuid())
+  transferNumber  String   @unique
+  orderId         String
+  orderNumber     String
+  fromDepartment  String
+  toDepartment    String
+  transferDate    DateTime
+  handedOverBy    String
+  receivedBy      String
+  processStatus   String
+  notes           String?  @db.Text
+  isReceived      Boolean  @default(false)
+  receivedDate    DateTime?
+  
+  order           Order    @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  items           TransferItem[]
+  processHistories ProcessHistory[]
+  
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  @@index([orderId])
+  @@index([transferDate])
+  @@index([processStatus])
+  @@map("transfer_logs")
+}
+
+// Transfer Item Model
+model TransferItem {
+  id             String      @id @default(cuid())
+  transferLogId  String
+  description    String
+  bundleNumber   String?
+  quantity       Int
+  unit           String
+  condition      String      // "good", "defect", "rework"
+  remarks        String?     @db.Text
+  
+  transferLog    TransferLog @relation(fields: [transferLogId], references: [id], onDelete: Cascade)
+  
+  createdAt      DateTime    @default(now())
+
+  @@index([transferLogId])
+  @@map("transfer_items")
+}
+
+// Process History Model
+model ProcessHistory {
+  id              String       @id @default(cuid())
+  orderId         String
+  timestamp       DateTime
+  processStatus   String
+  action          String       @db.Text
+  performedBy     String
+  department      String
+  duration        Int?
+  notes           String?      @db.Text
+  transferLogId   String?
+  
+  order           Order        @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  transferLog     TransferLog? @relation(fields: [transferLogId], references: [id])
+  
+  createdAt       DateTime     @default(now())
+
+  @@index([orderId])
+  @@index([timestamp])
+  @@index([processStatus])
+  @@map("process_histories")
+}
+
+// Reject Log Model
+model RejectLog {
+  id            String   @id @default(cuid())
+  orderId       String
+  processStatus String
+  date          DateTime
+  reportedBy    String
+  rejectType    String   // "material_defect", "cutting_error", "sewing_defect", "other"
+  quantity      Int
+  size          String?
+  description   String   @db.Text
+  action        String   // "rework", "scrap", "pending"
+  images        String?  @db.Text // JSON array of image URLs
+  
+  order         Order    @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  @@index([orderId])
+  @@index([date])
+  @@map("reject_logs")
+}
+
+// Leftover Material Model
+model LeftoverMaterial {
+  id              String   @id @default(cuid())
+  orderId         String
+  orderNumber     String
+  buyerId         String
+  buyerType       String   // "repeat" or "one-time"
+  status          String   // "stored", "reused", "returned", "disposed"
+  storageLocation String?
+  notes           String?  @db.Text
+  materials       String   @db.Text // JSON array of MaterialItem
+  
+  order           Order    @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  @@index([orderId])
+  @@index([status])
+  @@map("leftover_materials")
+}
+
+// Sewing Line Model
+model SewingLine {
+  id          String   @id @default(cuid())
+  lineName    String
+  lineCode    String   @unique
+  capacity    Int      // pieces per day
+  currentLoad Int      @default(0)
+  operators   Int
+  supervisor  String
+  status      String   @default("active") // "active", "maintenance", "inactive"
+  
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([status])
+  @@map("sewing_lines")
+}
+
+// Bundle Model
+model Bundle {
+  id             String   @id @default(cuid())
+  bundleNumber   String   @unique
+  orderId        String
+  size           String
+  quantity       Int
+  currentLocation String
+  currentStatus  String
+  
+  order          Order    @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  qrCode         BundleQRCode?
+  
+  createdAt      DateTime @default(now())
+  lastUpdated    DateTime @updatedAt
+
+  @@index([orderId])
+  @@index([currentStatus])
+  @@map("bundles")
+}
+
+// User Model
+model User {
+  id         String   @id @default(cuid())
+  name       String
+  department String
+  role       String   // "admin", "ppic", "cutting", "sewing", "qc", "warehouse"
+  email      String?  @unique
+  
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  @@index([department])
+  @@index([role])
+  @@map("users")
+}
+
+// QR Code Model untuk Order Level
+model OrderQRCode {
+  id          String   @id @default(cuid())
+  orderId     String   @unique
+  qrCode      String   @unique // Format: ORD-2024-00001
+  qrData      String   @db.Text // JSON data
+  
+  order       Order    @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  scans       QRScan[]
+  
+  createdAt   DateTime @default(now())
+  
+  @@index([qrCode])
+  @@map("order_qr_codes")
+}
+
+// QR Code Model untuk Bundle Level
+model BundleQRCode {
+  id          String   @id @default(cuid())
+  bundleId    String   @unique
+  qrCode      String   @unique // Format: ORD-2024-00001-M-001
+  qrData      String   @db.Text // JSON data
+  
+  bundle      Bundle   @relation(fields: [bundleId], references: [id], onDelete: Cascade)
+  scans       QRScan[]
+  
+  createdAt   DateTime @default(now())
+  
+  @@index([qrCode])
+  @@map("bundle_qr_codes")
+}
+
+// QR Scan Log - untuk tracking setiap scan
+model QRScan {
+  id            String   @id @default(cuid())
+  qrCode        String
+  qrType        String   // "order", "bundle"
+  
+  // Relations (nullable)
+  orderQRId     String?
+  bundleQRId    String?
+  
+  // Scan details
+  scannedBy     String
+  scannedAt     DateTime @default(now())
+  location      String   // Department/Location saat scan
+  action        String   // "view", "transfer", "qc_check", "complete"
+  notes         String?  @db.Text
+  
+  // Device info (optional)
+  deviceInfo    String?
+  
+  orderQR       OrderQRCode?  @relation(fields: [orderQRId], references: [id], onDelete: Cascade)
+  bundleQR      BundleQRCode? @relation(fields: [bundleQRId], references: [id], onDelete: Cascade)
+  
+  @@index([qrCode])
+  @@index([scannedAt])
+  @@map("qr_scans")
+}
