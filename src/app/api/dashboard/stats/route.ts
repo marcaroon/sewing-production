@@ -1,4 +1,4 @@
-// app/api/dashboard/stats/route.ts
+// app/api/dashboard/stats/route.ts - FIXED VERSION
 
 import { NextResponse } from "next/server";
 import prisma from "@/lib/prisma";
@@ -28,24 +28,31 @@ export async function GET() {
       (o) => o.currentProcess === "delivered"
     ).length;
 
-    const ordersOnHold = orders.filter(
-      (o) => o.currentState === "on_hold"
+    // FIXED: Check processSteps for on_hold status instead of currentState
+    const ordersOnHold = orders.filter((o) =>
+      o.processSteps?.some((ps) => ps.status === "on_hold")
     ).length;
 
     // Calculate WIP from totalQuantity - totalCompleted
     const wipProduction = orders
-      .filter(o => o.currentPhase === "production")
-      .reduce((sum, order) => sum + (order.totalQuantity - order.totalCompleted), 0);
+      .filter((o) => o.currentPhase === "production")
+      .reduce(
+        (sum, order) => sum + (order.totalQuantity - order.totalCompleted),
+        0
+      );
 
     const wipDelivery = orders
-      .filter(o => o.currentPhase === "delivery")
-      .reduce((sum, order) => sum + (order.totalQuantity - order.totalCompleted), 0);
+      .filter((o) => o.currentPhase === "delivery")
+      .reduce(
+        (sum, order) => sum + (order.totalQuantity - order.totalCompleted),
+        0
+      );
 
     // Calculate average production time (completed orders only)
     const completedOrders = orders.filter(
       (o) => o.currentProcess === "delivered"
     );
-    
+
     let avgProductionTime = 0;
     if (completedOrders.length > 0) {
       const totalDays = completedOrders.reduce((sum, order) => {

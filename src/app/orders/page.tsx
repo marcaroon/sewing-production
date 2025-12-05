@@ -1,4 +1,4 @@
-// app/orders/page.tsx - FULL CORRECTED VERSION
+// app/orders/page.tsx - FIXED VERSION
 
 "use client";
 
@@ -104,13 +104,21 @@ export default function OrdersPage() {
     "delivered",
   ];
 
-  // Calculate stats from orders
+  // ===== FIXED: Calculate stats from orders =====
   const totalOrders = orders.length;
+  
+  // Fixed: Check if any processStep has status "on_hold"
   const inProgress = orders.filter(
-    (o) => o.currentProcess !== "delivered" && o.currentState !== "on_hold"
+    (o) => o.currentProcess !== "delivered" && 
+          !o.processSteps?.some(ps => ps.status === "on_hold")
   ).length;
+  
   const completed = orders.filter((o) => o.currentProcess === "delivered").length;
-  const onHold = orders.filter((o) => o.currentState === "on_hold").length;
+  
+  // Fixed: Count orders with any on_hold process step
+  const onHold = orders.filter((o) =>
+    o.processSteps?.some(ps => ps.status === "on_hold")
+  ).length;
 
   if (isLoading) {
     return (
