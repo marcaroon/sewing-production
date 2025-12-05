@@ -1,27 +1,22 @@
-// app/orders/page.tsx (Updated with API)
+// app/orders/page.tsx - FULL CORRECTED VERSION
 
 "use client";
 
 import React, { useEffect, useState } from "react";
 import Link from "next/link";
-import { adaptNewOrderToOld } from "@/lib/order-adapter";
-import { Order as OldOrder, ProcessStatus } from "@/lib/types"; // Use old Order type
-import { ProcessStatus as OldProcessStatus } from "@/lib/types";
-import { OrderCard } from "@/components/OrderCard";
+import { Order, ProcessName } from "@/lib/types-new";
+import { OrderCardNew as OrderCard } from "@/components/OrderCardNew";
 import { Card, CardContent } from "@/components/ui/Card";
 import { Badge } from "@/components/ui/Badge";
-import { PROCESS_STATUS_LABELS } from "@/lib/constants";
+import { PROCESS_LABELS } from "@/lib/constants-new";
 import apiClient from "@/lib/api-client";
 
 export default function OrdersPage() {
-  const [orders, setOrders] = useState<OldOrder[]>([]);
-  const [filteredOrders, setFilteredOrders] = useState<OldOrder[]>([]);
+  const [orders, setOrders] = useState<Order[]>([]);
+  const [filteredOrders, setFilteredOrders] = useState<Order[]>([]);
   const [searchTerm, setSearchTerm] = useState("");
-  const [statusFilter, setStatusFilter] = useState<OldProcessStatus | "all">(
-    "all"
-  );
-
-  const [sortBy, setSortBy] = useState<"date" | "status" | "buyer">("date");
+  const [processFilter, setProcessFilter] = useState<ProcessName | "all">("all");
+  const [sortBy, setSortBy] = useState<"date" | "process" | "buyer">("date");
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string>("");
 
@@ -31,19 +26,17 @@ export default function OrdersPage() {
 
   useEffect(() => {
     filterAndSortOrders();
-  }, [orders, searchTerm, statusFilter, sortBy]);
+  }, [orders, searchTerm, processFilter, sortBy]);
 
   const loadOrders = async () => {
     setIsLoading(true);
     setError("");
-  
+
     try {
-      // API client already returns OLD format (adapted internally)
       const data = await apiClient.getOrders({
         search: searchTerm || undefined,
       });
-      
-      // data is already in OLD format from api-client
+
       setOrders(data);
     } catch (err) {
       console.error("Error loading orders:", err);
@@ -56,7 +49,7 @@ export default function OrdersPage() {
   const filterAndSortOrders = () => {
     let filtered = [...orders];
 
-    // Search filter (client-side untuk additional filtering)
+    // Search filter (client-side)
     if (searchTerm) {
       filtered = filtered.filter(
         (order) =>
@@ -66,10 +59,10 @@ export default function OrdersPage() {
       );
     }
 
-    // Status filter
-    if (statusFilter !== "all") {
+    // Process filter
+    if (processFilter !== "all") {
       filtered = filtered.filter(
-        (order) => order.currentStatus === statusFilter
+        (order) => order.currentProcess === processFilter
       );
     }
 
@@ -80,8 +73,8 @@ export default function OrdersPage() {
           return (
             new Date(b.orderDate).getTime() - new Date(a.orderDate).getTime()
           );
-        case "status":
-          return a.currentStatus.localeCompare(b.currentStatus);
+        case "process":
+          return a.currentProcess.localeCompare(b.currentProcess);
         case "buyer":
           return a.buyer.name.localeCompare(b.buyer.name);
         default:
@@ -92,8 +85,11 @@ export default function OrdersPage() {
     setFilteredOrders(filtered);
   };
 
-  const statusOptions: (OldProcessStatus | "all")[] = [
+  const processOptions: (ProcessName | "all")[] = [
     "all",
+    "draft",
+    "material_request",
+    "material_issued",
     "cutting",
     "numbering",
     "shiwake",
@@ -102,21 +98,19 @@ export default function OrdersPage() {
     "ironing",
     "final_qc",
     "packing",
-    "completed",
+    "final_inspection",
+    "loading",
+    "shipping",
+    "delivered",
   ];
 
-  // Calculate stats from filtered orders
+  // Calculate stats from orders
   const totalOrders = orders.length;
   const inProgress = orders.filter(
-    (o) =>
-      o.currentStatus !== "completed" &&
-      o.currentStatus !== "on_hold" &&
-      o.currentStatus !== "rejected"
+    (o) => o.currentProcess !== "delivered" && o.currentState !== "on_hold"
   ).length;
-  const completed = orders.filter(
-    (o) => o.currentStatus === "completed"
-  ).length;
-  const onHold = orders.filter((o) => o.currentStatus === "on_hold").length;
+  const completed = orders.filter((o) => o.currentProcess === "delivered").length;
+  const onHold = orders.filter((o) => o.currentState === "on_hold").length;
 
   if (isLoading) {
     return (
@@ -232,22 +226,22 @@ export default function OrdersPage() {
               />
             </div>
 
-            {/* Status Filter */}
+            {/* Process Filter */}
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">
-                Filter by Status
+                Filter by Process
               </label>
               <select
-                value={statusFilter}
+                value={processFilter}
                 onChange={(e) =>
-                  setStatusFilter(e.target.value as ProcessStatus | "all")
+                  setProcessFilter(e.target.value as ProcessName | "all")
                 }
                 className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
               >
-                <option value="all">All Status</option>
-                {statusOptions.slice(1).map((status) => (
-                  <option key={status} value={status}>
-                    {PROCESS_STATUS_LABELS[status as ProcessStatus]}
+                <option value="all">All Processes</option>
+                {processOptions.slice(1).map((process) => (
+                  <option key={process} value={process}>
+                    {PROCESS_LABELS[process as ProcessName]}
                   </option>
                 ))}
               </select>
@@ -261,19 +255,19 @@ export default function OrdersPage() {
               <select
                 value={sortBy}
                 onChange={(e) =>
-                  setSortBy(e.target.value as "date" | "status" | "buyer")
+                  setSortBy(e.target.value as "date" | "process" | "buyer")
                 }
                 className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
               >
                 <option value="date">Order Date (Newest)</option>
-                <option value="status">Status</option>
+                <option value="process">Current Process</option>
                 <option value="buyer">Buyer Name</option>
               </select>
             </div>
           </div>
 
           {/* Active Filters */}
-          {(searchTerm || statusFilter !== "all") && (
+          {(searchTerm || processFilter !== "all") && (
             <div className="mt-4 flex items-center gap-2">
               <span className="text-sm text-gray-600">Active filters:</span>
               {searchTerm && (
@@ -287,11 +281,11 @@ export default function OrdersPage() {
                   </button>
                 </Badge>
               )}
-              {statusFilter !== "all" && (
+              {processFilter !== "all" && (
                 <Badge variant="info">
-                  Status: {PROCESS_STATUS_LABELS[statusFilter as ProcessStatus]}
+                  Process: {PROCESS_LABELS[processFilter as ProcessName]}
                   <button
-                    onClick={() => setStatusFilter("all")}
+                    onClick={() => setProcessFilter("all")}
                     className="ml-2 hover:text-blue-900"
                   >
                     ×
@@ -301,7 +295,7 @@ export default function OrdersPage() {
               <button
                 onClick={() => {
                   setSearchTerm("");
-                  setStatusFilter("all");
+                  setProcessFilter("all");
                 }}
                 className="text-sm text-blue-600 hover:text-blue-800 font-medium"
               >
@@ -331,7 +325,7 @@ export default function OrdersPage() {
             </svg>
             <p className="text-lg font-medium mb-2">No orders found</p>
             <p className="text-sm">
-              {searchTerm || statusFilter !== "all"
+              {searchTerm || processFilter !== "all"
                 ? "Try adjusting your filters"
                 : "Create your first order to get started"}
             </p>

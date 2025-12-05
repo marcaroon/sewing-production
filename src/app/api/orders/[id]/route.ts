@@ -114,12 +114,11 @@ export async function PUT(
     const body = await request.json();
     const { id } = await params;
 
+    // Hanya allow update field-field yang masih relevan di NEW flow
     const {
-      currentStatus,
       assignedLine,
-      progress,
-      wip,
-      leadTime,
+      assignedTo,
+      totalCompleted,
       totalRejected,
       totalRework,
       materialsIssued,
@@ -129,64 +128,14 @@ export async function PUT(
 
     const updateData: any = {};
 
-    if (currentStatus !== undefined) updateData.currentStatus = currentStatus;
     if (assignedLine !== undefined) updateData.assignedLine = assignedLine;
+    if (assignedTo !== undefined) updateData.assignedTo = assignedTo;
+    if (totalCompleted !== undefined) updateData.totalCompleted = totalCompleted;
     if (totalRejected !== undefined) updateData.totalRejected = totalRejected;
     if (totalRework !== undefined) updateData.totalRework = totalRework;
-    if (materialsIssued !== undefined)
-      updateData.materialsIssued = materialsIssued;
+    if (materialsIssued !== undefined) updateData.materialsIssued = materialsIssued;
     if (hasLeftover !== undefined) updateData.hasLeftover = hasLeftover;
     if (notes !== undefined) updateData.notes = notes;
-
-    // Progress
-    if (progress) {
-      if (progress.cutting !== undefined)
-        updateData.progressCutting = progress.cutting;
-      if (progress.numbering !== undefined)
-        updateData.progressNumbering = progress.numbering;
-      if (progress.shiwake !== undefined)
-        updateData.progressShiwake = progress.shiwake;
-      if (progress.sewing !== undefined)
-        updateData.progressSewing = progress.sewing;
-      if (progress.qc !== undefined) updateData.progressQc = progress.qc;
-      if (progress.ironing !== undefined)
-        updateData.progressIroning = progress.ironing;
-      if (progress.finalQc !== undefined)
-        updateData.progressFinalQc = progress.finalQc;
-      if (progress.packing !== undefined)
-        updateData.progressPacking = progress.packing;
-    }
-
-    // WIP
-    if (wip) {
-      if (wip.atCutting !== undefined) updateData.wipAtCutting = wip.atCutting;
-      if (wip.atNumbering !== undefined)
-        updateData.wipAtNumbering = wip.atNumbering;
-      if (wip.atShiwake !== undefined) updateData.wipAtShiwake = wip.atShiwake;
-      if (wip.atSewing !== undefined) updateData.wipAtSewing = wip.atSewing;
-      if (wip.atQC !== undefined) updateData.wipAtQC = wip.atQC;
-      if (wip.atIroning !== undefined) updateData.wipAtIroning = wip.atIroning;
-      if (wip.atPacking !== undefined) updateData.wipAtPacking = wip.atPacking;
-    }
-
-    // Lead Time
-    if (leadTime) {
-      if (leadTime.cutting !== undefined)
-        updateData.leadTimeCutting = leadTime.cutting;
-      if (leadTime.numbering !== undefined)
-        updateData.leadTimeNumbering = leadTime.numbering;
-      if (leadTime.shiwake !== undefined)
-        updateData.leadTimeShiwake = leadTime.shiwake;
-      if (leadTime.sewing !== undefined)
-        updateData.leadTimeSewing = leadTime.sewing;
-      if (leadTime.qc !== undefined) updateData.leadTimeQc = leadTime.qc;
-      if (leadTime.ironing !== undefined)
-        updateData.leadTimeIroning = leadTime.ironing;
-      if (leadTime.finalQc !== undefined)
-        updateData.leadTimeFinalQc = leadTime.finalQc;
-      if (leadTime.packing !== undefined)
-        updateData.leadTimePacking = leadTime.packing;
-    }
 
     const updatedOrder = await prisma.order.update({
       where: { id },
@@ -198,30 +147,9 @@ export async function PUT(
       },
     });
 
-    // Transform response
-    const transformedOrder = {
-      id: updatedOrder.id,
-      orderNumber: updatedOrder.orderNumber,
-      buyer: {
-        id: updatedOrder.buyer.id,
-        name: updatedOrder.buyer.name,
-        type: updatedOrder.buyer.type,
-        code: updatedOrder.buyer.code,
-        contactPerson: updatedOrder.buyer.contactPerson || undefined,
-        phone: updatedOrder.buyer.phone || undefined,
-        leftoverPolicy: {
-          canReuse: updatedOrder.buyer.canReuse || false,
-          returRequired: updatedOrder.buyer.returRequired || false,
-          storageLocation: updatedOrder.buyer.storageLocation || undefined,
-        },
-      },
-      style: updatedOrder.style,
-      // ... rest of the transformation
-    };
-
     return NextResponse.json({
       success: true,
-      data: transformedOrder,
+      data: updatedOrder,
     });
   } catch (error) {
     console.error("Error updating order:", error);

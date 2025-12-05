@@ -1,16 +1,15 @@
-// app/api/orders/[id]/history/route.ts
+// app/api/orders/[id]/rejects/route.ts
 
 import { NextRequest, NextResponse } from "next/server";
 import prisma from "@/lib/prisma";
 
-// GET /api/orders/[id]/history
-// Returns process transitions for the order
+// GET /api/orders/[id]/rejects
 export async function GET(
   request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const transitions = await prisma.processTransition.findMany({
+    const rejects = await prisma.rejectLog.findMany({
       where: {
         orderId: (await params).id,
       },
@@ -23,20 +22,20 @@ export async function GET(
         },
       },
       orderBy: {
-        transitionTime: "desc",
+        detectedTime: "desc",
       },
     });
 
     return NextResponse.json({
       success: true,
-      data: transitions,
+      data: rejects,
     });
   } catch (error) {
-    console.error("Error fetching process transitions:", error);
+    console.error("Error fetching rejects:", error);
     return NextResponse.json(
       {
         success: false,
-        error: "Failed to fetch process transitions",
+        error: "Failed to fetch rejects",
       },
       { status: 500 }
     );

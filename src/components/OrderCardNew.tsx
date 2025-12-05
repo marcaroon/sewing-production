@@ -2,32 +2,35 @@
 
 import React from "react";
 import Link from "next/link";
-import { Order } from "@/lib/types";
+import { Order } from "@/lib/types-new";
 import { Card, CardContent, CardHeader, CardTitle } from "./ui/Card";
 import { Badge } from "./ui/Badge";
 import {
-  PROCESS_STATUS_LABELS,
-  STATUS_COLORS,
+  PROCESS_LABELS,
+  PHASE_LABELS,
+  PROCESS_STATE_LABELS,
+  PROCESS_STATE_COLORS,
   BUYER_TYPE_LABELS,
-} from "@/lib/constants";
-import {
-  formatDate,
-  calculateProgress,
-  isOrderDelayed,
-  getDelayDays,
-  calculateCompletionRate,
-  formatNumber,
-} from "@/lib/utils";
+} from "@/lib/constants-new";
+import { formatDate, formatNumber } from "@/lib/utils";
 
 interface OrderCardProps {
   order: Order;
 }
 
-export const OrderCard: React.FC<OrderCardProps> = ({ order }) => {
-  const progress = calculateProgress(order);
-  const isDelayed = isOrderDelayed(order);
-  const delayDays = getDelayDays(order);
-  const completionRate = calculateCompletionRate(order);
+export const OrderCardNew: React.FC<OrderCardProps> = ({ order }) => {
+  const isDelayed = new Date() > new Date(order.productionDeadline);
+  const delayDays = isDelayed
+    ? Math.ceil(
+        (new Date().getTime() - new Date(order.productionDeadline).getTime()) /
+          (1000 * 60 * 60 * 24)
+      )
+    : 0;
+
+  const completionRate =
+    order.totalQuantity > 0
+      ? Math.round((order.totalCompleted / order.totalQuantity) * 100)
+      : 0;
 
   return (
     <Link href={`/orders/${order.id}`}>
@@ -49,29 +52,34 @@ export const OrderCard: React.FC<OrderCardProps> = ({ order }) => {
         </CardHeader>
 
         <CardContent>
-          {/* Status */}
+          {/* Phase & Process */}
           <div className="mb-4">
-            <div className="flex items-center justify-between mb-2">
-              <span className="text-sm font-medium text-gray-700">Status:</span>
+            <div className="flex items-center gap-2 mb-2">
+              <Badge variant="info">{PHASE_LABELS[order.currentPhase]}</Badge>
               <span
                 className={`px-2.5 py-0.5 rounded-full text-xs font-medium ${
-                  STATUS_COLORS[order.currentStatus]
+                  PROCESS_STATE_COLORS[order.currentState]
                 }`}
               >
-                {PROCESS_STATUS_LABELS[order.currentStatus]}
+                {PROCESS_STATE_LABELS[order.currentState]}
               </span>
             </div>
+            <p className="text-sm font-medium text-gray-900">
+              {PROCESS_LABELS[order.currentProcess]}
+            </p>
+          </div>
 
-            {/* Progress Bar */}
+          {/* Progress */}
+          <div className="mb-4">
+            <div className="flex justify-between text-xs text-gray-600 mb-1">
+              <span>Completion</span>
+              <span>{completionRate}%</span>
+            </div>
             <div className="w-full bg-gray-200 rounded-full h-2">
               <div
                 className="bg-blue-600 h-2 rounded-full transition-all"
-                style={{ width: `${progress}%` }}
+                style={{ width: `${completionRate}%` }}
               />
-            </div>
-            <div className="flex justify-between text-xs text-gray-500 mt-1">
-              <span>{progress}% Progress</span>
-              <span>{completionRate}% Completed</span>
             </div>
           </div>
 
@@ -84,28 +92,28 @@ export const OrderCard: React.FC<OrderCardProps> = ({ order }) => {
               </p>
             </div>
             <div>
-              <span className="text-gray-600">Sewing Line:</span>
-              <p className="font-semibold text-gray-900">
-                {order.assignedLine || "-"}
+              <span className="text-gray-600">Completed:</span>
+              <p className="font-semibold text-green-600">
+                {formatNumber(order.totalCompleted)} pcs
               </p>
             </div>
             <div>
-              <span className="text-gray-600">Order Date:</span>
-              <p className="font-semibold text-gray-900">
-                {formatDate(order.orderDate)}
-              </p>
-            </div>
-            <div>
-              <span className="text-gray-600">Target Date:</span>
+              <span className="text-gray-600">Production Due:</span>
               <p
                 className={`font-semibold ${
                   isDelayed ? "text-red-600" : "text-gray-900"
                 }`}
               >
-                {formatDate(order.targetDate)}
+                {formatDate(order.productionDeadline)}
                 {isDelayed && (
                   <span className="text-xs ml-1">(+{delayDays}d)</span>
                 )}
+              </p>
+            </div>
+            <div>
+              <span className="text-gray-600">Delivery Due:</span>
+              <p className="font-semibold text-gray-900">
+                {formatDate(order.deliveryDeadline)}
               </p>
             </div>
           </div>
@@ -129,7 +137,9 @@ export const OrderCard: React.FC<OrderCardProps> = ({ order }) => {
           {/* Notes */}
           {order.notes && (
             <div className="mt-4 pt-4 border-t border-gray-200">
-              <p className="text-xs text-gray-600 italic">{order.notes}</p>
+              <p className="text-xs text-gray-600 italic line-clamp-2">
+                {order.notes}
+              </p>
             </div>
           )}
         </CardContent>

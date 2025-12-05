@@ -4,51 +4,36 @@
 
 import React, { useEffect, useState } from "react";
 import { useRouter, useParams } from "next/navigation";
-import { Order as OldOrder, ProcessHistoryLog, TransferLog } from "@/lib/types";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/Card";
 import { Badge } from "@/components/ui/Badge";
 import { Button } from "@/components/ui/Button";
-import { ProcessTimeline } from "@/components/ProcessTimeline";
-import { TransferLogTable } from "@/components/TransferLogTable";
-import { StatusUpdateForm } from "@/components/StatusUpdateForm";
 import { QRCodeDisplay } from "@/components/QRCodeDisplay";
 import { ProcessStepCard } from "@/components/ProcessStepCards";
+import apiClient from "@/lib/api-client";
+import { Order, ProcessStep } from "@/lib/types-new";
 import {
-  PROCESS_STATUS_LABELS,
-  STATUS_COLORS,
+  PROCESS_LABELS,
+  PHASE_LABELS,
+  PROCESS_STATE_LABELS,
   BUYER_TYPE_LABELS,
   GARMENT_CATEGORIES,
-} from "@/lib/constants";
-import {
-  formatDate,
-  formatDateTime,
-  calculateProgress,
-  isOrderDelayed,
-  getDelayDays,
-  calculateCompletionRate,
-  calculateRejectRate,
-  formatNumber,
-  calculateTotalWIP,
-} from "@/lib/utils";
-import apiClient from "@/lib/api-client";
-import { ProcessStep } from "@/lib/types-new";
+} from "@/lib/constants-new";
+import { formatDate, formatDateTime, formatNumber } from "@/lib/utils";
 
 export default function OrderDetailPage() {
   const router = useRouter();
   const params = useParams();
   const id = params.id as string;
 
-  const [order, setOrder] = useState<OldOrder | null>(null);
-  const [history, setHistory] = useState<ProcessHistoryLog[]>([]);
-  const [transfers, setTransfers] = useState<TransferLog[]>([]);
+  const [order, setOrder] = useState<Order | null>(null);
+  const [processSteps, setProcessSteps] = useState<ProcessStep[]>([]);
   const [qrCodes, setQrCodes] = useState<any>(null);
   const [activeTab, setActiveTab] = useState<
-    "overview" | "timeline" | "transfers" | "details" | "qr"
+    "overview" | "process-steps" | "details" | "qr"
   >("overview");
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string>("");
   const [isGeneratingQR, setIsGeneratingQR] = useState(false);
-  const [processSteps, setProcessSteps] = useState<ProcessStep[]>([]);
 
   useEffect(() => {
     loadOrderData();
@@ -59,43 +44,14 @@ export default function OrderDetailPage() {
     setError("");
 
     try {
-      const [orderData, historyData, transfersData] = await Promise.all([
-        apiClient.getOrderById(id), 
-        apiClient.getProcessHistoryByOrderId(id),
-        apiClient.getTransferLogsByOrderId(id),
+      // Load order dan process steps
+      const [orderData, stepsData] = await Promise.all([
+        apiClient.getOrderById(id),
+        apiClient.getProcessStepsByOrderId(id),
       ]);
 
-      // Transform orderData to match the full Order type with all required fields
-      const fullOrderData = {
-        ...orderData,
-        // Add missing fields with default values if they don't exist
-        targetDate: orderData.productionDeadline, // Map new field to old expected field
-        currentStatus: orderData.currentProcess as any, // Map to old field
-        progress: {
-          cutting: 0,
-          numbering: 0,
-          shiwake: 0,
-          sewing: 0,
-          qc: 0,
-          ironing: 0,
-          finalQc: 0,
-          packing: 0,
-        },
-        wip: {
-          atCutting: 0,
-          atNumbering: 0,
-          atShiwake: 0,
-          atSewing: 0,
-          atQC: 0,
-          atIroning: 0,
-          atPacking: 0,
-        },
-        leadTime: {},
-      };
-
-      setOrder(orderData); // Already OLD format
-      setHistory(historyData);
-      setTransfers(transfersData);
+      setOrder(orderData);
+      setProcessSteps(stepsData);
 
       // Check if order has QR codes
       if ((orderData as any).qrCode) {
@@ -155,6 +111,35 @@ export default function OrderDetailPage() {
     window.open(`/api/orders/${order.id}/print-qr?type=${type}`, "_blank");
   };
 
+  // Helper functions untuk calculate metrics
+  const calculateCompletionRate = () => {
+    return order && order.totalQuantity > 0
+      ? Math.round((order.totalCompleted / order.totalQuantity) * 100)
+      : 0;
+  };
+
+  const calculateRejectRate = () => {
+    return order && order.totalQuantity > 0
+      ? Math.round((order.totalRejected / order.totalQuantity) * 100 * 10) / 10
+      : 0;
+  };
+
+  const isDelayed = () => {
+    if (!order) return false;
+    const now = new Date();
+    const productionDeadline = new Date(order.productionDeadline);
+    return order.currentProcess !== "delivered" && now > productionDeadline;
+  };
+
+  const getDelayDays = () => {
+    if (!order || !isDelayed()) return 0;
+    const now = new Date();
+    const deadline = new Date(order.productionDeadline);
+    return Math.ceil(
+      (now.getTime() - deadline.getTime()) / (1000 * 60 * 60 * 24)
+    );
+  };
+
   if (isLoading) {
     return (
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
@@ -204,15 +189,14 @@ export default function OrderDetailPage() {
     );
   }
 
-  const progress = calculateProgress(order);
-  const isDelayed = isOrderDelayed(order);
-  const delayDays = getDelayDays(order);
-  const completionRate = calculateCompletionRate(order);
-  const rejectRate = calculateRejectRate(order);
-  const totalWIP = calculateTotalWIP(order);
+  const completionRate = calculateCompletionRate();
+  const rejectRate = calculateRejectRate();
+  const delayed = isDelayed();
+  const delayDays = getDelayDays();
 
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      {/* Header */}
       {/* Header */}
       <div className="mb-8">
         <div className="flex items-center gap-3 mb-4">
@@ -243,7 +227,7 @@ export default function OrderDetailPage() {
             </p>
           </div>
           <div className="flex items-center gap-3">
-            <StatusUpdateForm order={order} onUpdate={handleUpdate} />
+            {/* HAPUS StatusUpdateForm - diganti dengan action di ProcessStepCard */}
             <Badge
               variant={order.buyer.type === "repeat" ? "success" : "warning"}
             >
@@ -256,28 +240,32 @@ export default function OrderDetailPage() {
         <Card>
           <CardContent className="pt-6">
             <div className="flex items-center justify-between mb-3">
-              <span
-                className={`px-3 py-1.5 rounded-full text-sm font-medium ${
-                  STATUS_COLORS[order.currentStatus]
-                }`}
-              >
-                {PROCESS_STATUS_LABELS[order.currentStatus]}
-              </span>
+              <div className="flex items-center gap-2">
+                <Badge variant="info">{PHASE_LABELS[order.currentPhase]}</Badge>
+                <span className="text-lg font-semibold text-gray-900">
+                  {PROCESS_LABELS[order.currentProcess]}
+                </span>
+                <Badge variant="default">
+                  {PROCESS_STATE_LABELS[order.currentState]}
+                </Badge>
+              </div>
               <div className="text-right">
-                <p className="text-sm text-gray-600">Progress</p>
-                <p className="text-2xl font-bold text-gray-900">{progress}%</p>
+                <p className="text-sm text-gray-600">Completion</p>
+                <p className="text-2xl font-bold text-gray-900">
+                  {completionRate}%
+                </p>
               </div>
             </div>
             <div className="w-full bg-gray-200 rounded-full h-3">
               <div
                 className="bg-blue-600 h-3 rounded-full transition-all"
-                style={{ width: `${progress}%` }}
+                style={{ width: `${completionRate}%` }}
               />
             </div>
-            {isDelayed && (
+            {delayed && (
               <div className="mt-3 bg-red-50 border border-red-200 rounded-lg p-3">
                 <p className="text-sm text-red-800">
-                  ⚠️ Order terlambat {delayDays} hari dari target
+                  ⚠️ Order delayed {delayDays} days from production deadline
                 </p>
               </div>
             )}
@@ -289,12 +277,10 @@ export default function OrderDetailPage() {
       <div className="mb-6">
         <div className="border-b border-gray-200">
           <nav className="flex gap-8">
-            {(
-              ["overview", "timeline", "transfers", "details", "qr"] as const
-            ).map((tab) => (
+            {["overview", "process-steps", "details", "qr"].map((tab) => (
               <button
                 key={tab}
-                onClick={() => setActiveTab(tab)}
+                onClick={() => setActiveTab(tab as any)}
                 className={`py-4 px-1 border-b-2 font-medium text-sm transition-colors ${
                   activeTab === tab
                     ? "border-blue-600 text-blue-600"
@@ -302,9 +288,8 @@ export default function OrderDetailPage() {
                 }`}
               >
                 {tab === "overview" && "Overview"}
-                {tab === "timeline" && "Timeline Process"}
-                {tab === "transfers" && "Surat Jalan"}
-                {tab === "details" && "Detail Order"}
+                {tab === "process-steps" && "Process Steps"}
+                {tab === "details" && "Details"}
                 {tab === "qr" && "QR Codes"}
               </button>
             ))}
@@ -334,35 +319,23 @@ export default function OrderDetailPage() {
                   <div>
                     <p className="text-sm text-gray-600 mb-1">Completed</p>
                     <p className="text-2xl font-bold text-green-600">
-                      {completionRate}%
+                      {formatNumber(order.totalCompleted)}
                     </p>
-                    <p className="text-xs text-gray-500">
-                      {order.sizeBreakdown.reduce(
-                        (sum, s) => sum + s.completed,
-                        0
-                      )}{" "}
-                      pcs
-                    </p>
+                    <p className="text-xs text-gray-500">{completionRate}%</p>
                   </div>
                   <div>
-                    <p className="text-sm text-gray-600 mb-1">WIP</p>
-                    <p className="text-2xl font-bold text-orange-600">
-                      {formatNumber(totalWIP)}
+                    <p className="text-sm text-gray-600 mb-1">Rejected</p>
+                    <p className="text-2xl font-bold text-red-600">
+                      {formatNumber(order.totalRejected)}
+                    </p>
+                    <p className="text-xs text-gray-500">{rejectRate}%</p>
+                  </div>
+                  <div>
+                    <p className="text-sm text-gray-600 mb-1">Rework</p>
+                    <p className="text-2xl font-bold text-yellow-600">
+                      {formatNumber(order.totalRework)}
                     </p>
                     <p className="text-xs text-gray-500">pieces</p>
-                  </div>
-                  <div>
-                    <p className="text-sm text-gray-600 mb-1">Reject Rate</p>
-                    <p
-                      className={`text-2xl font-bold ${
-                        rejectRate > 5 ? "text-red-600" : "text-green-600"
-                      }`}
-                    >
-                      {rejectRate}%
-                    </p>
-                    <p className="text-xs text-gray-500">
-                      {order.totalRejected} pcs
-                    </p>
                   </div>
                 </div>
               </CardContent>
@@ -452,7 +425,7 @@ export default function OrderDetailPage() {
             </Card>
 
             {/* WIP Distribution */}
-            <Card>
+            {/* <Card>
               <CardHeader>
                 <CardTitle>WIP Distribution by Department</CardTitle>
               </CardHeader>
@@ -485,7 +458,7 @@ export default function OrderDetailPage() {
                   ))}
                 </div>
               </CardContent>
-            </Card>
+            </Card> */}
           </div>
 
           {/* Right Column - Details */}
@@ -503,21 +476,58 @@ export default function OrderDetailPage() {
                   </p>
                 </div>
                 <div>
-                  <p className="text-sm text-gray-600">Target Date</p>
+                  <p className="text-sm text-gray-600">Production Deadline</p>
                   <p
                     className={`font-semibold ${
-                      isDelayed ? "text-red-600" : "text-gray-900"
+                      delayed ? "text-red-600" : "text-gray-900"
                     }`}
                   >
-                    {formatDate(order.targetDate)}
+                    {formatDate(order.productionDeadline)}
+                    {delayed && (
+                      <span className="text-xs ml-1">(+{delayDays}d)</span>
+                    )}
                   </p>
                 </div>
                 <div>
-                  <p className="text-sm text-gray-600">Sewing Line</p>
+                  <p className="text-sm text-gray-600">Delivery Deadline</p>
                   <p className="font-semibold text-gray-900">
-                    {order.assignedLine || "Not assigned"}
+                    {formatDate(order.deliveryDeadline)}
                   </p>
                 </div>
+                <div>
+                  <p className="text-sm text-gray-600">Current Phase</p>
+                  <Badge variant="info">
+                    {PHASE_LABELS[order.currentPhase]}
+                  </Badge>
+                </div>
+                <div>
+                  <p className="text-sm text-gray-600">Current Process</p>
+                  <p className="font-semibold text-gray-900">
+                    {PROCESS_LABELS[order.currentProcess]}
+                  </p>
+                </div>
+                <div>
+                  <p className="text-sm text-gray-600">Current State</p>
+                  <Badge variant="default">
+                    {PROCESS_STATE_LABELS[order.currentState]}
+                  </Badge>
+                </div>
+                {order.assignedLine && (
+                  <div>
+                    <p className="text-sm text-gray-600">Sewing Line</p>
+                    <p className="font-semibold text-gray-900">
+                      {order.assignedLine}
+                    </p>
+                  </div>
+                )}
+                {order.assignedTo && (
+                  <div>
+                    <p className="text-sm text-gray-600">Assigned To</p>
+                    <p className="font-semibold text-gray-900">
+                      {order.assignedTo}
+                    </p>
+                  </div>
+                )}
                 <div>
                   <p className="text-sm text-gray-600">Created By</p>
                   <p className="font-semibold text-gray-900">
@@ -629,80 +639,242 @@ export default function OrderDetailPage() {
         </div>
       )}
 
-      {activeTab === "timeline" && (
-        <Card>
-          <CardHeader>
-            <CardTitle>Process Timeline & History</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <ProcessTimeline history={history} />
-          </CardContent>
-        </Card>
-      )}
-
-      {activeTab === "transfers" && (
-        <Card>
-          <CardHeader>
-            <CardTitle>Surat Jalan & Transfer Logs</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <TransferLogTable transfers={transfers} />
-          </CardContent>
-        </Card>
-      )}
-
       {activeTab === "details" && (
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          {/* Lead Time */}
+        <div className="space-y-6">
+          {/* Full Size Breakdown dengan detail */}
           <Card>
             <CardHeader>
-              <CardTitle>Lead Time per Process (hours)</CardTitle>
+              <CardTitle>Size Breakdown Details</CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="space-y-3">
-                {Object.entries(order.leadTime).map(([process, hours]) => (
-                  <div
-                    key={process}
-                    className="flex justify-between items-center"
-                  >
-                    <span className="text-sm text-gray-700 capitalize">
-                      {process.replace(/([A-Z])/g, " $1").trim()}
-                    </span>
-                    <span className="font-semibold text-gray-900">
-                      {hours || "-"} {hours ? "hours" : ""}
-                    </span>
-                  </div>
-                ))}
+              <div className="overflow-x-auto">
+                <table className="min-w-full">
+                  <thead>
+                    <tr className="border-b border-gray-200">
+                      <th className="text-left py-3 px-4 text-sm font-medium text-gray-700">
+                        Size
+                      </th>
+                      <th className="text-right py-3 px-4 text-sm font-medium text-gray-700">
+                        Quantity
+                      </th>
+                      <th className="text-right py-3 px-4 text-sm font-medium text-gray-700">
+                        Completed
+                      </th>
+                      <th className="text-right py-3 px-4 text-sm font-medium text-gray-700">
+                        Rejected
+                      </th>
+                      <th className="text-right py-3 px-4 text-sm font-medium text-gray-700">
+                        Bundles
+                      </th>
+                      <th className="text-right py-3 px-4 text-sm font-medium text-gray-700">
+                        %
+                      </th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {order.sizeBreakdown.map((size) => (
+                      <tr key={size.size} className="border-b border-gray-100">
+                        <td className="py-3 px-4 font-medium text-gray-900">
+                          {size.size}
+                        </td>
+                        <td className="py-3 px-4 text-right text-gray-900">
+                          {size.quantity}
+                        </td>
+                        <td className="py-3 px-4 text-right text-green-600 font-medium">
+                          {size.completed}
+                        </td>
+                        <td className="py-3 px-4 text-right text-red-600 font-medium">
+                          {size.rejected}
+                        </td>
+                        <td className="py-3 px-4 text-right text-gray-900">
+                          {size.bundleCount || 0}
+                        </td>
+                        <td className="py-3 px-4 text-right">
+                          {size.quantity > 0
+                            ? Math.round((size.completed / size.quantity) * 100)
+                            : 0}
+                          %
+                        </td>
+                      </tr>
+                    ))}
+                    <tr className="font-bold bg-gray-50">
+                      <td className="py-3 px-4">Total</td>
+                      <td className="py-3 px-4 text-right">
+                        {order.totalQuantity}
+                      </td>
+                      <td className="py-3 px-4 text-right text-green-600">
+                        {order.totalCompleted}
+                      </td>
+                      <td className="py-3 px-4 text-right text-red-600">
+                        {order.totalRejected}
+                      </td>
+                      <td className="py-3 px-4 text-right">
+                        {order.sizeBreakdown.reduce(
+                          (sum, s) => sum + (s.bundleCount || 0),
+                          0
+                        )}
+                      </td>
+                      <td className="py-3 px-4 text-right">
+                        {completionRate}%
+                      </td>
+                    </tr>
+                  </tbody>
+                </table>
               </div>
             </CardContent>
           </Card>
 
-          {/* Process Progress */}
+          {/* Material Status */}
           <Card>
             <CardHeader>
-              <CardTitle>Process Progress (%)</CardTitle>
+              <CardTitle>Material & Production Status</CardTitle>
             </CardHeader>
-            <CardContent>
-              <div className="space-y-4">
-                {Object.entries(order.progress).map(([process, percentage]) => (
-                  <div key={process}>
-                    <div className="flex justify-between items-center mb-2">
-                      <span className="text-sm font-medium text-gray-700 capitalize">
-                        {process}
-                      </span>
-                      <span className="text-sm font-bold text-gray-900">
-                        {percentage}%
-                      </span>
-                    </div>
-                    <div className="w-full bg-gray-200 rounded-full h-2">
-                      <div
-                        className="bg-blue-600 h-2 rounded-full"
-                        style={{ width: `${percentage}%` }}
-                      />
-                    </div>
-                  </div>
-                ))}
+            <CardContent className="space-y-4">
+              <div className="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
+                <span className="font-medium text-gray-900">
+                  Materials Issued
+                </span>
+                {order.materialsIssued ? (
+                  <Badge variant="success">✓ Issued</Badge>
+                ) : (
+                  <Badge variant="warning">Pending</Badge>
+                )}
               </div>
+              <div className="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
+                <span className="font-medium text-gray-900">Has Leftover</span>
+                {order.hasLeftover ? (
+                  <Badge variant="info">Yes</Badge>
+                ) : (
+                  <Badge variant="default">No</Badge>
+                )}
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Complete Buyer Info */}
+          <Card>
+            <CardHeader>
+              <CardTitle>Complete Buyer Information</CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-3">
+              <div>
+                <p className="text-sm text-gray-600">Name</p>
+                <p className="font-semibold text-gray-900">
+                  {order.buyer.name}
+                </p>
+              </div>
+              <div>
+                <p className="text-sm text-gray-600">Code</p>
+                <p className="font-semibold text-gray-900">
+                  {order.buyer.code}
+                </p>
+              </div>
+              <div>
+                <p className="text-sm text-gray-600">Type</p>
+                <Badge
+                  variant={
+                    order.buyer.type === "repeat" ? "success" : "warning"
+                  }
+                >
+                  {BUYER_TYPE_LABELS[order.buyer.type]}
+                </Badge>
+              </div>
+              {order.buyer.contactPerson && (
+                <div>
+                  <p className="text-sm text-gray-600">Contact Person</p>
+                  <p className="font-semibold text-gray-900">
+                    {order.buyer.contactPerson}
+                  </p>
+                  {order.buyer.phone && (
+                    <p className="text-sm text-gray-600">{order.buyer.phone}</p>
+                  )}
+                </div>
+              )}
+              <div>
+                <p className="text-sm text-gray-600 mb-2">Leftover Policy</p>
+                <div className="space-y-2 text-sm">
+                  <div className="flex items-center">
+                    {order.buyer.leftoverPolicy?.canReuse ? (
+                      <span className="text-green-600">✓ Can be reused</span>
+                    ) : (
+                      <span className="text-red-600">✗ Cannot be reused</span>
+                    )}
+                  </div>
+                  <div className="flex items-center">
+                    {order.buyer.leftoverPolicy?.returRequired ? (
+                      <span className="text-orange-600">⚠ Return required</span>
+                    ) : (
+                      <span className="text-gray-600">No return required</span>
+                    )}
+                  </div>
+                  {order.buyer.leftoverPolicy?.storageLocation && (
+                    <div>
+                      <p className="text-gray-600">
+                        Storage: {order.buyer.leftoverPolicy.storageLocation}
+                      </p>
+                    </div>
+                  )}
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Complete Style Info */}
+          <Card>
+            <CardHeader>
+              <CardTitle>Complete Style Information</CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-3">
+              <div>
+                <p className="text-sm text-gray-600">Style Code</p>
+                <p className="font-semibold text-gray-900">
+                  {order.style.styleCode}
+                </p>
+              </div>
+              <div>
+                <p className="text-sm text-gray-600">Name</p>
+                <p className="font-semibold text-gray-900">
+                  {order.style.name}
+                </p>
+              </div>
+              <div>
+                <p className="text-sm text-gray-600">Category</p>
+                <p className="font-semibold text-gray-900 capitalize">
+                  {GARMENT_CATEGORIES[order.style.category]}
+                </p>
+              </div>
+              {order.style.description && (
+                <div>
+                  <p className="text-sm text-gray-600">Description</p>
+                  <p className="text-sm text-gray-900">
+                    {order.style.description}
+                  </p>
+                </div>
+              )}
+              {(order.style.estimatedCuttingTime ||
+                order.style.estimatedSewingTime) && (
+                <div>
+                  <p className="text-sm text-gray-600 mb-2">Estimated Times</p>
+                  <div className="grid grid-cols-2 gap-4 text-sm">
+                    {order.style.estimatedCuttingTime && (
+                      <div>
+                        <p className="text-gray-600">Cutting</p>
+                        <p className="font-semibold">
+                          {order.style.estimatedCuttingTime} min
+                        </p>
+                      </div>
+                    )}
+                    {order.style.estimatedSewingTime && (
+                      <div>
+                        <p className="text-gray-600">Sewing</p>
+                        <p className="font-semibold">
+                          {order.style.estimatedSewingTime} min/pc
+                        </p>
+                      </div>
+                    )}
+                  </div>
+                </div>
+              )}
             </CardContent>
           </Card>
         </div>
@@ -822,6 +994,36 @@ export default function OrderDetailPage() {
                       </div>
                     )}
                   </div>
+                )}
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+      )}
+      {activeTab === "process-steps" && (
+        <div className="space-y-6">
+          <Card>
+            <CardHeader>
+              <CardTitle>Process Flow Tracking</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <p className="text-sm text-gray-600 mb-4">
+                Track each process step from PPIC through completion. Each step
+                shows detailed timestamps and state transitions.
+              </p>
+              <div className="space-y-4">
+                {processSteps.length === 0 ? (
+                  <div className="text-center py-8 text-gray-500">
+                    <p>No process steps found</p>
+                  </div>
+                ) : (
+                  processSteps.map((step) => (
+                    <ProcessStepCard
+                      key={step.id}
+                      processStep={step}
+                      onUpdate={loadOrderData}
+                    />
+                  ))
                 )}
               </div>
             </CardContent>

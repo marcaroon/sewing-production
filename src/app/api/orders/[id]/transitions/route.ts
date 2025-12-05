@@ -1,10 +1,9 @@
-// app/api/orders/[id]/history/route.ts
+// app/api/orders/[id]/transitions/route.ts
 
 import { NextRequest, NextResponse } from "next/server";
 import prisma from "@/lib/prisma";
 
-// GET /api/orders/[id]/history
-// Returns process transitions for the order
+// GET /api/orders/[id]/transitions
 export async function GET(
   request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
@@ -32,11 +31,11 @@ export async function GET(
       data: transitions,
     });
   } catch (error) {
-    console.error("Error fetching process transitions:", error);
+    console.error("Error fetching transitions:", error);
     return NextResponse.json(
       {
         success: false,
-        error: "Failed to fetch process transitions",
+        error: "Failed to fetch transitions",
       },
       { status: 500 }
     );

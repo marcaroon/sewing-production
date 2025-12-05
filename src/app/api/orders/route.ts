@@ -2,49 +2,60 @@ import { NextRequest, NextResponse } from "next/server";
 import prisma from "@/lib/prisma";
 import { PRODUCTION_PROCESSES, PROCESS_DEPARTMENT_MAP } from "@/lib/constants-new";
 
-export async function GET(request: NextRequest) {
+// GET /api/orders/[id] - Get order by ID
+export async function GET(
+  request: NextRequest,
+  { params }: { params: Promise<{ id: string }> }
+) {
   try {
-    const { searchParams } = new URL(request.url);
-    const phase = searchParams.get("phase");
-    const process = searchParams.get("process");
-    const state = searchParams.get("state");
-    const search = searchParams.get("search");
-
-    const where: any = {};
-
-    if (phase) where.currentPhase = phase;
-    if (process) where.currentProcess = process;
-    if (state) where.currentState = state;
-
-    if (search) {
-      where.OR = [
-        { orderNumber: { contains: search } },
-        { buyer: { name: { contains: search } } },
-        { style: { name: { contains: search } } },
-      ];
-    }
-
-    const orders = await prisma.order.findMany({
-      where,
+    const order = await prisma.order.findUnique({
+      where: { id: (await params).id }, 
       include: {
         buyer: true,
         style: true,
         sizeBreakdowns: true,
         processSteps: {
+          include: {
+            transitions: true,
+            rejects: true,
+          },
           orderBy: { sequenceOrder: "asc" },
         },
+        processTransitions: {
+          orderBy: { transitionTime: "desc" },
+        },
+        rejectLogs: {
+          orderBy: { detectedTime: "desc" },
+        },
+        bundles: {
+          include: { qrCode: true },
+        },
+        qrCode: true,
       },
-      orderBy: { createdAt: "desc" },
     });
 
+    if (!order) {
+      return NextResponse.json(
+        {
+          success: false,
+          error: "Order not found",
+        },
+        { status: 404 }
+      );
+    }
+
+    // Langsung return tanpa transform
     return NextResponse.json({
       success: true,
-      data: orders,
+      data: order,
     });
   } catch (error) {
-    console.error("Error fetching orders:", error);
+    console.error("Error fetching order:", error);
     return NextResponse.json(
-      { success: false, error: "Failed to fetch orders" },
+      {
+        success: false,
+        error: "Failed to fetch order",
+      },
       { status: 500 }
     );
   }

@@ -2,25 +2,15 @@
 // Updated API Client for New Flow
 
 import {
-  Order as NewOrder,
+  Order,
   ProcessStep,
   ProcessTransition,
   RejectLog,
   ProcessState,
   Buyer,
   Style,
-  DashboardStats as NewDashboardStats,
+  DashboardStats,
 } from "./types-new";
-
-import {
-  Order as OldOrder,
-  DashboardStats as OldDashboardStats,
-  ProcessHistoryLog,
-  TransferLog,
-  Order,
-} from "./types";
-
-import { adaptNewOrderToOld, adaptNewStatsToOld } from "./order-adapter";
 
 const API_BASE = "/api";
 
@@ -59,8 +49,7 @@ class ApiClient {
     process?: string;
     state?: string;
     search?: string;
-  }): Promise<OldOrder[]> {
-    // ← EXPLICIT OLD ORDER TYPE
+  }): Promise<Order[]> {
     const queryParams = new URLSearchParams();
     if (params?.phase) queryParams.append("phase", params.phase);
     if (params?.process) queryParams.append("process", params.process);
@@ -70,26 +59,21 @@ class ApiClient {
     const query = queryParams.toString();
     const endpoint = query ? `/orders?${query}` : "/orders";
 
-    const response = await this.request<{ success: boolean; data: NewOrder[] }>(
+    const response = await this.request<{ success: boolean; data: Order[] }>(
       endpoint
     );
 
-    // Adapt NEW orders to OLD format
-    return response.data.map((newOrder: NewOrder) =>
-      adaptNewOrderToOld(newOrder)
-    );
+    return response.data; // Langsung return, tanpa adapter
   }
 
   /**
    * Get order by ID - returns OLD format
    */
-  async getOrderById(id: string): Promise<OldOrder> {
-    // ← EXPLICIT OLD ORDER TYPE
-    const response = await this.request<{ success: boolean; data: NewOrder }>(
+  async getOrderById(id: string): Promise<Order> {
+    const response = await this.request<{ success: boolean; data: Order }>(
       `/orders/${id}`
     );
-
-    return adaptNewOrderToOld(response.data);
+    return response.data;
   }
 
   async createOrder(orderData: {
@@ -262,14 +246,12 @@ class ApiClient {
   /**
    * Get dashboard stats - returns OLD format
    */
-  async getDashboardStats(): Promise<OldDashboardStats> {
-    // ← EXPLICIT OLD STATS TYPE
+  async getDashboardStats(): Promise<DashboardStats> {
     const response = await this.request<{
       success: boolean;
-      data: NewDashboardStats;
+      data: DashboardStats;
     }>("/dashboard/stats");
-
-    return adaptNewStatsToOld(response.data);
+    return response.data;
   }
 
   async getProcessPerformance(): Promise<any> {
@@ -370,39 +352,6 @@ class ApiClient {
     const response = await this.request<{ success: boolean; data: any[] }>(
       "/sewing-lines"
     );
-    return response.data;
-  }
-
-  // IDKKK
-  async getProcessHistoryByOrderId(
-    orderId: string
-  ): Promise<ProcessHistoryLog[]> {
-    const response = await this.request<{
-      success: boolean;
-      data: ProcessHistoryLog[];
-    }>(`/orders/${orderId}/history`);
-    return response.data;
-  }
-
-  // Transfer Logs
-  async getTransferLogsByOrderId(orderId: string): Promise<TransferLog[]> {
-    const response = await this.request<{
-      success: boolean;
-      data: TransferLog[];
-    }>(`/orders/${orderId}/transfers`);
-    return response.data;
-  }
-
-  async createTransferLog(
-    transferData: Partial<TransferLog>
-  ): Promise<TransferLog> {
-    const response = await this.request<{
-      success: boolean;
-      data: TransferLog;
-    }>("/transfers", {
-      method: "POST",
-      body: JSON.stringify(transferData),
-    });
     return response.data;
   }
 }

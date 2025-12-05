@@ -1,23 +1,15 @@
-// app/api/process-steps/route.ts - GANTI ISI FILE
+// app/api/orders/[id]/process-steps/route.ts
 
 import { NextRequest, NextResponse } from "next/server";
 import prisma from "@/lib/prisma";
 
-// GET /api/process-steps?orderId=xxx
-export async function GET(request: NextRequest) {
+// GET /api/orders/[id]/process-steps
+export async function GET(
+  request: NextRequest,
+  { params }: { params: Promise<{ id: string }> }
+) {
   try {
-    const { searchParams } = new URL(request.url);
-    const orderId = searchParams.get("orderId");
-
-    if (!orderId) {
-      return NextResponse.json(
-        {
-          success: false,
-          error: "orderId is required",
-        },
-        { status: 400 }
-      );
-    }
+    const orderId = (await params).id;
 
     const processSteps = await prisma.processStep.findMany({
       where: { orderId },
