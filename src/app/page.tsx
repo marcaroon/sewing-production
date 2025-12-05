@@ -44,12 +44,9 @@ export default function DashboardPage() {
         apiClient.getDashboardStats(),
       ]);
 
-      // Adapt to old format
-      const adaptedOrders = ordersData.map(adaptNewOrderToOld);
-      const adaptedStats = adaptNewStatsToOld(statsData);
-
-      setOrders(adaptedOrders);
-      setStats(adaptedStats);
+      // Both already adapted to OLD format by api-client
+      setOrders(ordersData);
+      setStats(statsData);
     } catch (err) {
       console.error("Error loading dashboard:", err);
       setError("Failed to load dashboard data. Please try again.");

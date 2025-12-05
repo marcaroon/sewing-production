@@ -38,13 +38,13 @@ export default function OrdersPage() {
     setError("");
   
     try {
+      // API client already returns OLD format (adapted internally)
       const data = await apiClient.getOrders({
         search: searchTerm || undefined,
       });
       
-      // Convert new orders to old format
-      const adaptedOrders = data.map(adaptNewOrderToOld);
-      setOrders(adaptedOrders);
+      // data is already in OLD format from api-client
+      setOrders(data);
     } catch (err) {
       console.error("Error loading orders:", err);
       setError("Failed to load orders. Please try again.");
