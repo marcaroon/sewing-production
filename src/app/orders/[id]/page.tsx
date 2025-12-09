@@ -19,6 +19,7 @@ import {
   GARMENT_CATEGORIES,
 } from "@/lib/constants-new";
 import { formatDate, formatDateTime, formatNumber } from "@/lib/utils";
+import { TransferLogList } from "@/components/TransferLogList";
 
 export default function OrderDetailPage() {
   const router = useRouter();
@@ -29,7 +30,7 @@ export default function OrderDetailPage() {
   const [processSteps, setProcessSteps] = useState<ProcessStep[]>([]);
   const [qrCodes, setQrCodes] = useState<any>(null);
   const [activeTab, setActiveTab] = useState<
-    "overview" | "process-steps" | "details" | "qr"
+    "overview" | "process-steps" | "transfers" | "details" | "qr"
   >("overview");
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string>("");
@@ -277,22 +278,25 @@ export default function OrderDetailPage() {
       <div className="mb-6">
         <div className="border-b border-gray-200">
           <nav className="flex gap-8">
-            {["overview", "process-steps", "details", "qr"].map((tab) => (
-              <button
-                key={tab}
-                onClick={() => setActiveTab(tab as any)}
-                className={`py-4 px-1 border-b-2 font-medium text-sm transition-colors ${
-                  activeTab === tab
-                    ? "border-blue-600 text-blue-600"
-                    : "border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300"
-                }`}
-              >
-                {tab === "overview" && "Overview"}
-                {tab === "process-steps" && "Process Steps"}
-                {tab === "details" && "Details"}
-                {tab === "qr" && "QR Codes"}
-              </button>
-            ))}
+            {["overview", "process-steps", "transfers", "details", "qr"].map(
+              (tab) => (
+                <button
+                  key={tab}
+                  onClick={() => setActiveTab(tab as any)}
+                  className={`py-4 px-1 border-b-2 font-medium text-sm transition-colors ${
+                    activeTab === tab
+                      ? "border-blue-600 text-blue-600"
+                      : "border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300"
+                  }`}
+                >
+                  {tab === "overview" && "Overview"}
+                  {tab === "process-steps" && "Process Steps"}
+                  {tab === "transfers" && "Transfers"}
+                  {tab === "details" && "Details"}
+                  {tab === "qr" && "QR Codes"}
+                </button>
+              )
+            )}
           </nav>
         </div>
       </div>
@@ -636,6 +640,23 @@ export default function OrderDetailPage() {
               </Card>
             )}
           </div>
+        </div>
+      )}
+
+      {activeTab === "transfers" && (
+        <div className="space-y-6">
+          <Card>
+            <CardHeader>
+              <CardTitle>Surat Jalan / Transfer Logs</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <p className="text-sm text-gray-600 mb-4">
+                Riwayat perpindahan antar proses dengan detail lengkap termasuk
+                reject dan durasi.
+              </p>
+              <TransferLogList orderId={order.id} />
+            </CardContent>
+          </Card>
         </div>
       )}
 

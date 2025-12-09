@@ -2,7 +2,10 @@
 
 import { NextRequest, NextResponse } from "next/server";
 import prisma from "@/lib/prisma";
-import { PRODUCTION_PROCESSES, PROCESS_DEPARTMENT_MAP } from "@/lib/constants-new";
+import {
+  PRODUCTION_PROCESSES,
+  PROCESS_DEPARTMENT_MAP,
+} from "@/lib/constants-new";
 
 // GET /api/orders - Get all orders
 export async function GET(request: NextRequest) {

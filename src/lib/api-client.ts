@@ -10,6 +10,7 @@ import {
   Buyer,
   Style,
   DashboardStats,
+  TransferLog,
 } from "./types-new";
 
 const API_BASE = "/api";
@@ -352,6 +353,52 @@ class ApiClient {
     const response = await this.request<{ success: boolean; data: any[] }>(
       "/sewing-lines"
     );
+    return response.data;
+  }
+
+  async getTransferLogs(params?: {
+    orderId?: string;
+    status?: string;
+    department?: string;
+  }): Promise<TransferLog[]> {
+    const queryParams = new URLSearchParams();
+    if (params?.orderId) queryParams.append("orderId", params.orderId);
+    if (params?.status) queryParams.append("status", params.status);
+    if (params?.department) queryParams.append("department", params.department);
+
+    const query = queryParams.toString();
+    const endpoint = query ? `/transfer-logs?${query}` : "/transfer-logs";
+
+    const response = await this.request<{
+      success: boolean;
+      data: TransferLog[];
+    }>(endpoint);
+    return response.data;
+  }
+
+  async getTransferLogById(id: string): Promise<TransferLog> {
+    const response = await this.request<{
+      success: boolean;
+      data: TransferLog;
+    }>(`/transfer-logs/${id}`);
+    return response.data;
+  }
+
+  async receiveTransfer(
+    id: string,
+    data: {
+      receivedBy: string;
+      issues?: string;
+      notes?: string;
+    }
+  ): Promise<TransferLog> {
+    const response = await this.request<{
+      success: boolean;
+      data: TransferLog;
+    }>(`/transfer-logs/${id}/receive`, {
+      method: "POST",
+      body: JSON.stringify(data),
+    });
     return response.data;
   }
 }

@@ -42,48 +42,69 @@ CREATE TABLE `orders` (
     `buyerId` VARCHAR(191) NOT NULL,
     `styleId` VARCHAR(191) NOT NULL,
     `orderDate` DATETIME(3) NOT NULL,
-    `targetDate` DATETIME(3) NOT NULL,
+    `productionDeadline` DATETIME(3) NOT NULL,
+    `deliveryDeadline` DATETIME(3) NOT NULL,
     `totalQuantity` INTEGER NOT NULL,
-    `currentStatus` VARCHAR(191) NOT NULL DEFAULT 'draft',
+    `currentPhase` VARCHAR(191) NOT NULL DEFAULT 'production',
+    `currentProcess` VARCHAR(191) NOT NULL DEFAULT 'draft',
+    `currentState` VARCHAR(191) NOT NULL DEFAULT 'at_ppic',
     `assignedLine` VARCHAR(191) NULL,
+    `assignedTo` VARCHAR(191) NULL,
     `materialsIssued` BOOLEAN NOT NULL DEFAULT false,
+    `totalCompleted` INTEGER NOT NULL DEFAULT 0,
     `totalRejected` INTEGER NOT NULL DEFAULT 0,
     `totalRework` INTEGER NOT NULL DEFAULT 0,
     `hasLeftover` BOOLEAN NOT NULL DEFAULT false,
     `createdBy` VARCHAR(191) NOT NULL,
     `notes` TEXT NULL,
-    `progressCutting` INTEGER NOT NULL DEFAULT 0,
-    `progressNumbering` INTEGER NOT NULL DEFAULT 0,
-    `progressShiwake` INTEGER NOT NULL DEFAULT 0,
-    `progressSewing` INTEGER NOT NULL DEFAULT 0,
-    `progressQc` INTEGER NOT NULL DEFAULT 0,
-    `progressIroning` INTEGER NOT NULL DEFAULT 0,
-    `progressFinalQc` INTEGER NOT NULL DEFAULT 0,
-    `progressPacking` INTEGER NOT NULL DEFAULT 0,
-    `wipAtCutting` INTEGER NOT NULL DEFAULT 0,
-    `wipAtNumbering` INTEGER NOT NULL DEFAULT 0,
-    `wipAtShiwake` INTEGER NOT NULL DEFAULT 0,
-    `wipAtSewing` INTEGER NOT NULL DEFAULT 0,
-    `wipAtQC` INTEGER NOT NULL DEFAULT 0,
-    `wipAtIroning` INTEGER NOT NULL DEFAULT 0,
-    `wipAtPacking` INTEGER NOT NULL DEFAULT 0,
-    `leadTimeCutting` INTEGER NULL,
-    `leadTimeNumbering` INTEGER NULL,
-    `leadTimeShiwake` INTEGER NULL,
-    `leadTimeSewing` INTEGER NULL,
-    `leadTimeQc` INTEGER NULL,
-    `leadTimeIroning` INTEGER NULL,
-    `leadTimeFinalQc` INTEGER NULL,
-    `leadTimePacking` INTEGER NULL,
     `createdAt` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
     `updatedAt` DATETIME(3) NOT NULL,
 
     UNIQUE INDEX `orders_orderNumber_key`(`orderNumber`),
     INDEX `orders_buyerId_idx`(`buyerId`),
     INDEX `orders_styleId_idx`(`styleId`),
-    INDEX `orders_currentStatus_idx`(`currentStatus`),
+    INDEX `orders_currentPhase_idx`(`currentPhase`),
+    INDEX `orders_currentProcess_idx`(`currentProcess`),
+    INDEX `orders_currentState_idx`(`currentState`),
     INDEX `orders_orderDate_idx`(`orderDate`),
-    INDEX `orders_targetDate_idx`(`targetDate`),
+    INDEX `orders_productionDeadline_idx`(`productionDeadline`),
+    INDEX `orders_deliveryDeadline_idx`(`deliveryDeadline`),
+    PRIMARY KEY (`id`)
+) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+
+-- CreateTable
+CREATE TABLE `transfer_logs` (
+    `id` VARCHAR(191) NOT NULL,
+    `transferNumber` VARCHAR(191) NOT NULL,
+    `orderId` VARCHAR(191) NOT NULL,
+    `processStepId` VARCHAR(191) NOT NULL,
+    `fromProcess` VARCHAR(191) NOT NULL,
+    `fromDepartment` VARCHAR(191) NOT NULL,
+    `toProcess` VARCHAR(191) NOT NULL,
+    `toDepartment` VARCHAR(191) NOT NULL,
+    `transferDate` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
+    `handedOverBy` VARCHAR(191) NOT NULL,
+    `receivedBy` VARCHAR(191) NULL,
+    `quantityTransferred` INTEGER NOT NULL,
+    `quantityCompleted` INTEGER NOT NULL,
+    `quantityRejected` INTEGER NOT NULL,
+    `quantityRework` INTEGER NOT NULL,
+    `rejectSummary` TEXT NULL,
+    `processingDuration` INTEGER NULL,
+    `waitingDuration` INTEGER NULL,
+    `status` VARCHAR(191) NOT NULL DEFAULT 'pending',
+    `isReceived` BOOLEAN NOT NULL DEFAULT false,
+    `receivedDate` DATETIME(3) NULL,
+    `notes` TEXT NULL,
+    `issues` TEXT NULL,
+    `createdAt` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
+    `updatedAt` DATETIME(3) NOT NULL,
+
+    UNIQUE INDEX `transfer_logs_transferNumber_key`(`transferNumber`),
+    INDEX `transfer_logs_orderId_idx`(`orderId`),
+    INDEX `transfer_logs_processStepId_idx`(`processStepId`),
+    INDEX `transfer_logs_transferDate_idx`(`transferDate`),
+    INDEX `transfer_logs_status_idx`(`status`),
     PRIMARY KEY (`id`)
 ) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 
@@ -105,63 +126,60 @@ CREATE TABLE `size_breakdowns` (
 ) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 
 -- CreateTable
-CREATE TABLE `transfer_logs` (
+CREATE TABLE `process_steps` (
     `id` VARCHAR(191) NOT NULL,
-    `transferNumber` VARCHAR(191) NOT NULL,
     `orderId` VARCHAR(191) NOT NULL,
-    `orderNumber` VARCHAR(191) NOT NULL,
-    `fromDepartment` VARCHAR(191) NOT NULL,
-    `toDepartment` VARCHAR(191) NOT NULL,
-    `transferDate` DATETIME(3) NOT NULL,
-    `handedOverBy` VARCHAR(191) NOT NULL,
-    `receivedBy` VARCHAR(191) NOT NULL,
-    `processStatus` VARCHAR(191) NOT NULL,
+    `processName` VARCHAR(191) NOT NULL,
+    `processPhase` VARCHAR(191) NOT NULL,
+    `sequenceOrder` INTEGER NOT NULL,
+    `department` VARCHAR(191) NOT NULL,
+    `status` VARCHAR(191) NOT NULL DEFAULT 'pending',
+    `assignedTo` VARCHAR(191) NULL,
+    `assignedLine` VARCHAR(191) NULL,
+    `arrivedAtPpicTime` DATETIME(3) NULL,
+    `addedToWaitingTime` DATETIME(3) NULL,
+    `assignedTime` DATETIME(3) NULL,
+    `startedTime` DATETIME(3) NULL,
+    `completedTime` DATETIME(3) NULL,
+    `quantityReceived` INTEGER NOT NULL DEFAULT 0,
+    `quantityCompleted` INTEGER NOT NULL DEFAULT 0,
+    `quantityRejected` INTEGER NOT NULL DEFAULT 0,
+    `quantityRework` INTEGER NOT NULL DEFAULT 0,
+    `waitingDuration` INTEGER NULL,
+    `processingDuration` INTEGER NULL,
+    `totalDuration` INTEGER NULL,
     `notes` TEXT NULL,
-    `isReceived` BOOLEAN NOT NULL DEFAULT false,
-    `receivedDate` DATETIME(3) NULL,
     `createdAt` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
     `updatedAt` DATETIME(3) NOT NULL,
 
-    UNIQUE INDEX `transfer_logs_transferNumber_key`(`transferNumber`),
-    INDEX `transfer_logs_orderId_idx`(`orderId`),
-    INDEX `transfer_logs_transferDate_idx`(`transferDate`),
-    INDEX `transfer_logs_processStatus_idx`(`processStatus`),
+    INDEX `process_steps_orderId_idx`(`orderId`),
+    INDEX `process_steps_processName_idx`(`processName`),
+    INDEX `process_steps_processPhase_idx`(`processPhase`),
+    INDEX `process_steps_status_idx`(`status`),
+    INDEX `process_steps_sequenceOrder_idx`(`sequenceOrder`),
     PRIMARY KEY (`id`)
 ) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 
 -- CreateTable
-CREATE TABLE `transfer_items` (
-    `id` VARCHAR(191) NOT NULL,
-    `transferLogId` VARCHAR(191) NOT NULL,
-    `description` VARCHAR(191) NOT NULL,
-    `bundleNumber` VARCHAR(191) NULL,
-    `quantity` INTEGER NOT NULL,
-    `unit` VARCHAR(191) NOT NULL,
-    `condition` VARCHAR(191) NOT NULL,
-    `remarks` TEXT NULL,
-    `createdAt` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
-
-    INDEX `transfer_items_transferLogId_idx`(`transferLogId`),
-    PRIMARY KEY (`id`)
-) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
-
--- CreateTable
-CREATE TABLE `process_histories` (
+CREATE TABLE `process_transitions` (
     `id` VARCHAR(191) NOT NULL,
     `orderId` VARCHAR(191) NOT NULL,
-    `timestamp` DATETIME(3) NOT NULL,
-    `processStatus` VARCHAR(191) NOT NULL,
-    `action` TEXT NOT NULL,
+    `processStepId` VARCHAR(191) NOT NULL,
+    `fromState` VARCHAR(191) NOT NULL,
+    `toState` VARCHAR(191) NOT NULL,
+    `transitionTime` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
     `performedBy` VARCHAR(191) NOT NULL,
+    `processName` VARCHAR(191) NOT NULL,
     `department` VARCHAR(191) NOT NULL,
-    `duration` INTEGER NULL,
+    `quantity` INTEGER NULL,
     `notes` TEXT NULL,
-    `transferLogId` VARCHAR(191) NULL,
     `createdAt` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
 
-    INDEX `process_histories_orderId_idx`(`orderId`),
-    INDEX `process_histories_timestamp_idx`(`timestamp`),
-    INDEX `process_histories_processStatus_idx`(`processStatus`),
+    INDEX `process_transitions_orderId_idx`(`orderId`),
+    INDEX `process_transitions_processStepId_idx`(`processStepId`),
+    INDEX `process_transitions_transitionTime_idx`(`transitionTime`),
+    INDEX `process_transitions_fromState_idx`(`fromState`),
+    INDEX `process_transitions_toState_idx`(`toState`),
     PRIMARY KEY (`id`)
 ) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 
@@ -169,20 +187,32 @@ CREATE TABLE `process_histories` (
 CREATE TABLE `reject_logs` (
     `id` VARCHAR(191) NOT NULL,
     `orderId` VARCHAR(191) NOT NULL,
-    `processStatus` VARCHAR(191) NOT NULL,
-    `date` DATETIME(3) NOT NULL,
+    `processStepId` VARCHAR(191) NOT NULL,
+    `processName` VARCHAR(191) NOT NULL,
+    `processPhase` VARCHAR(191) NOT NULL,
+    `detectedTime` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
     `reportedBy` VARCHAR(191) NOT NULL,
     `rejectType` VARCHAR(191) NOT NULL,
+    `rejectCategory` VARCHAR(191) NOT NULL,
     `quantity` INTEGER NOT NULL,
     `size` VARCHAR(191) NULL,
+    `bundleNumber` VARCHAR(191) NULL,
     `description` TEXT NOT NULL,
+    `rootCause` TEXT NULL,
     `action` VARCHAR(191) NOT NULL,
+    `actionTakenBy` VARCHAR(191) NULL,
+    `actionTakenTime` DATETIME(3) NULL,
+    `reworkCompleted` BOOLEAN NOT NULL DEFAULT false,
+    `reworkCompletedTime` DATETIME(3) NULL,
+    `finalDisposition` VARCHAR(191) NULL,
     `images` TEXT NULL,
     `createdAt` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
     `updatedAt` DATETIME(3) NOT NULL,
 
     INDEX `reject_logs_orderId_idx`(`orderId`),
-    INDEX `reject_logs_date_idx`(`date`),
+    INDEX `reject_logs_processStepId_idx`(`processStepId`),
+    INDEX `reject_logs_detectedTime_idx`(`detectedTime`),
+    INDEX `reject_logs_rejectCategory_idx`(`rejectCategory`),
     PRIMARY KEY (`id`)
 ) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 
@@ -311,22 +341,28 @@ ALTER TABLE `orders` ADD CONSTRAINT `orders_buyerId_fkey` FOREIGN KEY (`buyerId`
 ALTER TABLE `orders` ADD CONSTRAINT `orders_styleId_fkey` FOREIGN KEY (`styleId`) REFERENCES `styles`(`id`) ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE `size_breakdowns` ADD CONSTRAINT `size_breakdowns_orderId_fkey` FOREIGN KEY (`orderId`) REFERENCES `orders`(`id`) ON DELETE CASCADE ON UPDATE CASCADE;
-
--- AddForeignKey
 ALTER TABLE `transfer_logs` ADD CONSTRAINT `transfer_logs_orderId_fkey` FOREIGN KEY (`orderId`) REFERENCES `orders`(`id`) ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE `transfer_items` ADD CONSTRAINT `transfer_items_transferLogId_fkey` FOREIGN KEY (`transferLogId`) REFERENCES `transfer_logs`(`id`) ON DELETE CASCADE ON UPDATE CASCADE;
+ALTER TABLE `transfer_logs` ADD CONSTRAINT `transfer_logs_processStepId_fkey` FOREIGN KEY (`processStepId`) REFERENCES `process_steps`(`id`) ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE `process_histories` ADD CONSTRAINT `process_histories_orderId_fkey` FOREIGN KEY (`orderId`) REFERENCES `orders`(`id`) ON DELETE CASCADE ON UPDATE CASCADE;
+ALTER TABLE `size_breakdowns` ADD CONSTRAINT `size_breakdowns_orderId_fkey` FOREIGN KEY (`orderId`) REFERENCES `orders`(`id`) ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE `process_histories` ADD CONSTRAINT `process_histories_transferLogId_fkey` FOREIGN KEY (`transferLogId`) REFERENCES `transfer_logs`(`id`) ON DELETE SET NULL ON UPDATE CASCADE;
+ALTER TABLE `process_steps` ADD CONSTRAINT `process_steps_orderId_fkey` FOREIGN KEY (`orderId`) REFERENCES `orders`(`id`) ON DELETE CASCADE ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE `process_transitions` ADD CONSTRAINT `process_transitions_orderId_fkey` FOREIGN KEY (`orderId`) REFERENCES `orders`(`id`) ON DELETE CASCADE ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE `process_transitions` ADD CONSTRAINT `process_transitions_processStepId_fkey` FOREIGN KEY (`processStepId`) REFERENCES `process_steps`(`id`) ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE `reject_logs` ADD CONSTRAINT `reject_logs_orderId_fkey` FOREIGN KEY (`orderId`) REFERENCES `orders`(`id`) ON DELETE CASCADE ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE `reject_logs` ADD CONSTRAINT `reject_logs_processStepId_fkey` FOREIGN KEY (`processStepId`) REFERENCES `process_steps`(`id`) ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE `leftover_materials` ADD CONSTRAINT `leftover_materials_orderId_fkey` FOREIGN KEY (`orderId`) REFERENCES `orders`(`id`) ON DELETE CASCADE ON UPDATE CASCADE;

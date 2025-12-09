@@ -1,5 +1,5 @@
 // app/api/process-steps/[id]/transition/route.ts
-// Handle state transitions for process steps
+// Updated to auto-generate transfer logs
 
 import { NextRequest, NextResponse } from "next/server";
 import prisma from "@/lib/prisma";
@@ -27,18 +27,13 @@ export async function POST(
       notes 
     } = body;
 
-    // Validate required fields
     if (!newState || !performedBy) {
       return NextResponse.json(
-        {
-          success: false,
-          error: "Missing required fields: newState and performedBy",
-        },
+        { success: false, error: "Missing required fields" },
         { status: 400 }
       );
     }
 
-    // Get current process step
     const processStep = await prisma.processStep.findUnique({
       where: { id: processStepId },
       include: {
@@ -48,58 +43,42 @@ export async function POST(
             style: true,
           },
         },
+        rejects: true, // Include rejects for transfer log
       },
     });
 
     if (!processStep) {
       return NextResponse.json(
-        {
-          success: false,
-          error: "Process step not found",
-        },
+        { success: false, error: "Process step not found" },
         { status: 404 }
       );
     }
 
-    // Determine current state from process step status and timestamps
+    // Determine current state
     let currentState = "at_ppic";
-    if (processStep.completedTime) {
-      currentState = "completed";
-    } else if (processStep.startedTime) {
-      currentState = "in_progress";
-    } else if (processStep.assignedTime) {
-      currentState = "assigned";
-    } else if (processStep.addedToWaitingTime) {
-      currentState = "waiting";
-    }
+    if (processStep.completedTime) currentState = "completed";
+    else if (processStep.startedTime) currentState = "in_progress";
+    else if (processStep.assignedTime) currentState = "assigned";
+    else if (processStep.addedToWaitingTime) currentState = "waiting";
 
-    // Validate transition
     if (!isValidStateTransition(currentState as any, newState)) {
       return NextResponse.json(
-        {
-          success: false,
-          error: `Invalid transition from ${currentState} to ${newState}`,
-        },
+        { success: false, error: `Invalid transition from ${currentState} to ${newState}` },
         { status: 400 }
       );
     }
 
-    // Start transaction
     const result = await prisma.$transaction(async (tx) => {
-      // 1. Update process step with new state timestamp
       const now = new Date();
-      const updateData: any = {
-        updatedAt: now,
-      };
+      const updateData: any = { updatedAt: now };
 
-      // Set appropriate timestamp based on new state
+      // Set appropriate timestamp
       switch (newState) {
         case "at_ppic":
           updateData.arrivedAtPpicTime = now;
           break;
         case "waiting":
           updateData.addedToWaitingTime = now;
-          // Calculate waiting duration when moving from waiting
           if (processStep.addedToWaitingTime && newState !== "waiting") {
             const waitStart = new Date(processStep.addedToWaitingTime);
             updateData.waitingDuration = Math.round(
@@ -119,9 +98,7 @@ export async function POST(
         case "completed":
           updateData.completedTime = now;
           updateData.status = "completed";
-          if (quantity) {
-            updateData.quantityCompleted = quantity;
-          }
+          if (quantity) updateData.quantityCompleted = quantity;
           
           // Calculate durations
           if (processStep.startedTime) {
@@ -130,7 +107,6 @@ export async function POST(
               (now.getTime() - procStart.getTime()) / (1000 * 60)
             );
           }
-          
           if (processStep.arrivedAtPpicTime) {
             const totalStart = new Date(processStep.arrivedAtPpicTime);
             updateData.totalDuration = Math.round(
@@ -140,16 +116,14 @@ export async function POST(
           break;
       }
 
-      if (notes) {
-        updateData.notes = notes;
-      }
+      if (notes) updateData.notes = notes;
 
       const updatedProcessStep = await tx.processStep.update({
         where: { id: processStepId },
         data: updateData,
       });
 
-      // 2. Log the transition
+      // Log transition
       const transition = await tx.processTransition.create({
         data: {
           orderId: processStep.orderId,
@@ -165,19 +139,16 @@ export async function POST(
         },
       });
 
-      // 3. Update order if completed
       let nextProcessStep = null;
+      let transferLog = null;
+
+      // ====== AUTO-GENERATE TRANSFER LOG WHEN COMPLETED ======
       if (newState === "completed") {
-        // Update order's current state back to at_ppic
         await tx.order.update({
           where: { id: processStep.orderId },
-          data: {
-            currentState: "at_ppic",
-            updatedAt: now,
-          },
+          data: { currentState: "at_ppic", updatedAt: now },
         });
 
-        // Check if this is the last process in current phase
         const nextProcess = getNextProcess(
           processStep.processName as any,
           processStep.processPhase as any
@@ -188,6 +159,48 @@ export async function POST(
             processStep.processName as any,
             processStep.processPhase as any
           );
+
+          // Generate Transfer Number
+          const year = now.getFullYear();
+          const count = await tx.transferLog.count({
+            where: { transferNumber: { startsWith: `TRF-${year}` } },
+          });
+          const transferNumber = `TRF-${year}-${String(count + 1).padStart(5, "0")}`;
+
+          // Prepare reject summary
+          const rejectSummary = processStep.rejects.length > 0 
+            ? JSON.stringify(processStep.rejects.map(r => ({
+                type: r.rejectType,
+                category: r.rejectCategory,
+                quantity: r.quantity,
+                description: r.description,
+                action: r.action,
+              })))
+            : null;
+
+          // Create Transfer Log (Surat Jalan)
+          transferLog = await tx.transferLog.create({
+            data: {
+              transferNumber,
+              orderId: processStep.orderId,
+              processStepId: processStep.id,
+              fromProcess: processStep.processName,
+              fromDepartment: processStep.department,
+              toProcess: nextProcess,
+              toDepartment: PROCESS_DEPARTMENT_MAP[nextProcess],
+              transferDate: now,
+              handedOverBy: performedBy,
+              quantityTransferred: updatedProcessStep.quantityCompleted,
+              quantityCompleted: updatedProcessStep.quantityCompleted,
+              quantityRejected: updatedProcessStep.quantityRejected,
+              quantityRework: updatedProcessStep.quantityRework,
+              rejectSummary,
+              processingDuration: updatedProcessStep.processingDuration,
+              waitingDuration: updatedProcessStep.waitingDuration,
+              status: "pending",
+              notes: notes || `Transfer from ${processStep.processName} to ${nextProcess}`,
+            },
+          });
 
           // Create next process step
           const sequenceOrder = updatedProcessStep.sequenceOrder + 1;
@@ -204,7 +217,6 @@ export async function POST(
             },
           });
 
-          // Update order to reflect next process
           await tx.order.update({
             where: { id: processStep.orderId },
             data: {
@@ -214,7 +226,6 @@ export async function POST(
             },
           });
 
-          // Log transition for new process step
           await tx.processTransition.create({
             data: {
               orderId: processStep.orderId,
@@ -229,7 +240,7 @@ export async function POST(
             },
           });
         } else {
-          // This was the last process - mark order as completed
+          // Last process - mark as completed
           await tx.order.update({
             where: { id: processStep.orderId },
             data: {
@@ -240,7 +251,7 @@ export async function POST(
           });
         }
       } else {
-        // Update order's current state
+        // Update order's current state (not completed)
         await tx.order.update({
           where: { id: processStep.orderId },
           data: {
@@ -256,17 +267,14 @@ export async function POST(
         processStep: updatedProcessStep,
         transition,
         nextProcessStep,
+        transferLog, // Include transfer log in response
       };
     });
 
     return NextResponse.json({
       success: true,
       message: `Transitioned from ${currentState} to ${newState}`,
-      data: {
-        processStep: result.processStep,
-        transition: result.transition,
-        nextProcessStep: result.nextProcessStep,
-      },
+      data: result,
     });
   } catch (error) {
     console.error("Error transitioning process step:", error);

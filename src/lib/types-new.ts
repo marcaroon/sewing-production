@@ -349,6 +349,41 @@ export interface RejectLogCreate {
   images?: string[];
 }
 
+export interface TransferLog {
+  id: string;
+  transferNumber: string;
+  orderId: string;
+  processStepId: string;
+
+  fromProcess: ProcessName;
+  fromDepartment: string;
+  toProcess: ProcessName;
+  toDepartment: string;
+
+  transferDate: Date;
+  handedOverBy: string;
+  receivedBy?: string;
+
+  quantityTransferred: number;
+  quantityCompleted: number;
+  quantityRejected: number;
+  quantityRework: number;
+
+  rejectSummary?: string; // JSON
+  processingDuration?: number;
+  waitingDuration?: number;
+
+  status: "pending" | "received" | "disputed";
+  isReceived: boolean;
+  receivedDate?: Date;
+
+  notes?: string;
+  issues?: string;
+
+  createdAt: Date;
+  updatedAt: Date;
+}
+
 export function isProcessState(value: string): value is ProcessState {
   return [
     "at_ppic",

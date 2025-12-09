@@ -85,6 +85,7 @@ model Order {
   buyer                 Buyer    @relation(fields: [buyerId], references: [id])
   style                 Style    @relation(fields: [styleId], references: [id])
   
+  transferLogs          TransferLog[]
   sizeBreakdowns        SizeBreakdown[]
   processSteps          ProcessStep[]
   processTransitions    ProcessTransition[]
@@ -105,6 +106,57 @@ model Order {
   @@index([productionDeadline])
   @@index([deliveryDeadline])
   @@map("orders")
+}
+
+model TransferLog {
+  id                String   @id @default(cuid())
+  transferNumber    String   @unique // TRF-2024-00001
+  
+  orderId           String
+  processStepId     String   // Process step yang selesai
+  
+  fromProcess       String   // Process name yang selesai
+  fromDepartment    String
+  toProcess         String   // Process name berikutnya
+  toDepartment      String
+  
+  transferDate      DateTime @default(now())
+  handedOverBy      String
+  receivedBy        String?  // Null until received
+  
+  // Quantities transferred
+  quantityTransferred Int
+  quantityCompleted   Int     // dari process sebelumnya
+  quantityRejected    Int
+  quantityRework      Int
+  
+  // Rejection details (JSON)
+  rejectSummary     String?  @db.Text // JSON array of reject details
+  
+  // Duration info
+  processingDuration Int?    // minutes
+  waitingDuration    Int?    // minutes
+  
+  // Status
+  status            String   @default("pending") // "pending", "received", "disputed"
+  isReceived        Boolean  @default(false)
+  receivedDate      DateTime?
+  
+  // Notes & Issues
+  notes             String?  @db.Text
+  issues            String?  @db.Text // Any problems/damages noted
+  
+  order             Order    @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  processStep       ProcessStep @relation(fields: [processStepId], references: [id], onDelete: Cascade)
+  
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+
+  @@index([orderId])
+  @@index([processStepId])
+  @@index([transferDate])
+  @@index([status])
+  @@map("transfer_logs")
 }
 
 // Size Breakdown Model (unchanged)
@@ -165,6 +217,7 @@ model ProcessStep {
   order                 Order    @relation(fields: [orderId], references: [id], onDelete: Cascade)
   transitions           ProcessTransition[]
   rejects               RejectLog[]
+  transferLogs          TransferLog[]
   
   createdAt             DateTime @default(now())
   updatedAt             DateTime @updatedAt
