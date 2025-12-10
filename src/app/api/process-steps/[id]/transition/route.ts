@@ -3,11 +3,11 @@
 
 import { NextRequest, NextResponse } from "next/server";
 import prisma from "@/lib/prisma";
-import { 
+import {
   isValidStateTransition,
   getNextProcess,
   getNextPhase,
-  PROCESS_DEPARTMENT_MAP 
+  PROCESS_DEPARTMENT_MAP,
 } from "@/lib/constants-new";
 
 export async function POST(
@@ -17,15 +17,9 @@ export async function POST(
   try {
     const processStepId = (await params).id;
     const body = await request.json();
-    
-    const { 
-      newState, 
-      performedBy, 
-      assignedTo, 
-      assignedLine,
-      quantity,
-      notes 
-    } = body;
+
+    const { newState, performedBy, assignedTo, assignedLine, quantity, notes } =
+      body;
 
     if (!newState || !performedBy) {
       return NextResponse.json(
@@ -63,7 +57,10 @@ export async function POST(
 
     if (!isValidStateTransition(currentState as any, newState)) {
       return NextResponse.json(
-        { success: false, error: `Invalid transition from ${currentState} to ${newState}` },
+        {
+          success: false,
+          error: `Invalid transition from ${currentState} to ${newState}`,
+        },
         { status: 400 }
       );
     }
@@ -99,7 +96,7 @@ export async function POST(
           updateData.completedTime = now;
           updateData.status = "completed";
           if (quantity) updateData.quantityCompleted = quantity;
-          
+
           // Calculate durations
           if (processStep.startedTime) {
             const procStart = new Date(processStep.startedTime);
@@ -142,114 +139,77 @@ export async function POST(
       let nextProcessStep = null;
       let transferLog = null;
 
-      // ====== AUTO-GENERATE TRANSFER LOG WHEN COMPLETED ======
+      // ====== GENERATE TRANSFER LOG WHEN COMPLETED ======
+      // ====== GENERATE TRANSFER LOG WHEN COMPLETED ======
       if (newState === "completed") {
+        // Update order to at_ppic (PPIC will assign next process)
         await tx.order.update({
           where: { id: processStep.orderId },
-          data: { currentState: "at_ppic", updatedAt: now },
+          data: {
+            currentState: "at_ppic",
+            currentProcess: processStep.processName, // Keep current until PPIC assigns next
+            updatedAt: now,
+          },
         });
 
-        const nextProcess = getNextProcess(
-          processStep.processName as any,
-          processStep.processPhase as any
-        );
+        // Get all completed process steps to know history
+        const completedSteps = await tx.processStep.findMany({
+          where: {
+            orderId: processStep.orderId,
+            status: "completed",
+          },
+          select: { processName: true },
+        });
 
-        if (nextProcess) {
-          const nextPhase = getNextPhase(
-            processStep.processName as any,
-            processStep.processPhase as any
-          );
+        const completedProcessNames = completedSteps.map((s) => s.processName);
 
-          // Generate Transfer Number
-          const year = now.getFullYear();
-          const count = await tx.transferLog.count({
-            where: { transferNumber: { startsWith: `TRF-${year}` } },
-          });
-          const transferNumber = `TRF-${year}-${String(count + 1).padStart(5, "0")}`;
+        // Generate Transfer Log (without creating next step yet)
+        const year = now.getFullYear();
+        const count = await tx.transferLog.count({
+          where: { transferNumber: { startsWith: `TRF-${year}` } },
+        });
+        const transferNumber = `TRF-${year}-${String(count + 1).padStart(
+          5,
+          "0"
+        )}`;
 
-          // Prepare reject summary
-          const rejectSummary = processStep.rejects.length > 0 
-            ? JSON.stringify(processStep.rejects.map(r => ({
-                type: r.rejectType,
-                category: r.rejectCategory,
-                quantity: r.quantity,
-                description: r.description,
-                action: r.action,
-              })))
+        const rejectSummary =
+          processStep.rejects.length > 0
+            ? JSON.stringify(
+                processStep.rejects.map((r) => ({
+                  type: r.rejectType,
+                  category: r.rejectCategory,
+                  quantity: r.quantity,
+                  description: r.description,
+                  action: r.action,
+                }))
+              )
             : null;
 
-          // Create Transfer Log (Surat Jalan)
-          transferLog = await tx.transferLog.create({
-            data: {
-              transferNumber,
-              orderId: processStep.orderId,
-              processStepId: processStep.id,
-              fromProcess: processStep.processName,
-              fromDepartment: processStep.department,
-              toProcess: nextProcess,
-              toDepartment: PROCESS_DEPARTMENT_MAP[nextProcess],
-              transferDate: now,
-              handedOverBy: performedBy,
-              quantityTransferred: updatedProcessStep.quantityCompleted,
-              quantityCompleted: updatedProcessStep.quantityCompleted,
-              quantityRejected: updatedProcessStep.quantityRejected,
-              quantityRework: updatedProcessStep.quantityRework,
-              rejectSummary,
-              processingDuration: updatedProcessStep.processingDuration,
-              waitingDuration: updatedProcessStep.waitingDuration,
-              status: "pending",
-              notes: notes || `Transfer from ${processStep.processName} to ${nextProcess}`,
-            },
-          });
-
-          // Create next process step
-          const sequenceOrder = updatedProcessStep.sequenceOrder + 1;
-          nextProcessStep = await tx.processStep.create({
-            data: {
-              orderId: processStep.orderId,
-              processName: nextProcess,
-              processPhase: nextPhase || processStep.processPhase,
-              sequenceOrder,
-              department: PROCESS_DEPARTMENT_MAP[nextProcess],
-              status: "pending",
-              quantityReceived: updatedProcessStep.quantityCompleted,
-              arrivedAtPpicTime: now,
-            },
-          });
-
-          await tx.order.update({
-            where: { id: processStep.orderId },
-            data: {
-              currentProcess: nextProcess,
-              currentPhase: nextPhase || processStep.processPhase,
-              currentState: "at_ppic",
-            },
-          });
-
-          await tx.processTransition.create({
-            data: {
-              orderId: processStep.orderId,
-              processStepId: nextProcessStep.id,
-              fromState: "at_ppic",
-              toState: "at_ppic",
-              transitionTime: now,
-              performedBy: "SYSTEM",
-              processName: nextProcess,
-              department: PROCESS_DEPARTMENT_MAP[nextProcess],
-              notes: `Auto-created from completion of ${processStep.processName}`,
-            },
-          });
-        } else {
-          // Last process - mark as completed
-          await tx.order.update({
-            where: { id: processStep.orderId },
-            data: {
-              currentProcess: "delivered",
-              currentState: "completed",
-              totalCompleted: updatedProcessStep.quantityCompleted,
-            },
-          });
-        }
+        transferLog = await tx.transferLog.create({
+          data: {
+            transferNumber,
+            orderId: processStep.orderId,
+            processStepId: processStep.id,
+            fromProcess: processStep.processName,
+            fromDepartment: processStep.department,
+            toProcess: "to_be_assigned", // PPIC will assign
+            toDepartment: "PPIC",
+            transferDate: now,
+            handedOverBy: performedBy,
+            quantityTransferred: updatedProcessStep.quantityCompleted,
+            quantityCompleted: updatedProcessStep.quantityCompleted,
+            quantityRejected: updatedProcessStep.quantityRejected,
+            quantityRework: updatedProcessStep.quantityRework,
+            rejectSummary,
+            processingDuration: updatedProcessStep.processingDuration,
+            waitingDuration: updatedProcessStep.waitingDuration,
+            status: "pending",
+            notes:
+              notes ||
+              `Completed ${processStep.processName}, awaiting PPIC assignment`,
+          },
+        });
       } else {
         // Update order's current state (not completed)
         await tx.order.update({

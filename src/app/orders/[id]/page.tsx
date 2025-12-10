@@ -9,6 +9,7 @@ import { Badge } from "@/components/ui/Badge";
 import { Button } from "@/components/ui/Button";
 import { QRCodeDisplay } from "@/components/QRCodeDisplay";
 import { ProcessStepCard } from "@/components/ProcessStepCards";
+import { PPICAssignmentModal } from "@/components/PPICAssignmentModal";
 import apiClient from "@/lib/api-client";
 import { Order, ProcessStep } from "@/lib/types-new";
 import {
@@ -35,6 +36,7 @@ export default function OrderDetailPage() {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string>("");
   const [isGeneratingQR, setIsGeneratingQR] = useState(false);
+  const [isPPICModalOpen, setIsPPICModalOpen] = useState(false);
 
   useEffect(() => {
     loadOrderData();

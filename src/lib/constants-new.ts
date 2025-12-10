@@ -159,8 +159,8 @@ export const REJECT_TYPE_COLORS: Record<RejectCategory, string> = {
 export const VALID_STATE_TRANSITIONS: Record<ProcessState, ProcessState[]> = {
   at_ppic: ["waiting"],
   waiting: ["assigned"],
-  assigned: ["in_progress", "waiting"], 
-  in_progress: ["completed", "at_ppic"], 
+  assigned: ["in_progress", "waiting"],
+  in_progress: ["completed", "at_ppic"],
   completed: ["at_ppic"],
 };
 
@@ -280,4 +280,29 @@ export function getProcessSequenceOrder(processName: ProcessName): number {
   if (delIndex >= 0) return PRODUCTION_PROCESSES.length + delIndex + 1;
 
   return 0;
+}
+
+/**
+ * Get available next processes that can be assigned from current process
+ * Excludes processes that have already been completed
+ */
+export function getAvailableNextProcesses(
+  completedProcesses: ProcessName[]
+): ProcessName[] {
+  const allProcesses = [...PRODUCTION_PROCESSES, ...DELIVERY_PROCESSES];
+
+  // Filter out processes that have been completed
+  return allProcesses.filter(
+    (process) => !completedProcesses.includes(process) && process !== "draft"
+  );
+}
+
+/**
+ * Check if a process has been completed in order
+ */
+export function hasProcessBeenCompleted(
+  processName: ProcessName,
+  completedProcesses: ProcessName[]
+): boolean {
+  return completedProcesses.includes(processName);
 }

@@ -145,6 +145,29 @@ class ApiClient {
     return response.data;
   }
 
+  async assignNextProcess(data: {
+    orderId: string;
+    nextProcessName: string;
+    assignedBy: string;
+    notes?: string;
+  }): Promise<any> {
+    const response = await this.request<{ success: boolean; data: any }>(
+      "/process-steps/assign-next",
+      {
+        method: "POST",
+        body: JSON.stringify(data),
+      }
+    );
+    return response.data;
+  }
+
+  async getCompletedProcesses(orderId: string): Promise<string[]> {
+    const steps = await this.getProcessStepsByOrderId(orderId);
+    return steps
+      .filter((s) => s.status === "completed")
+      .map((s) => s.processName);
+  }
+
   // ==================== PROCESS TRANSITIONS ====================
 
   async getTransitionsByOrderId(orderId: string): Promise<ProcessTransition[]> {
