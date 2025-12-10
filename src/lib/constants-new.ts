@@ -284,16 +284,20 @@ export function getProcessSequenceOrder(processName: ProcessName): number {
 
 /**
  * Get available next processes that can be assigned from current process
- * Excludes processes that have already been completed
+ * Excludes processes that have already been completed or in progress
  */
 export function getAvailableNextProcesses(
-  completedProcesses: ProcessName[]
+  completedProcesses: ProcessName[],
+  inProgressProcesses: ProcessName[] = []
 ): ProcessName[] {
   const allProcesses = [...PRODUCTION_PROCESSES, ...DELIVERY_PROCESSES];
 
-  // Filter out processes that have been completed
+  // Combine completed and in-progress processes
+  const unavailableProcesses = [...completedProcesses, ...inProgressProcesses];
+
+  // Filter out processes that have been completed, in progress, or is draft
   return allProcesses.filter(
-    (process) => !completedProcesses.includes(process) && process !== "draft"
+    (process) => !unavailableProcesses.includes(process) && process !== "draft"
   );
 }
 

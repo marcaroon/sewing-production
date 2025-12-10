@@ -49,10 +49,16 @@ export const PPICAssignmentModal: React.FC<PPICAssignmentModalProps> = ({
 
   const loadCompletedProcesses = async () => {
     try {
-      const completed = await apiClient.getCompletedProcesses(orderId);
-      setCompletedProcesses(completed as ProcessName[]);
+      const unavailable = await apiClient.getAllUnavailableProcesses(orderId);
+      setCompletedProcesses([
+        ...unavailable.completed,
+        ...unavailable.inProgress,
+      ] as ProcessName[]);
 
-      const available = getAvailableNextProcesses(completed as ProcessName[]);
+      const available = getAvailableNextProcesses(
+        unavailable.completed as ProcessName[],
+        unavailable.inProgress as ProcessName[]
+      );
       setAvailableProcesses(available);
 
       // Auto-select first available
@@ -132,12 +138,15 @@ export const PPICAssignmentModal: React.FC<PPICAssignmentModalProps> = ({
             </div>
           </div>
 
-          {/* Completed Processes History */}
+          {/* Completed/In-Progress Processes History */}
           {completedProcesses.length > 0 && (
             <div className="bg-green-50 border border-green-200 rounded-lg p-4">
               <h4 className="font-semibold text-green-900 mb-3">
-                ✓ Completed Processes
+                🚫 Unavailable Processes
               </h4>
+              <p className="text-xs text-green-700 mb-2">
+                These processes are either completed or currently in progress
+              </p>
               <div className="flex flex-wrap gap-2">
                 {completedProcesses.map((process) => (
                   <Badge key={process} variant="success">
@@ -259,10 +268,17 @@ export const PPICAssignmentModal: React.FC<PPICAssignmentModalProps> = ({
 
           {/* Warning */}
           <div className="bg-yellow-50 border border-yellow-300 rounded-lg p-4">
-            <p className="text-sm text-yellow-800">
-              ⚠️ <strong>Important:</strong> This assignment cannot be undone.
-              Make sure you select the correct next process.
-            </p>
+            <div className="space-y-2">
+              <p className="text-sm text-yellow-800">
+                ⚠️ <strong>Important:</strong> This assignment cannot be undone.
+                Make sure you select the correct next process.
+              </p>
+              <p className="text-xs text-yellow-700">
+                ℹ️ <strong>Note:</strong> You can only assign to processes that
+                haven't been completed yet. Processes are automatically filtered
+                based on order history.
+              </p>
+            </div>
           </div>
         </div>
 

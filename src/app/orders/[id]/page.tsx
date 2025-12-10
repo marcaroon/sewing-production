@@ -200,7 +200,6 @@ export default function OrderDetailPage() {
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
       {/* Header */}
-      {/* Header */}
       <div className="mb-8">
         <div className="flex items-center gap-3 mb-4">
           <button
@@ -230,12 +229,21 @@ export default function OrderDetailPage() {
             </p>
           </div>
           <div className="flex items-center gap-3">
-            {/* HAPUS StatusUpdateForm - diganti dengan action di ProcessStepCard */}
             <Badge
               variant={order.buyer.type === "repeat" ? "success" : "warning"}
             >
               {BUYER_TYPE_LABELS[order.buyer.type]}
             </Badge>
+            {/* Show Assign button only if currentState is at_ppic */}
+            {order.currentState === "at_ppic" && (
+              <Button
+                onClick={() => setIsPPICModalOpen(true)}
+                variant="primary"
+                size="sm"
+              >
+                Assign Next Process
+              </Button>
+            )}
           </div>
         </div>
 
@@ -1053,6 +1061,14 @@ export default function OrderDetailPage() {
           </Card>
         </div>
       )}
+      {/* PPIC Assignment Modal */}
+      <PPICAssignmentModal
+        isOpen={isPPICModalOpen}
+        onClose={() => setIsPPICModalOpen(false)}
+        orderId={order.id}
+        currentProcess={order.currentProcess}
+        onSuccess={handleUpdate}
+      />
     </div>
   );
 }

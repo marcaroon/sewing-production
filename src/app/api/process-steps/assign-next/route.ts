@@ -3,7 +3,12 @@
 
 import { NextRequest, NextResponse } from "next/server";
 import prisma from "@/lib/prisma";
-import { PROCESS_DEPARTMENT_MAP } from "@/lib/constants-new";
+import {
+  DELIVERY_PROCESSES,
+  PROCESS_DEPARTMENT_MAP,
+  PRODUCTION_PROCESSES,
+} from "@/lib/constants-new";
+import { ProcessName } from "@/lib/types-new";
 
 export async function POST(request: NextRequest) {
   try {
@@ -13,6 +18,15 @@ export async function POST(request: NextRequest) {
     if (!orderId || !nextProcessName || !assignedBy) {
       return NextResponse.json(
         { success: false, error: "Missing required fields" },
+        { status: 400 }
+      );
+    }
+
+    // Validate nextProcessName is a valid ProcessName
+    const validProcesses = [...PRODUCTION_PROCESSES, ...DELIVERY_PROCESSES];
+    if (!validProcesses.includes(nextProcessName)) {
+      return NextResponse.json(
+        { success: false, error: "Invalid process name" },
         { status: 400 }
       );
     }
@@ -49,7 +63,9 @@ export async function POST(request: NextRequest) {
       }
 
       const now = new Date();
-      const nextDepartment = PROCESS_DEPARTMENT_MAP[nextProcessName];
+      // Type assertion since we've validated it above
+      const nextDepartment =
+        PROCESS_DEPARTMENT_MAP[nextProcessName as ProcessName];
 
       // Determine phase
       const isDeliveryProcess = [
