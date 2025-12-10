@@ -1,7 +1,8 @@
-// components/ui/Modal.tsx
+// components/ui/Modal.tsx - IMPROVED VERSION
 
 import React, { useEffect } from "react";
 import { cn } from "@/lib/utils";
+import { X } from "lucide-react";
 
 interface ModalProps {
   isOpen: boolean;
@@ -57,7 +58,7 @@ export const Modal: React.FC<ModalProps> = ({
     <div className="fixed inset-0 z-50 overflow-y-auto">
       {/* Backdrop */}
       <div
-        className="fixed inset-0 bg-black bg-opacity-50 transition-opacity"
+        className="fixed inset-0 bg-black bg-opacity-60 transition-opacity backdrop-blur-sm"
         onClick={onClose}
       />
 
@@ -65,40 +66,32 @@ export const Modal: React.FC<ModalProps> = ({
       <div className="flex min-h-full items-center justify-center p-4">
         <div
           className={cn(
-            "relative bg-white rounded-lg shadow-xl w-full",
+            "relative bg-white rounded-xl shadow-2xl w-full border border-gray-200",
             sizeStyles[size]
           )}
           onClick={(e) => e.stopPropagation()}
         >
           {/* Header */}
           {(title || showCloseButton) && (
-            <div className="flex items-center justify-between px-6 py-4 border-b border-gray-200">
+            <div className="flex items-center justify-between px-6 py-5 border-b-2 border-gray-200 bg-gray-50">
               {title && (
-                <h3 className="text-lg font-semibold text-gray-900">{title}</h3>
+                <h3 className="text-xl font-bold text-gray-900">{title}</h3>
               )}
               {showCloseButton && (
                 <button
                   onClick={onClose}
-                  className="text-gray-400 hover:text-gray-600 transition-colors"
+                  className="text-gray-400 hover:text-gray-600 transition-colors p-1 hover:bg-gray-200 rounded-lg"
                 >
-                  <svg
-                    className="w-6 h-6"
-                    fill="none"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth="2"
-                    viewBox="0 0 24 24"
-                    stroke="currentColor"
-                  >
-                    <path d="M6 18L18 6M6 6l12 12" />
-                  </svg>
+                  <X className="w-6 h-6" />
                 </button>
               )}
             </div>
           )}
 
           {/* Content */}
-          <div className="px-6 py-4">{children}</div>
+          <div className="px-6 py-5 max-h-[calc(100vh-200px)] overflow-y-auto">
+            {children}
+          </div>
         </div>
       </div>
     </div>
@@ -117,7 +110,7 @@ export const ModalFooter: React.FC<ModalFooterProps> = ({
   return (
     <div
       className={cn(
-        "flex items-center justify-end gap-3 px-6 py-4 border-t border-gray-200 bg-gray-50",
+        "flex items-center justify-end gap-3 px-6 py-4 border-t-2 border-gray-200 bg-gray-50",
         className
       )}
     >

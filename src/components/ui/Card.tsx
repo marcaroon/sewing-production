@@ -1,4 +1,4 @@
-// components/ui/Card.tsx
+// components/ui/Card.tsx - IMPROVED VERSION
 
 import React from "react";
 import { cn } from "@/lib/utils";
@@ -6,13 +6,15 @@ import { cn } from "@/lib/utils";
 interface CardProps {
   children: React.ReactNode;
   className?: string;
+  hover?: boolean;
 }
 
-export const Card: React.FC<CardProps> = ({ children, className }) => {
+export const Card: React.FC<CardProps> = ({ children, className, hover = false }) => {
   return (
     <div
       className={cn(
-        "bg-white rounded-lg shadow-md border border-gray-200",
+        "bg-white rounded-xl shadow-sm border border-gray-200",
+        hover && "hover:shadow-md transition-shadow duration-200",
         className
       )}
     >
@@ -31,7 +33,7 @@ export const CardHeader: React.FC<CardHeaderProps> = ({
   className,
 }) => {
   return (
-    <div className={cn("px-6 py-4 border-b border-gray-200", className)}>
+    <div className={cn("px-6 py-5 border-b border-gray-200 bg-gray-50/50", className)}>
       {children}
     </div>
   );
@@ -47,7 +49,7 @@ export const CardTitle: React.FC<CardTitleProps> = ({
   className,
 }) => {
   return (
-    <h3 className={cn("text-lg font-semibold text-gray-900", className)}>
+    <h3 className={cn("text-lg font-bold text-gray-900", className)}>
       {children}
     </h3>
   );
@@ -62,7 +64,7 @@ export const CardContent: React.FC<CardContentProps> = ({
   children,
   className,
 }) => {
-  return <div className={cn("px-6 py-4", className)}>{children}</div>;
+  return <div className={cn("px-6 py-5", className)}>{children}</div>;
 };
 
 interface CardFooterProps {

@@ -1,4 +1,4 @@
-// components/QRCodeDisplay.tsx
+// components/QRCodeDisplay.tsx - IMPROVED VERSION
 
 "use client";
 
@@ -7,6 +7,7 @@ import QRCodeSVG from "react-qr-code";
 import { Card, CardContent, CardHeader, CardTitle } from "./ui/Card";
 import { Button } from "./ui/Button";
 import { Badge } from "./ui/Badge";
+import { Download, Printer, Package, FileText } from "lucide-react";
 
 interface QRCodeDisplayProps {
   qrCode: string;
@@ -28,7 +29,6 @@ export const QRCodeDisplay: React.FC<QRCodeDisplayProps> = ({
   const [downloadUrl, setDownloadUrl] = useState<string>("");
 
   useEffect(() => {
-    // Generate download URL for SVG
     if (showDownload) {
       const svg = document.getElementById(`qr-${qrCode}`);
       if (svg) {
@@ -75,17 +75,19 @@ export const QRCodeDisplay: React.FC<QRCodeDisplayProps> = ({
               .qr-container {
                 text-align: center;
                 padding: 20px;
-                border: 2px solid #000;
+                border: 3px solid #000;
               }
               .title {
-                font-size: 18px;
+                font-size: 20px;
                 font-weight: bold;
                 margin: 10px 0;
+                color: #000;
               }
               .subtitle {
                 font-size: 14px;
-                color: #666;
+                color: #333;
                 margin: 5px 0 15px 0;
+                font-weight: 600;
               }
               @media print {
                 body { margin: 0; }
@@ -114,11 +116,18 @@ export const QRCodeDisplay: React.FC<QRCodeDisplayProps> = ({
   };
 
   return (
-    <Card>
+    <Card hover>
       <CardHeader>
         <div className="flex items-center justify-between">
-          <CardTitle>{title || "QR Code"}</CardTitle>
-          <Badge variant={type === "order" ? "info" : "success"}>
+          <div className="flex items-center gap-2">
+            {type === "order" ? (
+              <FileText className="w-5 h-5 text-blue-600" />
+            ) : (
+              <Package className="w-5 h-5 text-green-600" />
+            )}
+            <CardTitle>{title || "QR Code"}</CardTitle>
+          </div>
+          <Badge variant={type === "order" ? "info" : "success"} size="sm">
             {type === "order" ? "Order" : "Bundle"}
           </Badge>
         </div>
@@ -126,64 +135,47 @@ export const QRCodeDisplay: React.FC<QRCodeDisplayProps> = ({
       <CardContent>
         <div className="flex flex-col items-center space-y-4">
           {/* QR Code */}
-          <div className="bg-white p-4 rounded-lg border-2 border-gray-200">
+          <div className="bg-white p-5 rounded-lg border-4 border-gray-300 shadow-sm">
             <QRCodeSVG
               id={`qr-${qrCode}`}
               value={qrCode}
               size={size}
               level="H"
-            //   includeMargin={true}
             />
           </div>
 
           {/* Labels */}
-          <div className="text-center">
-            <p className="font-mono text-sm font-bold text-gray-900">
+          <div className="text-center w-full">
+            <p className="font-mono text-sm font-bold text-gray-900 bg-gray-100 border-2 border-gray-300 rounded px-3 py-2">
               {qrCode}
             </p>
             {subtitle && (
-              <p className="text-xs text-gray-600 mt-1">{subtitle}</p>
+              <p className="text-xs font-semibold text-gray-700 mt-2 bg-blue-50 border border-blue-200 rounded px-2 py-1">
+                {subtitle}
+              </p>
             )}
           </div>
 
           {/* Actions */}
           {showDownload && (
-            <div className="flex gap-2">
+            <div className="flex gap-2 w-full">
               <Button
                 variant="outline"
                 size="sm"
                 onClick={handleDownload}
                 disabled={!downloadUrl}
+                className="flex-1"
               >
-                <svg
-                  className="w-4 h-4 mr-2"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"
-                  />
-                </svg>
-                Download SVG
+                <Download className="w-4 h-4" />
+                Download
               </Button>
-              <Button variant="outline" size="sm" onClick={handlePrint}>
-                <svg
-                  className="w-4 h-4 mr-2"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"
-                  />
-                </svg>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={handlePrint}
+                className="flex-1"
+              >
+                <Printer className="w-4 h-4" />
                 Print
               </Button>
             </div>

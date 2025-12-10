@@ -1,4 +1,4 @@
-// components/ProcessStepCard.tsx - IMPROVED VERSION
+// components/ProcessStepCards.tsx - IMPROVED VERSION
 "use client";
 
 import React, { useState } from "react";
@@ -29,6 +29,20 @@ import {
 } from "@/lib/constants-new";
 import { formatDateTime, formatNumber } from "@/lib/utils";
 import apiClient from "@/lib/api-client";
+import {
+  Package,
+  CheckCircle2,
+  XCircle,
+  RotateCcw,
+  Clock,
+  PlayCircle,
+  AlertCircle,
+  ArrowRight,
+  User,
+  MapPin,
+  Calendar,
+  TrendingUp,
+} from "lucide-react";
 
 interface ProcessStepCardProps {
   processStep: ProcessStep;
@@ -62,12 +76,13 @@ export const ProcessStepCard: React.FC<ProcessStepCardProps> = ({
 
   const validNextStates = VALID_STATE_TRANSITIONS[currentStateTyped] || [];
 
-  // Get next process info for better context
   const nextProcess = getNextProcess(
     processStep.processName as any,
     processStep.processPhase as any
   );
-  const nextDepartment = nextProcess ? PROCESS_DEPARTMENT_MAP[nextProcess] : null;
+  const nextDepartment = nextProcess
+    ? PROCESS_DEPARTMENT_MAP[nextProcess]
+    : null;
 
   const [transitionData, setTransitionData] = useState<{
     newState: ProcessState | "";
@@ -149,30 +164,42 @@ export const ProcessStepCard: React.FC<ProcessStepCardProps> = ({
     }
   };
 
-  // Get state label helper
   const getStateLabel = (state: string): string => {
     return PROCESS_STATE_LABELS[state as ProcessState] || state;
   };
 
+  const completionRate =
+    processStep.quantityReceived > 0
+      ? Math.round(
+          (processStep.quantityCompleted / processStep.quantityReceived) * 100
+        )
+      : 0;
+
   return (
     <>
-      <Card className="border-l-4 border-l-blue-500">
+      <Card className="border-l-4 border-l-blue-600">
         <CardHeader>
           <div className="flex items-start justify-between">
-            <div>
-              <CardTitle className="text-lg">
-                {PROCESS_LABELS[processStep.processName]}
-              </CardTitle>
-              <p className="text-sm text-gray-600 mt-1">
-                {processStep.department}
-              </p>
+            <div className="flex-1">
+              <div className="flex items-center gap-2 mb-1">
+                <TrendingUp className="w-5 h-5 text-blue-600" />
+                <CardTitle className="text-lg">
+                  {PROCESS_LABELS[processStep.processName]}
+                </CardTitle>
+              </div>
+              <div className="flex items-center gap-2 mt-2">
+                <MapPin className="w-4 h-4 text-gray-600" />
+                <p className="text-sm font-semibold text-gray-700">
+                  {processStep.department}
+                </p>
+              </div>
             </div>
             <div className="flex flex-col items-end gap-2">
-              <Badge variant="info">
+              <Badge variant="info" size="sm">
                 {PHASE_LABELS[processStep.processPhase as ProductionPhase]}
               </Badge>
               <span
-                className={`px-2.5 py-0.5 rounded-full text-xs font-medium ${
+                className={`px-2.5 py-1 rounded-full text-xs font-bold ${
                   PROCESS_STATE_COLORS[currentState as ProcessState]
                 }`}
               >
@@ -182,62 +209,59 @@ export const ProcessStepCard: React.FC<ProcessStepCardProps> = ({
           </div>
         </CardHeader>
 
-        <CardContent className="space-y-4">
+        <CardContent className="space-y-5">
           {/* Quantities */}
-          <div className="grid grid-cols-2 gap-4">
-            <div>
-              <p className="text-xs text-gray-600">Received</p>
-              <p className="text-lg font-bold text-gray-900">
-                {formatNumber(processStep.quantityReceived)}
-              </p>
+          <div className="grid grid-cols-2 gap-3">
+            <div className="flex items-center gap-3 p-3 bg-blue-50 border border-blue-200 rounded-lg">
+              <Package className="w-5 h-5 text-blue-600" />
+              <div>
+                <p className="text-xs font-semibold text-blue-700">Received</p>
+                <p className="text-lg font-bold text-blue-900">
+                  {formatNumber(processStep.quantityReceived)}
+                </p>
+              </div>
             </div>
-            <div>
-              <p className="text-xs text-gray-600">Completed</p>
-              <p className="text-lg font-bold text-green-600">
-                {formatNumber(processStep.quantityCompleted)}
-              </p>
+            <div className="flex items-center gap-3 p-3 bg-green-50 border border-green-200 rounded-lg">
+              <CheckCircle2 className="w-5 h-5 text-green-600" />
+              <div>
+                <p className="text-xs font-semibold text-green-700">
+                  Completed
+                </p>
+                <p className="text-lg font-bold text-green-900">
+                  {formatNumber(processStep.quantityCompleted)}
+                </p>
+              </div>
             </div>
-            <div>
-              <p className="text-xs text-gray-600">Rejected</p>
-              <p className="text-lg font-bold text-red-600">
-                {formatNumber(processStep.quantityRejected)}
-              </p>
+            <div className="flex items-center gap-3 p-3 bg-red-50 border border-red-200 rounded-lg">
+              <XCircle className="w-5 h-5 text-red-600" />
+              <div>
+                <p className="text-xs font-semibold text-red-700">Rejected</p>
+                <p className="text-lg font-bold text-red-900">
+                  {formatNumber(processStep.quantityRejected)}
+                </p>
+              </div>
             </div>
-            <div>
-              <p className="text-xs text-gray-600">Rework</p>
-              <p className="text-lg font-bold text-yellow-600">
-                {formatNumber(processStep.quantityRework)}
-              </p>
+            <div className="flex items-center gap-3 p-3 bg-yellow-50 border border-yellow-200 rounded-lg">
+              <RotateCcw className="w-5 h-5 text-yellow-600" />
+              <div>
+                <p className="text-xs font-semibold text-yellow-700">Rework</p>
+                <p className="text-lg font-bold text-yellow-900">
+                  {formatNumber(processStep.quantityRework)}
+                </p>
+              </div>
             </div>
           </div>
 
           {/* Progress Bar */}
           <div>
-            <div className="flex justify-between text-xs text-gray-600 mb-1">
+            <div className="flex justify-between items-center text-xs font-bold text-gray-700 mb-2">
               <span>Progress</span>
-              <span>
-                {processStep.quantityReceived > 0
-                  ? Math.round(
-                      (processStep.quantityCompleted /
-                        processStep.quantityReceived) *
-                        100
-                    )
-                  : 0}
-                %
-              </span>
+              <span className="text-blue-600">{completionRate}%</span>
             </div>
-            <div className="w-full bg-gray-200 rounded-full h-2">
+            <div className="w-full bg-gray-200 rounded-full h-3 overflow-hidden">
               <div
-                className="bg-blue-600 h-2 rounded-full"
-                style={{
-                  width: `${
-                    processStep.quantityReceived > 0
-                      ? (processStep.quantityCompleted /
-                          processStep.quantityReceived) *
-                        100
-                      : 0
-                  }%`,
-                }}
+                className="bg-gradient-to-r from-blue-500 to-blue-600 h-3 rounded-full transition-all duration-300"
+                style={{ width: `${completionRate}%` }}
               />
             </div>
           </div>
@@ -248,43 +272,68 @@ export const ProcessStepCard: React.FC<ProcessStepCardProps> = ({
             processStep.assignedTime ||
             processStep.startedTime ||
             processStep.completedTime) && (
-            <div className="bg-gray-50 rounded-lg p-3 space-y-2 text-xs">
+            <div className="bg-gray-50 border border-gray-200 rounded-lg p-4 space-y-2.5 text-xs">
               {processStep.arrivedAtPpicTime && (
-                <div className="flex justify-between">
-                  <span className="text-gray-600">At PPIC:</span>
-                  <span className="font-medium">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-2">
+                    <Calendar className="w-4 h-4 text-gray-600" />
+                    <span className="font-semibold text-gray-700">
+                      At PPIC:
+                    </span>
+                  </div>
+                  <span className="font-bold text-gray-900">
                     {formatDateTime(processStep.arrivedAtPpicTime)}
                   </span>
                 </div>
               )}
               {processStep.addedToWaitingTime && (
-                <div className="flex justify-between">
-                  <span className="text-gray-600">Waiting:</span>
-                  <span className="font-medium">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-2">
+                    <Clock className="w-4 h-4 text-gray-600" />
+                    <span className="font-semibold text-gray-700">
+                      Waiting:
+                    </span>
+                  </div>
+                  <span className="font-bold text-gray-900">
                     {formatDateTime(processStep.addedToWaitingTime)}
                   </span>
                 </div>
               )}
               {processStep.assignedTime && (
-                <div className="flex justify-between">
-                  <span className="text-gray-600">Assigned:</span>
-                  <span className="font-medium">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-2">
+                    <User className="w-4 h-4 text-gray-600" />
+                    <span className="font-semibold text-gray-700">
+                      Assigned:
+                    </span>
+                  </div>
+                  <span className="font-bold text-gray-900">
                     {formatDateTime(processStep.assignedTime)}
                   </span>
                 </div>
               )}
               {processStep.startedTime && (
-                <div className="flex justify-between">
-                  <span className="text-gray-600">Started:</span>
-                  <span className="font-medium">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-2">
+                    <PlayCircle className="w-4 h-4 text-gray-600" />
+                    <span className="font-semibold text-gray-700">
+                      Started:
+                    </span>
+                  </div>
+                  <span className="font-bold text-gray-900">
                     {formatDateTime(processStep.startedTime)}
                   </span>
                 </div>
               )}
               {processStep.completedTime && (
-                <div className="flex justify-between">
-                  <span className="text-gray-600">Completed:</span>
-                  <span className="font-medium">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-2">
+                    <CheckCircle2 className="w-4 h-4 text-gray-600" />
+                    <span className="font-semibold text-gray-700">
+                      Completed:
+                    </span>
+                  </div>
+                  <span className="font-bold text-gray-900">
                     {formatDateTime(processStep.completedTime)}
                   </span>
                 </div>
@@ -294,42 +343,50 @@ export const ProcessStepCard: React.FC<ProcessStepCardProps> = ({
 
           {/* Assignment Info */}
           {(processStep.assignedTo || processStep.assignedLine) && (
-            <div className="bg-blue-50 rounded-lg p-3 text-sm">
+            <div className="bg-purple-50 border border-purple-200 rounded-lg p-4 text-sm">
               {processStep.assignedTo && (
-                <p>
-                  <span className="text-gray-600">Assigned to:</span>{" "}
-                  <span className="font-medium">{processStep.assignedTo}</span>
-                </p>
+                <div className="flex items-center gap-2 mb-1">
+                  <User className="w-4 h-4 text-purple-600" />
+                  <span className="font-semibold text-purple-700">
+                    Assigned to:
+                  </span>
+                  <span className="font-bold text-purple-900">
+                    {processStep.assignedTo}
+                  </span>
+                </div>
               )}
               {processStep.assignedLine && (
-                <p>
-                  <span className="text-gray-600">Line:</span>{" "}
-                  <span className="font-medium">
+                <div className="flex items-center gap-2">
+                  <MapPin className="w-4 h-4 text-purple-600" />
+                  <span className="font-semibold text-purple-700">Line:</span>
+                  <span className="font-bold text-purple-900">
                     {processStep.assignedLine}
                   </span>
-                </p>
+                </div>
               )}
             </div>
           )}
 
           {/* Actions */}
           {currentState !== "completed" && validNextStates.length > 0 && (
-            <div className="flex gap-2 pt-2">
+            <div className="flex gap-2 pt-3">
               <Button
                 onClick={() => setIsTransitionModalOpen(true)}
                 variant="primary"
-                size="sm"
+                size="md"
                 className="flex-1"
               >
+                <ArrowRight className="w-4 h-4" />
                 Next: {PROCESS_STATE_LABELS[validNextStates[0]]}
               </Button>
               {currentState === "in_progress" && (
                 <Button
                   onClick={() => setIsRejectModalOpen(true)}
                   variant="danger"
-                  size="sm"
+                  size="md"
                 >
-                  Record Reject
+                  <AlertCircle className="w-4 h-4" />
+                  Reject
                 </Button>
               )}
             </div>
@@ -355,30 +412,56 @@ export const ProcessStepCard: React.FC<ProcessStepCardProps> = ({
             {/* CONTEXT INFO - Show DETAILED transition path */}
             <div className="bg-linear-to-r from-blue-50 to-indigo-50 border-2 border-blue-300 rounded-lg p-5">
               <h4 className="font-bold text-blue-900 mb-4 flex items-center gap-2">
-                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                <svg
+                  className="w-5 h-5"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+                  />
                 </svg>
                 Transition Details
               </h4>
-              
+
               <div className="space-y-4">
                 {/* FROM (Current State) */}
                 <div className="bg-white rounded-lg p-4 border-l-4 border-blue-500">
-                  <p className="text-xs font-semibold text-blue-600 uppercase mb-2">📍 FROM (Current)</p>
+                  <p className="text-xs font-semibold text-blue-600 uppercase mb-2">
+                    📍 FROM (Current)
+                  </p>
                   <div className="space-y-1">
                     <p className="text-base font-bold text-gray-900">
                       {PROCESS_LABELS[processStep.processName]}
                     </p>
                     <p className="text-sm text-gray-700">
-                      📂 Department: <span className="font-semibold">{processStep.department}</span>
+                      📂 Department:{" "}
+                      <span className="font-semibold">
+                        {processStep.department}
+                      </span>
                     </p>
                     <p className="text-sm text-gray-700">
-                      🔄 Status: <span className="font-semibold">{getStateLabel(currentState)}</span>
+                      🔄 Status:{" "}
+                      <span className="font-semibold">
+                        {getStateLabel(currentState)}
+                      </span>
                     </p>
                     {processStep.assignedTo && (
                       <p className="text-sm text-gray-700">
-                        👤 Current PIC: <span className="font-semibold">{processStep.assignedTo}</span>
-                        {processStep.assignedLine && <span className="text-gray-600"> (Line: {processStep.assignedLine})</span>}
+                        👤 Current PIC:{" "}
+                        <span className="font-semibold">
+                          {processStep.assignedTo}
+                        </span>
+                        {processStep.assignedLine && (
+                          <span className="text-gray-600">
+                            {" "}
+                            (Line: {processStep.assignedLine})
+                          </span>
+                        )}
                       </p>
                     )}
                   </div>
@@ -386,69 +469,107 @@ export const ProcessStepCard: React.FC<ProcessStepCardProps> = ({
 
                 {/* ARROW */}
                 <div className="flex justify-center">
-                  <svg className="w-8 h-8 text-blue-600 animate-pulse" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M19 14l-7 7m0 0l-7-7m7 7V3" />
+                  <svg
+                    className="w-8 h-8 text-blue-600 animate-pulse"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={3}
+                      d="M19 14l-7 7m0 0l-7-7m7 7V3"
+                    />
                   </svg>
                 </div>
 
                 {/* TO (Next State) */}
                 <div className="bg-white rounded-lg p-4 border-l-4 border-green-500">
-                  <p className="text-xs font-semibold text-green-600 uppercase mb-2">🎯 TO (Next)</p>
+                  <p className="text-xs font-semibold text-green-600 uppercase mb-2">
+                    🎯 TO (Next)
+                  </p>
                   <div className="space-y-1">
                     <p className="text-base font-bold text-gray-900">
                       {getStateLabel(transitionData.newState)}
                     </p>
-                    
+
                     {/* Show specific location based on state */}
                     {transitionData.newState === "at_ppic" && (
                       <div className="mt-2 bg-blue-50 rounded p-2">
                         <p className="text-sm text-blue-900">
-                          📋 Will arrive at: <span className="font-bold">PPIC Department</span>
+                          📋 Will arrive at:{" "}
+                          <span className="font-bold">PPIC Department</span>
                         </p>
-                        <p className="text-xs text-blue-700">For review and next process planning</p>
+                        <p className="text-xs text-blue-700">
+                          For review and next process planning
+                        </p>
                       </div>
                     )}
-                    
+
                     {transitionData.newState === "waiting" && (
                       <div className="mt-2 bg-yellow-50 rounded p-2">
                         <p className="text-sm text-yellow-900">
-                          ⏳ Will be added to: <span className="font-bold">{processStep.department} Waiting List</span>
+                          ⏳ Will be added to:{" "}
+                          <span className="font-bold">
+                            {processStep.department} Waiting List
+                          </span>
                         </p>
-                        <p className="text-xs text-yellow-700">Waiting to be assigned to operator</p>
+                        <p className="text-xs text-yellow-700">
+                          Waiting to be assigned to operator
+                        </p>
                       </div>
                     )}
-                    
+
                     {transitionData.newState === "assigned" && (
                       <div className="mt-2 bg-purple-50 rounded p-2">
                         <p className="text-sm text-purple-900">
-                          👤 Will be assigned at: <span className="font-bold">{processStep.department}</span>
+                          👤 Will be assigned at:{" "}
+                          <span className="font-bold">
+                            {processStep.department}
+                          </span>
                         </p>
-                        <p className="text-xs text-purple-700">Specify operator/PIC below</p>
+                        <p className="text-xs text-purple-700">
+                          Specify operator/PIC below
+                        </p>
                       </div>
                     )}
-                    
+
                     {transitionData.newState === "in_progress" && (
                       <div className="mt-2 bg-orange-50 rounded p-2">
                         <p className="text-sm text-orange-900">
-                          ⚙️ Work will start at: <span className="font-bold">{processStep.department}</span>
+                          ⚙️ Work will start at:{" "}
+                          <span className="font-bold">
+                            {processStep.department}
+                          </span>
                         </p>
                         <p className="text-xs text-orange-700">
                           By: {processStep.assignedTo || "Assigned operator"}
-                          {processStep.assignedLine && ` (${processStep.assignedLine})`}
+                          {processStep.assignedLine &&
+                            ` (${processStep.assignedLine})`}
                         </p>
                       </div>
                     )}
-                    
+
                     {transitionData.newState === "completed" && (
                       <div className="mt-2 bg-green-50 rounded p-2">
                         <p className="text-sm text-green-900">
-                          ✅ Will complete at: <span className="font-bold">{processStep.department}</span>
+                          ✅ Will complete at:{" "}
+                          <span className="font-bold">
+                            {processStep.department}
+                          </span>
                         </p>
                         {nextProcess && nextDepartment ? (
                           <div className="mt-2 pt-2 border-t border-green-200">
-                            <p className="text-xs text-green-800 font-semibold">📦 Then transfer to:</p>
+                            <p className="text-xs text-green-800 font-semibold">
+                              📦 Then transfer to:
+                            </p>
                             <p className="text-sm text-green-900">
-                              → <span className="font-bold">{PROCESS_LABELS[nextProcess]}</span> ({nextDepartment})
+                              →{" "}
+                              <span className="font-bold">
+                                {PROCESS_LABELS[nextProcess]}
+                              </span>{" "}
+                              ({nextDepartment})
                             </p>
                             <p className="text-xs text-green-700 mt-1">
                               ℹ️ Surat Jalan will be auto-generated
@@ -456,7 +577,8 @@ export const ProcessStepCard: React.FC<ProcessStepCardProps> = ({
                           </div>
                         ) : (
                           <p className="text-xs text-green-700 mt-1">
-                            🎉 This is the final process - Order will be marked as delivered
+                            🎉 This is the final process - Order will be marked
+                            as delivered
                           </p>
                         )}
                       </div>
@@ -489,7 +611,8 @@ export const ProcessStepCard: React.FC<ProcessStepCardProps> = ({
                 ))}
               </select>
               <p className="text-xs text-gray-600 mt-1">
-                Current: {getStateLabel(currentState)} → Next: {getStateLabel(transitionData.newState)}
+                Current: {getStateLabel(currentState)} → Next:{" "}
+                {getStateLabel(transitionData.newState)}
               </p>
             </div>
 
@@ -519,8 +642,10 @@ export const ProcessStepCard: React.FC<ProcessStepCardProps> = ({
             {/* ASSIGN TO - Only show for "assigned" state */}
             {transitionData.newState === "assigned" && (
               <div className="bg-purple-50 border border-purple-200 rounded-lg p-4 space-y-4">
-                <h4 className="font-semibold text-purple-900">Assignment Details</h4>
-                
+                <h4 className="font-semibold text-purple-900">
+                  Assignment Details
+                </h4>
+
                 <div>
                   <label className="block text-sm font-medium text-gray-900 mb-2">
                     Assign To (Operator/PIC) *
@@ -574,8 +699,10 @@ export const ProcessStepCard: React.FC<ProcessStepCardProps> = ({
             {/* COMPLETED - Show quantity input */}
             {transitionData.newState === "completed" && (
               <div className="bg-green-50 border border-green-200 rounded-lg p-4">
-                <h4 className="font-semibold text-green-900 mb-3">Completion Details</h4>
-                
+                <h4 className="font-semibold text-green-900 mb-3">
+                  Completion Details
+                </h4>
+
                 <div>
                   <label className="block text-sm font-medium text-gray-900 mb-2">
                     Quantity Completed *
@@ -595,7 +722,8 @@ export const ProcessStepCard: React.FC<ProcessStepCardProps> = ({
                     required
                   />
                   <p className="text-xs text-green-700 mt-1">
-                    Max: {formatNumber(processStep.quantityReceived)} pcs (received quantity)
+                    Max: {formatNumber(processStep.quantityReceived)} pcs
+                    (received quantity)
                   </p>
                 </div>
               </div>
@@ -661,13 +789,17 @@ export const ProcessStepCard: React.FC<ProcessStepCardProps> = ({
 
             {/* CONTEXT */}
             <div className="bg-red-50 border border-red-200 rounded-lg p-4">
-              <h4 className="font-semibold text-red-900 mb-2">Process Information</h4>
+              <h4 className="font-semibold text-red-900 mb-2">
+                Process Information
+              </h4>
               <div className="text-sm space-y-1">
                 <p className="text-red-800">
-                  <span className="font-medium">Process:</span> {PROCESS_LABELS[processStep.processName]}
+                  <span className="font-medium">Process:</span>{" "}
+                  {PROCESS_LABELS[processStep.processName]}
                 </p>
                 <p className="text-red-800">
-                  <span className="font-medium">Department:</span> {processStep.department}
+                  <span className="font-medium">Department:</span>{" "}
+                  {processStep.department}
                 </p>
                 <p className="text-red-700 text-xs mt-2">
                   Recording reject/rework will deduct from completed quantity
@@ -683,7 +815,13 @@ export const ProcessStepCard: React.FC<ProcessStepCardProps> = ({
               <div className="grid grid-cols-2 gap-3">
                 <button
                   type="button"
-                  onClick={() => setRejectData({ ...rejectData, rejectCategory: "reject", action: "scrap" })}
+                  onClick={() =>
+                    setRejectData({
+                      ...rejectData,
+                      rejectCategory: "reject",
+                      action: "scrap",
+                    })
+                  }
                   className={`p-4 border-2 rounded-lg text-left transition-all ${
                     rejectData.rejectCategory === "reject"
                       ? "border-red-500 bg-red-50"
@@ -697,7 +835,13 @@ export const ProcessStepCard: React.FC<ProcessStepCardProps> = ({
                 </button>
                 <button
                   type="button"
-                  onClick={() => setRejectData({ ...rejectData, rejectCategory: "rework", action: "rework" })}
+                  onClick={() =>
+                    setRejectData({
+                      ...rejectData,
+                      rejectCategory: "rework",
+                      action: "rework",
+                    })
+                  }
                   className={`p-4 border-2 rounded-lg text-left transition-all ${
                     rejectData.rejectCategory === "rework"
                       ? "border-yellow-500 bg-yellow-50"
@@ -845,29 +989,63 @@ export const ProcessStepCard: React.FC<ProcessStepCardProps> = ({
             </div>
 
             {/* Summary */}
-            <div className={`border-2 rounded-lg p-4 ${
-              rejectData.rejectCategory === "reject" 
-                ? "border-red-300 bg-red-50" 
-                : "border-yellow-300 bg-yellow-50"
-            }`}>
-              <h4 className={`font-semibold mb-2 ${
-                rejectData.rejectCategory === "reject" ? "text-red-900" : "text-yellow-900"
-              }`}>
+            <div
+              className={`border-2 rounded-lg p-4 ${
+                rejectData.rejectCategory === "reject"
+                  ? "border-red-300 bg-red-50"
+                  : "border-yellow-300 bg-yellow-50"
+              }`}
+            >
+              <h4
+                className={`font-semibold mb-2 ${
+                  rejectData.rejectCategory === "reject"
+                    ? "text-red-900"
+                    : "text-yellow-900"
+                }`}
+              >
                 Summary
               </h4>
               <div className="text-sm space-y-1">
-                <p className={rejectData.rejectCategory === "reject" ? "text-red-800" : "text-yellow-800"}>
-                  <span className="font-medium">Category:</span> {REJECT_CATEGORY_LABELS[rejectData.rejectCategory]}
+                <p
+                  className={
+                    rejectData.rejectCategory === "reject"
+                      ? "text-red-800"
+                      : "text-yellow-800"
+                  }
+                >
+                  <span className="font-medium">Category:</span>{" "}
+                  {REJECT_CATEGORY_LABELS[rejectData.rejectCategory]}
                 </p>
-                <p className={rejectData.rejectCategory === "reject" ? "text-red-800" : "text-yellow-800"}>
-                  <span className="font-medium">Type:</span> {REJECT_TYPE_LABELS[rejectData.rejectType]}
+                <p
+                  className={
+                    rejectData.rejectCategory === "reject"
+                      ? "text-red-800"
+                      : "text-yellow-800"
+                  }
+                >
+                  <span className="font-medium">Type:</span>{" "}
+                  {REJECT_TYPE_LABELS[rejectData.rejectType]}
                 </p>
-                <p className={rejectData.rejectCategory === "reject" ? "text-red-800" : "text-yellow-800"}>
-                  <span className="font-medium">Quantity:</span> {rejectData.quantity} pcs
+                <p
+                  className={
+                    rejectData.rejectCategory === "reject"
+                      ? "text-red-800"
+                      : "text-yellow-800"
+                  }
+                >
+                  <span className="font-medium">Quantity:</span>{" "}
+                  {rejectData.quantity} pcs
                   {rejectData.size && ` (Size: ${rejectData.size})`}
                 </p>
-                <p className={rejectData.rejectCategory === "reject" ? "text-red-800" : "text-yellow-800"}>
-                  <span className="font-medium">Action:</span> {REJECT_ACTION_LABELS[rejectData.action]}
+                <p
+                  className={
+                    rejectData.rejectCategory === "reject"
+                      ? "text-red-800"
+                      : "text-yellow-800"
+                  }
+                >
+                  <span className="font-medium">Action:</span>{" "}
+                  {REJECT_ACTION_LABELS[rejectData.action]}
                 </p>
               </div>
             </div>
@@ -882,18 +1060,16 @@ export const ProcessStepCard: React.FC<ProcessStepCardProps> = ({
             >
               Cancel
             </Button>
-            <Button 
-              type="submit" 
-              variant="danger" 
-              disabled={isSubmitting}
-            >
+            <Button type="submit" variant="danger" disabled={isSubmitting}>
               {isSubmitting ? (
                 <>
                   <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
                   Recording...
                 </>
               ) : (
-                `Record ${rejectData.rejectCategory === "reject" ? "Reject" : "Rework"}`
+                `Record ${
+                  rejectData.rejectCategory === "reject" ? "Reject" : "Rework"
+                }`
               )}
             </Button>
           </ModalFooter>

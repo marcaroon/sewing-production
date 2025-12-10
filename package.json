@@ -7,19 +7,15 @@
     "build": "next build",
     "start": "next start",
     "lint": "eslint",
-    
     "prisma:generate": "prisma generate",
     "prisma:studio": "prisma studio",
     "prisma:seed": "tsx prisma/seed.ts",
-    
     "migrate:prepare": "echo '⚠️  Make sure you have updated prisma/schema.prisma first!' && prisma migrate dev --name add_new_flow_structure",
     "migrate:data": "tsx prisma/migrate-to-new-flow.ts",
     "migrate:verify": "prisma studio",
     "migrate:full": "npm run migrate:prepare && npm run migrate:data && echo '✅ Migration completed! Please verify the data.'",
-    
     "db:backup": "echo 'Run your database backup command here'",
     "db:restore": "echo 'Run your database restore command here'",
-    
     "test:api": "echo 'API tests not yet implemented'",
     "test:e2e": "echo 'E2E tests not yet implemented'"
   },
@@ -27,6 +23,7 @@
     "@prisma/adapter-pg": "^7.0.1",
     "@prisma/client": "^6.19.0",
     "dotenv": "^17.2.3",
+    "lucide-react": "^0.556.0",
     "next": "16.0.4",
     "pg": "^8.16.3",
     "qrcode": "^1.5.4",

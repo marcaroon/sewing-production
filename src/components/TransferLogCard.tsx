@@ -1,13 +1,27 @@
+// components/TransferLogCard.tsx - IMPROVED VERSION
 "use client";
 
 import React, { useState } from "react";
-import { TransferLog, ProcessName } from "@/lib/types-new"; // Import ProcessName
+import { TransferLog, ProcessName } from "@/lib/types-new";
 import { Card, CardContent, CardHeader, CardTitle } from "./ui/Card";
 import { Badge } from "./ui/Badge";
 import { Button } from "./ui/Button";
 import { Modal, ModalFooter } from "./ui/Modal";
 import { PROCESS_LABELS } from "@/lib/constants-new";
 import { formatDateTime, formatNumber } from "@/lib/utils";
+import {
+  FileText,
+  ArrowRight,
+  Package,
+  CheckCircle2,
+  XCircle,
+  RotateCcw,
+  Printer,
+  AlertTriangle,
+  User,
+  Calendar,
+  Clock,
+} from "lucide-react";
 
 interface TransferLogCardProps {
   transferLog: TransferLog;
@@ -28,12 +42,10 @@ export const TransferLogCard: React.FC<TransferLogCardProps> = ({
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState("");
 
-  // Parse reject summary
   const rejects = transferLog.rejectSummary
     ? JSON.parse(transferLog.rejectSummary)
     : [];
 
-  // Helper function to get process label safely
   const getProcessLabel = (processName: ProcessName): string => {
     return PROCESS_LABELS[processName] || processName;
   };
@@ -77,18 +89,25 @@ export const TransferLogCard: React.FC<TransferLogCardProps> = ({
     <>
       <Card
         className={`${
-          transferLog.status === "disputed" ? "border-red-300 border-2" : ""
+          transferLog.status === "disputed" ? "border-red-400 border-2" : ""
         }`}
+        hover
       >
         <CardHeader>
           <div className="flex items-start justify-between">
-            <div>
-              <CardTitle className="text-base">
-                {transferLog.transferNumber}
-              </CardTitle>
-              <p className="text-sm text-gray-600 mt-1">
-                {formatDateTime(transferLog.transferDate)}
-              </p>
+            <div className="flex items-center gap-2">
+              <FileText className="w-5 h-5 text-blue-600" />
+              <div>
+                <CardTitle className="text-base">
+                  {transferLog.transferNumber}
+                </CardTitle>
+                <div className="flex items-center gap-2 mt-1">
+                  <Calendar className="w-3 h-3 text-gray-600" />
+                  <p className="text-xs font-semibold text-gray-700">
+                    {formatDateTime(transferLog.transferDate)}
+                  </p>
+                </div>
+              </div>
             </div>
             <Badge
               variant={
@@ -98,9 +117,10 @@ export const TransferLogCard: React.FC<TransferLogCardProps> = ({
                   ? "danger"
                   : "warning"
               }
+              size="sm"
             >
               {transferLog.status === "received"
-                ? "Diterima"
+                ? "Received"
                 : transferLog.status === "disputed"
                 ? "Disputed"
                 : "Pending"}
@@ -110,110 +130,150 @@ export const TransferLogCard: React.FC<TransferLogCardProps> = ({
 
         <CardContent className="space-y-4">
           {/* Transfer Route */}
-          <div className="flex items-center justify-between bg-gray-50 rounded-lg p-3">
+          <div className="flex items-center justify-between bg-gradient-to-r from-blue-50 to-purple-50 border-2 border-blue-200 rounded-lg p-4">
             <div className="flex-1">
-              <p className="text-xs text-gray-600">Dari</p>
-              <p className="font-semibold text-sm text-gray-900">
+              <p className="text-xs font-bold text-blue-700 uppercase mb-1">
+                From
+              </p>
+              <p className="font-bold text-sm text-gray-900">
                 {getProcessLabel(transferLog.fromProcess)}
               </p>
-              <p className="text-xs text-gray-600">
+              <p className="text-xs font-semibold text-gray-700 mt-0.5">
                 {transferLog.fromDepartment}
               </p>
             </div>
             <div className="px-4">
-              <svg
-                className="w-6 h-6 text-gray-400"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M13 7l5 5m0 0l-5 5m5-5H6"
-                />
-              </svg>
+              <ArrowRight className="w-6 h-6 text-blue-600" />
             </div>
             <div className="flex-1">
-              <p className="text-xs text-gray-600">Ke</p>
-              <p className="font-semibold text-sm text-gray-900">
+              <p className="text-xs font-bold text-purple-700 uppercase mb-1">
+                To
+              </p>
+              <p className="font-bold text-sm text-gray-900">
                 {getProcessLabel(transferLog.toProcess)}
               </p>
-              <p className="text-xs text-gray-600">
+              <p className="text-xs font-semibold text-gray-700 mt-0.5">
                 {transferLog.toDepartment}
               </p>
             </div>
           </div>
 
           {/* Quantities */}
-          <div className="grid grid-cols-2 gap-3 text-sm">
-            <div className="bg-blue-50 rounded p-2">
-              <p className="text-xs text-blue-800">Transferred</p>
-              <p className="font-bold text-blue-900">
-                {formatNumber(transferLog.quantityTransferred)} pcs
-              </p>
+          <div className="grid grid-cols-2 gap-2.5 text-sm">
+            <div className="flex items-center gap-2 bg-blue-50 border border-blue-200 rounded-lg p-2.5">
+              <Package className="w-4 h-4 text-blue-600" />
+              <div>
+                <p className="text-xs font-bold text-blue-700">Transferred</p>
+                <p className="font-bold text-blue-900">
+                  {formatNumber(transferLog.quantityTransferred)} pcs
+                </p>
+              </div>
             </div>
-            <div className="bg-green-50 rounded p-2">
-              <p className="text-xs text-green-800">Completed</p>
-              <p className="font-bold text-green-900">
-                {formatNumber(transferLog.quantityCompleted)} pcs
-              </p>
+            <div className="flex items-center gap-2 bg-green-50 border border-green-200 rounded-lg p-2.5">
+              <CheckCircle2 className="w-4 h-4 text-green-600" />
+              <div>
+                <p className="text-xs font-bold text-green-700">Completed</p>
+                <p className="font-bold text-green-900">
+                  {formatNumber(transferLog.quantityCompleted)} pcs
+                </p>
+              </div>
             </div>
             {transferLog.quantityRejected > 0 && (
-              <div className="bg-red-50 rounded p-2">
-                <p className="text-xs text-red-800">Rejected</p>
-                <p className="font-bold text-red-900">
-                  {formatNumber(transferLog.quantityRejected)} pcs
-                </p>
+              <div className="flex items-center gap-2 bg-red-50 border border-red-200 rounded-lg p-2.5">
+                <XCircle className="w-4 h-4 text-red-600" />
+                <div>
+                  <p className="text-xs font-bold text-red-700">Rejected</p>
+                  <p className="font-bold text-red-900">
+                    {formatNumber(transferLog.quantityRejected)} pcs
+                  </p>
+                </div>
               </div>
             )}
             {transferLog.quantityRework > 0 && (
-              <div className="bg-yellow-50 rounded p-2">
-                <p className="text-xs text-yellow-800">Rework</p>
-                <p className="font-bold text-yellow-900">
-                  {formatNumber(transferLog.quantityRework)} pcs
-                </p>
+              <div className="flex items-center gap-2 bg-yellow-50 border border-yellow-200 rounded-lg p-2.5">
+                <RotateCcw className="w-4 h-4 text-yellow-600" />
+                <div>
+                  <p className="text-xs font-bold text-yellow-700">Rework</p>
+                  <p className="font-bold text-yellow-900">
+                    {formatNumber(transferLog.quantityRework)} pcs
+                  </p>
+                </div>
               </div>
             )}
           </div>
 
           {/* People */}
-          <div className="grid grid-cols-2 gap-3 text-sm">
+          <div className="grid grid-cols-2 gap-3 text-sm bg-gray-50 border border-gray-200 rounded-lg p-3">
             <div>
-              <p className="text-xs text-gray-600">Diserahkan</p>
-              <p className="font-semibold text-gray-900">
+              <div className="flex items-center gap-1.5 mb-1">
+                <User className="w-3 h-3 text-gray-600" />
+                <p className="text-xs font-bold text-gray-700">Handed Over</p>
+              </div>
+              <p className="font-bold text-gray-900">
                 {transferLog.handedOverBy}
               </p>
             </div>
             <div>
-              <p className="text-xs text-gray-600">Diterima</p>
-              <p className="font-semibold text-gray-900">
+              <div className="flex items-center gap-1.5 mb-1">
+                <User className="w-3 h-3 text-gray-600" />
+                <p className="text-xs font-bold text-gray-700">Received By</p>
+              </div>
+              <p className="font-bold text-gray-900">
                 {transferLog.receivedBy || "-"}
               </p>
             </div>
           </div>
 
+          {/* Duration Info */}
+          {(transferLog.processingDuration || transferLog.waitingDuration) && (
+            <div className="grid grid-cols-2 gap-2 text-xs">
+              {transferLog.processingDuration && (
+                <div className="flex items-center gap-2 bg-blue-50 border border-blue-200 rounded px-2.5 py-2">
+                  <Clock className="w-3 h-3 text-blue-600" />
+                  <div>
+                    <p className="font-semibold text-blue-700">Processing</p>
+                    <p className="font-bold text-blue-900">
+                      {transferLog.processingDuration} min
+                    </p>
+                  </div>
+                </div>
+              )}
+              {transferLog.waitingDuration && (
+                <div className="flex items-center gap-2 bg-yellow-50 border border-yellow-200 rounded px-2.5 py-2">
+                  <Clock className="w-3 h-3 text-yellow-600" />
+                  <div>
+                    <p className="font-semibold text-yellow-700">Waiting</p>
+                    <p className="font-bold text-yellow-900">
+                      {transferLog.waitingDuration} min
+                    </p>
+                  </div>
+                </div>
+              )}
+            </div>
+          )}
+
           {/* Actions */}
-          <div className="flex gap-2 pt-2 border-t border-gray-200">
+          <div className="flex gap-2 pt-2 border-t-2 border-gray-200">
             <Button
               onClick={() => setIsDetailModalOpen(true)}
               variant="outline"
               size="sm"
               className="flex-1"
             >
+              <FileText className="w-4 h-4" />
               Detail
             </Button>
             <Button onClick={handlePrint} variant="outline" size="sm">
-              Print
+              <Printer className="w-4 h-4" />
             </Button>
             {!transferLog.isReceived && (
               <Button
                 onClick={() => setIsReceiveModalOpen(true)}
-                variant="primary"
+                variant="success"
                 size="sm"
               >
-                Terima
+                <CheckCircle2 className="w-4 h-4" />
+                Receive
               </Button>
             )}
           </div>
@@ -224,29 +284,31 @@ export const TransferLogCard: React.FC<TransferLogCardProps> = ({
       <Modal
         isOpen={isDetailModalOpen}
         onClose={() => setIsDetailModalOpen(false)}
-        title={`Detail Surat Jalan - ${transferLog.transferNumber}`}
+        title={`Surat Jalan - ${transferLog.transferNumber}`}
         size="lg"
       >
         <div className="space-y-4">
-          {/* Full details here - similar to card but expanded */}
-          <div className="bg-gray-50 rounded-lg p-4">
-            <h4 className="font-semibold mb-3">Informasi Transfer</h4>
+          <div className="bg-gradient-to-r from-blue-50 to-purple-50 border-2 border-blue-300 rounded-lg p-4">
+            <h4 className="font-bold text-gray-900 mb-3 flex items-center gap-2">
+              <FileText className="w-5 h-5 text-blue-600" />
+              Transfer Information
+            </h4>
             <div className="grid grid-cols-2 gap-4 text-sm">
               <div>
-                <p className="text-gray-600">Dari Proses</p>
-                <p className="font-semibold">
+                <p className="text-gray-700 font-semibold">From Process</p>
+                <p className="font-bold text-gray-900">
                   {getProcessLabel(transferLog.fromProcess)}
                 </p>
-                <p className="text-xs text-gray-600">
+                <p className="text-xs font-semibold text-gray-600">
                   {transferLog.fromDepartment}
                 </p>
               </div>
               <div>
-                <p className="text-gray-600">Ke Proses</p>
-                <p className="font-semibold">
+                <p className="text-gray-700 font-semibold">To Process</p>
+                <p className="font-bold text-gray-900">
                   {getProcessLabel(transferLog.toProcess)}
                 </p>
-                <p className="text-xs text-gray-600">
+                <p className="text-xs font-semibold text-gray-600">
                   {transferLog.toDepartment}
                 </p>
               </div>
@@ -254,26 +316,37 @@ export const TransferLogCard: React.FC<TransferLogCardProps> = ({
           </div>
 
           {rejects.length > 0 && (
-            <div className="bg-red-50 border border-red-200 rounded-lg p-4">
-              <h4 className="font-semibold text-red-900 mb-3">
-                Detail Reject/Rework
+            <div className="bg-red-50 border-2 border-red-300 rounded-lg p-4">
+              <h4 className="font-bold text-red-900 mb-3 flex items-center gap-2">
+                <AlertTriangle className="w-5 h-5 text-red-600" />
+                Reject/Rework Details
               </h4>
               <div className="space-y-2">
                 {rejects.map((reject: any, idx: number) => (
-                  <div key={idx} className="bg-white rounded p-3 text-sm">
-                    <div className="flex justify-between mb-1">
-                      <span className="font-semibold">{reject.type}</span>
+                  <div
+                    key={idx}
+                    className="bg-white border border-red-200 rounded-lg p-3 text-sm"
+                  >
+                    <div className="flex justify-between mb-2">
+                      <span className="font-bold text-gray-900">
+                        {reject.type}
+                      </span>
                       <Badge
                         variant={
                           reject.category === "reject" ? "danger" : "warning"
                         }
+                        size="sm"
                       >
                         {reject.category}
                       </Badge>
                     </div>
-                    <p className="text-gray-700">{reject.description}</p>
-                    <p className="text-gray-600 text-xs mt-1">
-                      Qty: {reject.quantity} pcs • Action: {reject.action}
+                    <p className="text-gray-800 font-medium">
+                      {reject.description}
+                    </p>
+                    <p className="text-gray-700 text-xs mt-2">
+                      Qty:{" "}
+                      <span className="font-bold">{reject.quantity} pcs</span> •
+                      Action: <span className="font-bold">{reject.action}</span>
                     </p>
                   </div>
                 ))}
@@ -282,16 +355,26 @@ export const TransferLogCard: React.FC<TransferLogCardProps> = ({
           )}
 
           {transferLog.notes && (
-            <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
-              <p className="font-semibold text-yellow-900 mb-1">Catatan</p>
-              <p className="text-sm text-yellow-800">{transferLog.notes}</p>
+            <div className="bg-yellow-50 border-2 border-yellow-300 rounded-lg p-4">
+              <p className="font-bold text-yellow-900 mb-2 flex items-center gap-2">
+                <FileText className="w-4 h-4" />
+                Notes
+              </p>
+              <p className="text-sm font-medium text-yellow-800">
+                {transferLog.notes}
+              </p>
             </div>
           )}
 
           {transferLog.issues && (
-            <div className="bg-red-50 border border-red-300 rounded-lg p-4">
-              <p className="font-semibold text-red-900 mb-1">⚠ Issues</p>
-              <p className="text-sm text-red-800">{transferLog.issues}</p>
+            <div className="bg-red-50 border-2 border-red-300 rounded-lg p-4">
+              <p className="font-bold text-red-900 mb-2 flex items-center gap-2">
+                <AlertTriangle className="w-4 h-4" />
+                Issues
+              </p>
+              <p className="text-sm font-medium text-red-800">
+                {transferLog.issues}
+              </p>
             </div>
           )}
         </div>
@@ -301,28 +384,29 @@ export const TransferLogCard: React.FC<TransferLogCardProps> = ({
       <Modal
         isOpen={isReceiveModalOpen}
         onClose={() => !isSubmitting && setIsReceiveModalOpen(false)}
-        title="Terima Surat Jalan"
+        title="Receive Transfer"
         size="md"
       >
         <form onSubmit={handleReceive}>
           <div className="space-y-4">
             {error && (
-              <div className="bg-red-50 border border-red-200 rounded p-3 text-sm text-red-800">
+              <div className="bg-red-50 border-2 border-red-300 rounded-lg p-3 text-sm font-semibold text-red-800 flex items-center gap-2">
+                <AlertTriangle className="w-4 h-4" />
                 {error}
               </div>
             )}
 
-            <div className="bg-blue-50 rounded-lg p-4 text-sm">
-              <p className="font-semibold mb-2">Yang akan diterima:</p>
-              <p>
-                {transferLog.quantityTransferred} pcs dari{" "}
+            <div className="bg-blue-50 border-2 border-blue-300 rounded-lg p-4 text-sm">
+              <p className="font-bold text-blue-900 mb-2">Will Receive:</p>
+              <p className="text-gray-900 font-semibold">
+                {transferLog.quantityTransferred} pcs from{" "}
                 {getProcessLabel(transferLog.fromProcess)}
               </p>
             </div>
 
             <div>
-              <label className="block text-sm font-medium mb-2">
-                Nama Penerima *
+              <label className="block text-sm font-bold text-gray-900 mb-2">
+                Receiver Name *
               </label>
               <input
                 type="text"
@@ -330,38 +414,38 @@ export const TransferLogCard: React.FC<TransferLogCardProps> = ({
                 onChange={(e) =>
                   setReceiveData({ ...receiveData, receivedBy: e.target.value })
                 }
-                className="w-full px-3 py-2 border rounded-lg"
+                className="w-full px-4 py-2.5 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 font-medium text-gray-900"
                 required
                 disabled={isSubmitting}
               />
             </div>
 
             <div>
-              <label className="block text-sm font-medium mb-2">
-                Ada Masalah/Issues? (opsional)
+              <label className="block text-sm font-bold text-gray-900 mb-2">
+                Issues? (optional)
               </label>
               <textarea
                 value={receiveData.issues}
                 onChange={(e) =>
                   setReceiveData({ ...receiveData, issues: e.target.value })
                 }
-                className="w-full px-3 py-2 border rounded-lg"
+                className="w-full px-4 py-2.5 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 font-medium text-gray-900"
                 rows={3}
-                placeholder="Jika ada kerusakan, kekurangan, atau masalah lainnya..."
+                placeholder="Any damage, shortage, or problems..."
                 disabled={isSubmitting}
               />
             </div>
 
             <div>
-              <label className="block text-sm font-medium mb-2">
-                Catatan Tambahan (opsional)
+              <label className="block text-sm font-bold text-gray-900 mb-2">
+                Additional Notes (optional)
               </label>
               <textarea
                 value={receiveData.notes}
                 onChange={(e) =>
                   setReceiveData({ ...receiveData, notes: e.target.value })
                 }
-                className="w-full px-3 py-2 border rounded-lg"
+                className="w-full px-4 py-2.5 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 font-medium text-gray-900"
                 rows={2}
                 disabled={isSubmitting}
               />
@@ -375,10 +459,10 @@ export const TransferLogCard: React.FC<TransferLogCardProps> = ({
               onClick={() => setIsReceiveModalOpen(false)}
               disabled={isSubmitting}
             >
-              Batal
+              Cancel
             </Button>
-            <Button type="submit" variant="primary" disabled={isSubmitting}>
-              {isSubmitting ? "Processing..." : "Konfirmasi Terima"}
+            <Button type="submit" variant="success" disabled={isSubmitting}>
+              {isSubmitting ? "Processing..." : "Confirm Receive"}
             </Button>
           </ModalFooter>
         </form>
