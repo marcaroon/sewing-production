@@ -803,7 +803,7 @@ export default function OrderDetailPage() {
                 </p>
               </div>
               <div>
-                <p className="text-sm text-gray-600">Type</p>
+                <p className="text-sm text-gray-600 mb-2">Type</p>
                 <Badge
                   variant={
                     order.buyer.type === "repeat" ? "success" : "warning"

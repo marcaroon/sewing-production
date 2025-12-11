@@ -31,7 +31,13 @@ interface FilterState {
   searchTerm: string;
   processFilter: ProcessName | "all";
   phaseFilter: "all" | "production" | "delivery";
-  stateFilter: "all" | "at_ppic" | "waiting" | "assigned" | "in_progress" | "completed";
+  stateFilter:
+    | "all"
+    | "at_ppic"
+    | "waiting"
+    | "assigned"
+    | "in_progress"
+    | "completed";
   buyerFilter: string;
   dateRange: {
     type: "all" | "custom" | "today" | "week" | "month" | "year";
@@ -73,7 +79,13 @@ export default function AdvancedOrdersPage() {
 
   // Sort State
   const [sortConfig, setSortConfig] = useState<{
-    field: "date" | "process" | "buyer" | "deadline" | "completion" | "quantity";
+    field:
+      | "date"
+      | "process"
+      | "buyer"
+      | "deadline"
+      | "completion"
+      | "quantity";
     direction: "asc" | "desc";
   }>({
     field: "date",
@@ -193,7 +205,7 @@ export default function AdvancedOrdersPage() {
         if (order.currentProcess === "delivered") return false;
         const deadline = new Date(order.productionDeadline);
         const isDelayed = now > deadline;
-        
+
         return filters.deadlineStatus === "delayed" ? isDelayed : !isDelayed;
       });
     }
@@ -201,9 +213,10 @@ export default function AdvancedOrdersPage() {
     // Completion Range Filter
     if (filters.completionRange.min > 0 || filters.completionRange.max < 100) {
       filtered = filtered.filter((order) => {
-        const completion = order.totalQuantity > 0
-          ? (order.totalCompleted / order.totalQuantity) * 100
-          : 0;
+        const completion =
+          order.totalQuantity > 0
+            ? (order.totalCompleted / order.totalQuantity) * 100
+            : 0;
         return (
           completion >= filters.completionRange.min &&
           completion <= filters.completionRange.max
@@ -232,8 +245,14 @@ export default function AdvancedOrdersPage() {
             new Date(b.productionDeadline).getTime();
           break;
         case "completion":
-          const compA = a.totalQuantity > 0 ? (a.totalCompleted / a.totalQuantity) * 100 : 0;
-          const compB = b.totalQuantity > 0 ? (b.totalCompleted / b.totalQuantity) * 100 : 0;
+          const compA =
+            a.totalQuantity > 0
+              ? (a.totalCompleted / a.totalQuantity) * 100
+              : 0;
+          const compB =
+            b.totalQuantity > 0
+              ? (b.totalCompleted / b.totalQuantity) * 100
+              : 0;
           comparison = compA - compB;
           break;
         case "quantity":
@@ -284,13 +303,22 @@ export default function AdvancedOrdersPage() {
     if (filters.buyerFilter !== "all") count++;
     if (filters.dateRange.type !== "all") count++;
     if (filters.deadlineStatus !== "all") count++;
-    if (filters.completionRange.min > 0 || filters.completionRange.max < 100) count++;
+    if (filters.completionRange.min > 0 || filters.completionRange.max < 100)
+      count++;
     return count;
   };
 
   const exportToCSV = () => {
-    const headers = ["Order Number", "Buyer", "Style", "Order Date", "Status", "Quantity", "Completed"];
-    const rows = filteredOrders.map(order => [
+    const headers = [
+      "Order Number",
+      "Buyer",
+      "Style",
+      "Order Date",
+      "Status",
+      "Quantity",
+      "Completed",
+    ];
+    const rows = filteredOrders.map((order) => [
       order.orderNumber,
       order.buyer.name,
       order.style.name,
@@ -300,17 +328,19 @@ export default function AdvancedOrdersPage() {
       order.totalCompleted,
     ]);
 
-    const csv = [headers, ...rows].map(row => row.join(",")).join("\n");
+    const csv = [headers, ...rows].map((row) => row.join(",")).join("\n");
     const blob = new Blob([csv], { type: "text/csv" });
     const url = window.URL.createObjectURL(blob);
     const a = document.createElement("a");
     a.href = url;
-    a.download = `orders-export-${new Date().toISOString().split("T")[0]}.csv`;
+    a.download = `ORDERS-EXPORT-${new Date().toISOString().split("T")[0]}.csv`;
     a.click();
   };
 
   const uniqueBuyers = Array.from(
-    new Set(orders.map((o) => JSON.stringify({ id: o.buyer.id, name: o.buyer.name })))
+    new Set(
+      orders.map((o) => JSON.stringify({ id: o.buyer.id, name: o.buyer.name }))
+    )
   ).map((s) => JSON.parse(s));
 
   const processOptions: (ProcessName | "all")[] = [
@@ -338,7 +368,9 @@ export default function AdvancedOrdersPage() {
       o.currentProcess !== "delivered" &&
       !o.processSteps?.some((ps) => ps.status === "on_hold")
   ).length;
-  const completed = orders.filter((o) => o.currentProcess === "delivered").length;
+  const completed = orders.filter(
+    (o) => o.currentProcess === "delivered"
+  ).length;
   const onHold = orders.filter((o) =>
     o.processSteps?.some((ps) => ps.status === "on_hold")
   ).length;
@@ -386,22 +418,19 @@ export default function AdvancedOrdersPage() {
       <div className="mb-8">
         <div className="flex items-center justify-between mb-4">
           <div>
-            <h1 className="text-3xl font-bold text-gray-900 mb-2">All Orders</h1>
-            <p className="text-base text-gray-700">
-              Advanced filtering and sorting untuk monitoring order produksi
-            </p>
+            <h1 className="text-3xl font-bold text-gray-900 mb-2">
+              All Orders
+            </h1>
           </div>
           <div className="flex items-center gap-3">
             <button
               onClick={exportToCSV}
               className="bg-green-600 text-white px-4 py-2.5 rounded-lg hover:bg-green-700 transition-all font-semibold shadow-sm hover:shadow-md flex items-center gap-2"
             >
-              <Download className="w-4 h-4" />
               Export CSV
             </button>
             <Link href="/orders/new">
               <button className="bg-blue-600 text-white px-6 py-3 rounded-lg hover:bg-blue-700 transition-all font-semibold shadow-sm hover:shadow-md flex items-center gap-2">
-                <Plus className="w-5 h-5" />
                 New Order
               </button>
             </Link>
@@ -415,8 +444,12 @@ export default function AdvancedOrdersPage() {
               <div className="flex items-center gap-3">
                 <Package className="w-8 h-8 text-blue-600" />
                 <div>
-                  <p className="text-xs font-semibold text-gray-600 uppercase">Total</p>
-                  <p className="text-2xl font-bold text-gray-900">{totalOrders}</p>
+                  <p className="text-xs font-semibold text-gray-600 uppercase">
+                    Total
+                  </p>
+                  <p className="text-2xl font-bold text-gray-900">
+                    {totalOrders}
+                  </p>
                 </div>
               </div>
             </CardContent>
@@ -426,8 +459,12 @@ export default function AdvancedOrdersPage() {
               <div className="flex items-center gap-3">
                 <Factory className="w-8 h-8 text-orange-600" />
                 <div>
-                  <p className="text-xs font-semibold text-gray-600 uppercase">In Progress</p>
-                  <p className="text-2xl font-bold text-orange-600">{inProgress}</p>
+                  <p className="text-xs font-semibold text-gray-600 uppercase">
+                    In Progress
+                  </p>
+                  <p className="text-2xl font-bold text-orange-600">
+                    {inProgress}
+                  </p>
                 </div>
               </div>
             </CardContent>
@@ -437,8 +474,12 @@ export default function AdvancedOrdersPage() {
               <div className="flex items-center gap-3">
                 <CheckCircle2 className="w-8 h-8 text-green-600" />
                 <div>
-                  <p className="text-xs font-semibold text-gray-600 uppercase">Completed</p>
-                  <p className="text-2xl font-bold text-green-600">{completed}</p>
+                  <p className="text-xs font-semibold text-gray-600 uppercase">
+                    Completed
+                  </p>
+                  <p className="text-2xl font-bold text-green-600">
+                    {completed}
+                  </p>
                 </div>
               </div>
             </CardContent>
@@ -448,7 +489,9 @@ export default function AdvancedOrdersPage() {
               <div className="flex items-center gap-3">
                 <PauseCircle className="w-8 h-8 text-red-600" />
                 <div>
-                  <p className="text-xs font-semibold text-gray-600 uppercase">On Hold</p>
+                  <p className="text-xs font-semibold text-gray-600 uppercase">
+                    On Hold
+                  </p>
                   <p className="text-2xl font-bold text-red-600">{onHold}</p>
                 </div>
               </div>
@@ -465,7 +508,6 @@ export default function AdvancedOrdersPage() {
             {/* Search */}
             <div>
               <label className="text-sm font-bold text-gray-900 mb-2 flex items-center gap-2">
-                <Search className="w-4 h-4 text-gray-600" />
                 Search
               </label>
               <input
@@ -482,7 +524,6 @@ export default function AdvancedOrdersPage() {
             {/* Process Filter */}
             <div>
               <label className="text-sm font-bold text-gray-900 mb-2 flex items-center gap-2">
-                <Filter className="w-4 h-4 text-gray-600" />
                 Process
               </label>
               <select
@@ -507,7 +548,6 @@ export default function AdvancedOrdersPage() {
             {/* Date Range Type */}
             <div>
               <label className="text-sm font-bold text-gray-900 mb-2 flex items-center gap-2">
-                <Calendar className="w-4 h-4 text-gray-600" />
                 Date Range
               </label>
               <select
@@ -534,8 +574,7 @@ export default function AdvancedOrdersPage() {
 
             {/* Sort By */}
             <div>
-              <label className="block text-sm font-bold text-gray-900 mb-2 flex items-center gap-2">
-                <ArrowUpDown className="w-4 h-4 text-gray-600" />
+              <label className="text-sm font-bold text-gray-900 mb-2 flex items-center gap-2">
                 Sort By
               </label>
               <div className="flex gap-2">
@@ -559,7 +598,9 @@ export default function AdvancedOrdersPage() {
                     }))
                   }
                   className="px-3 py-2 border-2 border-gray-300 rounded-lg hover:bg-gray-50 transition-colors"
-                  title={sortConfig.direction === "asc" ? "Ascending" : "Descending"}
+                  title={
+                    sortConfig.direction === "asc" ? "Ascending" : "Descending"
+                  }
                 >
                   <ChevronDown
                     className={`w-5 h-5 transition-transform ${
@@ -621,7 +662,6 @@ export default function AdvancedOrdersPage() {
               onClick={() => setShowAdvancedFilters(!showAdvancedFilters)}
               className="flex items-center gap-2 text-blue-600 hover:text-blue-800 font-semibold text-sm"
             >
-              <SlidersHorizontal className="w-4 h-4" />
               {showAdvancedFilters ? "Hide" : "Show"} Advanced Filters
               {activeFilterCount > 0 && (
                 <Badge variant="info" size="sm">
@@ -635,7 +675,6 @@ export default function AdvancedOrdersPage() {
                 onClick={clearAllFilters}
                 className="text-red-600 hover:text-red-800 font-semibold text-sm flex items-center gap-1"
               >
-                <X className="w-4 h-4" />
                 Clear All Filters
               </button>
             )}
@@ -643,9 +682,8 @@ export default function AdvancedOrdersPage() {
 
           {/* Advanced Filters Section */}
           {showAdvancedFilters && (
-            <div className="mt-4 p-4 bg-gradient-to-r from-purple-50 to-blue-50 border-2 border-purple-200 rounded-lg space-y-4">
+            <div className="mt-4 p-4 bg-linear-to-r from-purple-50 to-blue-50 border-2 border-purple-200 rounded-lg space-y-4">
               <h3 className="font-bold text-purple-900 mb-3 flex items-center gap-2">
-                <SlidersHorizontal className="w-5 h-5" />
                 Advanced Filters
               </h3>
 
@@ -789,7 +827,7 @@ export default function AdvancedOrdersPage() {
                 <span className="text-sm font-semibold text-gray-700">
                   Active filters:
                 </span>
-                
+
                 {filters.searchTerm && (
                   <Badge variant="info" className="flex items-center gap-1.5">
                     Search: {filters.searchTerm}
@@ -804,7 +842,8 @@ export default function AdvancedOrdersPage() {
 
                 {filters.processFilter !== "all" && (
                   <Badge variant="info" className="flex items-center gap-1.5">
-                    Process: {PROCESS_LABELS[filters.processFilter as ProcessName]}
+                    Process:{" "}
+                    {PROCESS_LABELS[filters.processFilter as ProcessName]}
                     <button
                       onClick={() =>
                         setFilters({ ...filters, processFilter: "all" })
@@ -831,7 +870,10 @@ export default function AdvancedOrdersPage() {
                 )}
 
                 {filters.dateRange.type !== "all" && (
-                  <Badge variant="success" className="flex items-center gap-1.5">
+                  <Badge
+                    variant="success"
+                    className="flex items-center gap-1.5"
+                  >
                     Date: {filters.dateRange.type}
                     <button
                       onClick={() =>
@@ -848,7 +890,10 @@ export default function AdvancedOrdersPage() {
                 )}
 
                 {filters.deadlineStatus !== "all" && (
-                  <Badge variant="warning" className="flex items-center gap-1.5">
+                  <Badge
+                    variant="warning"
+                    className="flex items-center gap-1.5"
+                  >
                     Deadline: {filters.deadlineStatus}
                     <button
                       onClick={() =>
@@ -870,14 +915,16 @@ export default function AdvancedOrdersPage() {
       <div className="mb-6 flex items-center justify-between">
         <div className="flex items-center gap-4">
           <p className="text-sm font-semibold text-gray-700">
-            Showing <span className="text-blue-600">{filteredOrders.length}</span> of{" "}
+            Showing{" "}
+            <span className="text-blue-600">{filteredOrders.length}</span> of{" "}
             <span className="text-gray-900">{totalOrders}</span> orders
           </p>
-          
+
           {sortConfig.field && (
             <p className="text-xs text-gray-600">
-              Sorted by: <span className="font-semibold">{sortConfig.field}</span>{" "}
-              ({sortConfig.direction === "asc" ? "↑" : "↓"})
+              Sorted by:{" "}
+              <span className="font-semibold">{sortConfig.field}</span> (
+              {sortConfig.direction === "asc" ? "↑" : "↓"})
             </p>
           )}
         </div>
