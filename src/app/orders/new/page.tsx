@@ -1,4 +1,4 @@
-// app/orders/new/page.tsx (Fixed API Call)
+// src/app/orders/new/page.tsx - UPDATED with Process Template Selection
 
 "use client";
 
@@ -6,6 +6,7 @@ import React, { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { Buyer, Style, SizeType } from "@/lib/types-new";
 import { SIZE_OPTIONS, BUYER_TYPE_LABELS } from "@/lib/constants-new";
+import { getTemplateOptions, getTemplateById } from "@/lib/process-templates";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/Card";
 import { Button } from "@/components/ui/Button";
 import { Badge } from "@/components/ui/Badge";
@@ -22,10 +23,11 @@ export default function NewOrderPage() {
     buyerId: "",
     styleId: "",
     orderDate: new Date().toISOString().split("T")[0],
-    productionDeadline: "", // GANTI dari targetDate
-    deliveryDeadline: "", // TAMBAHKAN ini
+    productionDeadline: "",
+    deliveryDeadline: "",
     createdBy: "Admin",
     notes: "",
+    processTemplateId: "full_process", // NEW: Default template
   });
 
   const [sizeBreakdown, setSizeBreakdown] = useState<{
@@ -33,6 +35,10 @@ export default function NewOrderPage() {
   }>({});
 
   const [errors, setErrors] = useState<{ [key: string]: string }>({});
+
+  // Template options
+  const templateOptions = getTemplateOptions();
+  const selectedTemplate = getTemplateById(formData.processTemplateId);
 
   useEffect(() => {
     loadData();
@@ -76,21 +82,12 @@ export default function NewOrderPage() {
   const validate = (): boolean => {
     const newErrors: { [key: string]: string } = {};
 
-    if (!formData.buyerId) {
-      newErrors.buyerId = "Please select a buyer";
-    }
-
-    if (!formData.styleId) {
-      newErrors.styleId = "Please select a style";
-    }
-
-    if (!formData.productionDeadline) {
+    if (!formData.buyerId) newErrors.buyerId = "Please select a buyer";
+    if (!formData.styleId) newErrors.styleId = "Please select a style";
+    if (!formData.productionDeadline)
       newErrors.productionDeadline = "Please set production deadline";
-    }
-
-    if (!formData.deliveryDeadline) {
+    if (!formData.deliveryDeadline)
       newErrors.deliveryDeadline = "Please set delivery deadline";
-    }
 
     if (new Date(formData.productionDeadline) <= new Date(formData.orderDate)) {
       newErrors.productionDeadline =
@@ -113,6 +110,10 @@ export default function NewOrderPage() {
       newErrors.createdBy = "Please enter your name";
     }
 
+    if (!formData.processTemplateId) {
+      newErrors.processTemplateId = "Please select a process template";
+    }
+
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
@@ -120,20 +121,14 @@ export default function NewOrderPage() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    if (!validate()) {
-      return;
-    }
-
-    if (!selectedBuyer || !selectedStyle) {
-      return;
-    }
+    if (!validate()) return;
+    if (!selectedBuyer || !selectedStyle) return;
 
     setIsSubmitting(true);
 
     try {
       const totalQuantity = getTotalQuantity();
 
-      // Create size breakdown array
       const sizeBreakdownArray = SIZE_OPTIONS.filter(
         (size) => sizeBreakdown[size] && sizeBreakdown[size]! > 0
       ).map((size) => ({
@@ -141,32 +136,41 @@ export default function NewOrderPage() {
         quantity: sizeBreakdown[size]!,
       }));
 
-      // Create order data matching NEW API schema
+      // NEW: Include process template
       const orderData = {
         buyerId: formData.buyerId,
         styleId: formData.styleId,
         orderDate: formData.orderDate,
-        productionDeadline: formData.productionDeadline, // NEW field
-        deliveryDeadline: formData.deliveryDeadline, // NEW field
+        productionDeadline: formData.productionDeadline,
+        deliveryDeadline: formData.deliveryDeadline,
         totalQuantity,
         sizeBreakdown: sizeBreakdownArray,
         createdBy: formData.createdBy,
         notes: formData.notes,
+        processTemplateId: formData.processTemplateId, // NEW
       };
 
-      // Create order via API
-      const newOrder = await apiClient.createOrder(orderData);
+      const response = await fetch("/api/orders", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(orderData),
+      });
 
-      // Generate QR codes for the order
-      try {
-        await apiClient.generateOrderQR(newOrder.id);
-      } catch (qrError) {
-        console.error("Failed to generate QR codes:", qrError);
-        // Continue anyway, QR can be generated later
+      const result = await response.json();
+
+      if (result.success) {
+        // Generate QR codes
+        try {
+          await apiClient.generateOrderQR(result.data.id);
+        } catch (qrError) {
+          console.error("Failed to generate QR codes:", qrError);
+        }
+
+        router.push(`/orders/${result.data.id}`);
+      } else {
+        alert(result.error || "Failed to create order");
+        setIsSubmitting(false);
       }
-
-      // Redirect to order detail
-      router.push(`/orders/${newOrder.id}`);
     } catch (error) {
       console.error("Error creating order:", error);
       alert("Failed to create order. Please try again.");
@@ -281,17 +285,6 @@ export default function NewOrderPage() {
                       </p>
                     </div>
                   </div>
-                  {selectedBuyer.contactPerson && (
-                    <div className="mt-3 pt-3 border-t border-blue-200">
-                      <p className="text-blue-900 font-medium text-sm">
-                        Contact Person
-                      </p>
-                      <p className="text-blue-800 text-sm">
-                        {selectedBuyer.contactPerson}
-                        {selectedBuyer.phone && ` - ${selectedBuyer.phone}`}
-                      </p>
-                    </div>
-                  )}
                 </div>
               )}
             </div>
@@ -345,41 +338,106 @@ export default function NewOrderPage() {
                       </p>
                     </div>
                   </div>
-                  {selectedStyle.description && (
-                    <div className="mt-3 pt-3 border-t border-gray-200">
-                      <p className="text-gray-700 font-medium text-sm">
-                        Description
+                </div>
+              )}
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* NEW: Process Template Selection */}
+        <Card>
+          <CardHeader>
+            <CardTitle>3. Select Process Template</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Process Flow Template *
+                </label>
+                <select
+                  value={formData.processTemplateId}
+                  onChange={(e) =>
+                    setFormData({
+                      ...formData,
+                      processTemplateId: e.target.value,
+                    })
+                  }
+                  className={`w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent ${
+                    errors.processTemplateId
+                      ? "border-red-500"
+                      : "border-gray-300"
+                  }`}
+                  disabled={isSubmitting}
+                >
+                  <option value="">-- Select Template --</option>
+                  {templateOptions.map((template) => (
+                    <option key={template.value} value={template.value}>
+                      {template.label} ({template.steps} steps, ~
+                      {template.days} days)
+                    </option>
+                  ))}
+                </select>
+                {errors.processTemplateId && (
+                  <p className="text-sm text-red-600 mt-1">
+                    {errors.processTemplateId}
+                  </p>
+                )}
+              </div>
+
+              {selectedTemplate && (
+                <div className="bg-purple-50 border-2 border-purple-300 rounded-lg p-4">
+                  <h4 className="font-bold text-purple-900 mb-3 flex items-center gap-2">
+                    <svg
+                      className="w-5 h-5"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"
+                      />
+                    </svg>
+                    Template Preview
+                  </h4>
+
+                  <div className="grid grid-cols-2 gap-4 text-sm mb-4">
+                    <div>
+                      <p className="text-purple-700 font-semibold">
+                        Total Steps
                       </p>
-                      <p className="text-gray-600 text-sm">
-                        {selectedStyle.description}
+                      <p className="text-2xl font-bold text-purple-900">
+                        {selectedTemplate.processes.length}
                       </p>
                     </div>
-                  )}
-                  {(selectedStyle.estimatedCuttingTime ||
-                    selectedStyle.estimatedSewingTime) && (
-                    <div className="mt-3 pt-3 border-t border-gray-200 flex gap-6 text-sm">
-                      {selectedStyle.estimatedCuttingTime && (
-                        <div>
-                          <p className="text-gray-700 font-medium">
-                            Est. Cutting Time
-                          </p>
-                          <p className="text-gray-600">
-                            {selectedStyle.estimatedCuttingTime} min
-                          </p>
-                        </div>
-                      )}
-                      {selectedStyle.estimatedSewingTime && (
-                        <div>
-                          <p className="text-gray-700 font-medium">
-                            Est. Sewing Time
-                          </p>
-                          <p className="text-gray-600">
-                            {selectedStyle.estimatedSewingTime} min/pc
-                          </p>
-                        </div>
-                      )}
+                    <div>
+                      <p className="text-purple-700 font-semibold">
+                        Estimated Days
+                      </p>
+                      <p className="text-2xl font-bold text-purple-900">
+                        ~{selectedTemplate.estimatedDays}
+                      </p>
                     </div>
-                  )}
+                  </div>
+
+                  <div className="bg-white rounded p-3 max-h-48 overflow-y-auto">
+                    <p className="text-xs font-bold text-purple-900 mb-2 uppercase">
+                      Process Flow:
+                    </p>
+                    <ol className="text-xs space-y-1">
+                      {selectedTemplate.processes.map((process, idx) => (
+                        <li key={process} className="text-gray-800">
+                          <span className="font-bold text-purple-700">
+                            {idx + 1}.
+                          </span>{" "}
+                          {process.replace(/_/g, " ").toUpperCase()}
+                        </li>
+                      ))}
+                    </ol>
+                  </div>
                 </div>
               )}
             </div>
@@ -389,7 +447,7 @@ export default function NewOrderPage() {
         {/* Size Breakdown */}
         <Card>
           <CardHeader>
-            <CardTitle>3. Size Breakdown</CardTitle>
+            <CardTitle>4. Size Breakdown</CardTitle>
           </CardHeader>
           <CardContent>
             <div className="space-y-4">
@@ -430,15 +488,13 @@ export default function NewOrderPage() {
           </CardContent>
         </Card>
 
-        {/* Dates */}
-        {/* Schedule Section */}
+        {/* Schedule */}
         <Card>
           <CardHeader>
-            <CardTitle>4. Schedule</CardTitle>
+            <CardTitle>5. Schedule</CardTitle>
           </CardHeader>
           <CardContent>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-              {/* Order Date */}
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
                   Order Date *
@@ -454,7 +510,6 @@ export default function NewOrderPage() {
                 />
               </div>
 
-              {/* Production Deadline */}
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
                   Production Deadline *
@@ -482,7 +537,6 @@ export default function NewOrderPage() {
                 )}
               </div>
 
-              {/* Delivery Deadline */}
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
                   Delivery Deadline *
@@ -510,19 +564,13 @@ export default function NewOrderPage() {
                 )}
               </div>
             </div>
-
-            {/* Helpful hint */}
-            <p className="text-xs text-gray-500 mt-2">
-              💡 Delivery deadline should be after production completion to
-              allow for final checks and packaging.
-            </p>
           </CardContent>
         </Card>
 
         {/* Additional Info */}
         <Card>
           <CardHeader>
-            <CardTitle>5. Additional Information</CardTitle>
+            <CardTitle>6. Additional Information</CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
             <div>

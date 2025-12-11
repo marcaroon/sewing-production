@@ -68,7 +68,11 @@ model Order {
   currentPhase          String   @default("production") // "production" or "delivery"
   currentProcess        String   @default("draft")      // process name
   currentState          String   @default("at_ppic")    // "at_ppic", "waiting", "assigned", "in_progress", "completed"
-  
+
+  processFlow String?
+  processTemplate String?
+  totalProcessSteps Int @default(0)
+
   assignedLine          String?
   assignedTo            String?   // operator/PIC yang sedang handle
   materialsIssued       Boolean  @default(false)

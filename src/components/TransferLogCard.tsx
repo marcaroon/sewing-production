@@ -130,7 +130,7 @@ export const TransferLogCard: React.FC<TransferLogCardProps> = ({
 
         <CardContent className="space-y-4">
           {/* Transfer Route */}
-          <div className="flex items-center justify-between bg-gradient-to-r from-blue-50 to-purple-50 border-2 border-blue-200 rounded-lg p-4">
+          <div className="flex items-center justify-between bg-linear-to-r from-blue-50 to-purple-50 border-2 border-blue-200 rounded-lg p-4">
             <div className="flex-1">
               <p className="text-xs font-bold text-blue-700 uppercase mb-1">
                 From
@@ -288,7 +288,7 @@ export const TransferLogCard: React.FC<TransferLogCardProps> = ({
         size="lg"
       >
         <div className="space-y-4">
-          <div className="bg-gradient-to-r from-blue-50 to-purple-50 border-2 border-blue-300 rounded-lg p-4">
+          <div className="bg-linear-to-r from-blue-50 to-purple-50 border-2 border-blue-300 rounded-lg p-4">
             <h4 className="font-bold text-gray-900 mb-3 flex items-center gap-2">
               <FileText className="w-5 h-5 text-blue-600" />
               Transfer Information

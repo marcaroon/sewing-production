@@ -10,6 +10,7 @@ import { Button } from "@/components/ui/Button";
 import { QRCodeDisplay } from "@/components/QRCodeDisplay";
 import { ProcessStepCard } from "@/components/ProcessStepCards";
 import { PPICAssignmentModal } from "@/components/PPICAssignmentModal";
+import { DualProgressBarsFull } from "@/components/DualProgressBars";
 import apiClient from "@/lib/api-client";
 import { Order, ProcessStep } from "@/lib/types-new";
 import {
@@ -248,7 +249,7 @@ export default function OrderDetailPage() {
         </div>
 
         {/* Status Bar */}
-        <Card>
+        {/* <Card>
           <CardContent className="pt-6">
             <div className="flex items-center justify-between mb-3">
               <div className="flex items-center gap-2">
@@ -281,7 +282,8 @@ export default function OrderDetailPage() {
               </div>
             )}
           </CardContent>
-        </Card>
+        </Card> */}
+        <DualProgressBarsFull order={order} />
       </div>
 
       {/* Tabs */}
@@ -509,7 +511,7 @@ export default function OrderDetailPage() {
                   </p>
                 </div>
                 <div>
-                  <p className="text-sm text-gray-600">Current Phase</p>
+                  <p className="text-sm text-gray-600 mb-2">Current Phase</p>
                   <Badge variant="info">
                     {PHASE_LABELS[order.currentPhase]}
                   </Badge>
@@ -521,7 +523,7 @@ export default function OrderDetailPage() {
                   </p>
                 </div>
                 <div>
-                  <p className="text-sm text-gray-600">Current State</p>
+                  <p className="text-sm text-gray-600 mb-2">Current State</p>
                   <Badge variant="default">
                     {PROCESS_STATE_LABELS[order.currentState]}
                   </Badge>
@@ -576,7 +578,7 @@ export default function OrderDetailPage() {
                   </p>
                 </div>
                 <div>
-                  <p className="text-sm text-gray-600">Type</p>
+                  <p className="text-sm text-gray-600 mb-2">Type</p>
                   <Badge
                     variant={
                       order.buyer.type === "repeat" ? "success" : "warning"

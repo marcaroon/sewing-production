@@ -12,7 +12,14 @@ import {
   BUYER_TYPE_LABELS,
 } from "@/lib/constants-new";
 import { formatDate, formatNumber } from "@/lib/utils";
-import { Calendar, Package, CheckCircle2, Clock, AlertTriangle } from "lucide-react";
+import {
+  Calendar,
+  Package,
+  CheckCircle2,
+  Clock,
+  AlertTriangle,
+} from "lucide-react";
+import { DualProgressBarsCompact } from "@/components/DualProgressBars";
 
 interface OrderCardProps {
   order: Order;
@@ -45,9 +52,7 @@ export const OrderCardNew: React.FC<OrderCardProps> = ({ order }) => {
               <p className="text-sm font-medium text-gray-700 mt-1">
                 {order.buyer.name}
               </p>
-              <p className="text-xs text-gray-600 mt-0.5">
-                {order.style.name}
-              </p>
+              <p className="text-xs text-gray-600 mt-0.5">{order.style.name}</p>
             </div>
             <Badge
               variant={order.buyer.type === "repeat" ? "success" : "warning"}
@@ -75,7 +80,7 @@ export const OrderCardNew: React.FC<OrderCardProps> = ({ order }) => {
           </div>
 
           {/* Progress */}
-          <div className="mb-4">
+          {/* <div className="mb-4">
             <div className="flex justify-between items-center text-xs font-semibold text-gray-700 mb-2">
               <span>Completion Progress</span>
               <span className="text-blue-600">{completionRate}%</span>
@@ -86,7 +91,9 @@ export const OrderCardNew: React.FC<OrderCardProps> = ({ order }) => {
                 style={{ width: `${completionRate}%` }}
               />
             </div>
-          </div>
+          </div> */}
+
+          <DualProgressBarsCompact order={order} />
 
           {/* Info Grid */}
           <div className="grid grid-cols-2 gap-3 text-sm mb-3">
@@ -111,7 +118,9 @@ export const OrderCardNew: React.FC<OrderCardProps> = ({ order }) => {
             <div className="flex items-start gap-2">
               <Calendar className="w-4 h-4 text-gray-500 mt-0.5" />
               <div>
-                <span className="text-gray-600 text-xs block">Production Due</span>
+                <span className="text-gray-600 text-xs block">
+                  Production Due
+                </span>
                 <p
                   className={`font-bold ${
                     isDelayed ? "text-red-600" : "text-gray-900"
@@ -124,7 +133,9 @@ export const OrderCardNew: React.FC<OrderCardProps> = ({ order }) => {
             <div className="flex items-start gap-2">
               <Clock className="w-4 h-4 text-gray-500 mt-0.5" />
               <div>
-                <span className="text-gray-600 text-xs block">Delivery Due</span>
+                <span className="text-gray-600 text-xs block">
+                  Delivery Due
+                </span>
                 <p className="font-bold text-gray-900">
                   {formatDate(order.deliveryDeadline)}
                 </p>
@@ -148,10 +159,14 @@ export const OrderCardNew: React.FC<OrderCardProps> = ({ order }) => {
           {order.totalRejected > 0 && (
             <div className="mt-3 pt-3 border-t border-gray-200">
               <div className="flex items-center justify-between bg-red-50 border border-red-200 rounded-lg px-3 py-2">
-                <span className="text-xs font-semibold text-red-700">Rejected:</span>
+                <span className="text-xs font-semibold text-red-700">
+                  Rejected:
+                </span>
                 <span className="text-sm font-bold text-red-600">
                   {order.totalRejected} pcs (
-                  {((order.totalRejected / order.totalQuantity) * 100).toFixed(1)}
+                  {((order.totalRejected / order.totalQuantity) * 100).toFixed(
+                    1
+                  )}
                   %)
                 </span>
               </div>

@@ -110,6 +110,8 @@ export interface SizeBreakdown {
 // ==================== ORDER ====================
 
 export interface Order {
+  totalProcessSteps: number;
+  processTemplate: string;
   id: string;
   orderNumber: string;
   buyer: Buyer;

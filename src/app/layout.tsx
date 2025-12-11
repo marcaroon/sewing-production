@@ -22,7 +22,7 @@ export default function RootLayout({
     <html lang="id">
       <body className={inter.className}>
         {/* Header */}
-        <header className="bg-gradient-to-r from-blue-600 to-blue-700 border-b-4 border-blue-800 sticky top-0 z-40 shadow-lg">
+        <header className="bg-linear-to-r from-blue-600 to-blue-700 border-b-4 border-blue-800 sticky top-0 z-40 shadow-lg">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div className="flex items-center justify-between h-16">
               <Link
@@ -33,7 +33,10 @@ export default function RootLayout({
                   <Package className="w-6 h-6 text-blue-600" />
                 </div>
                 <div>
-                  <h1 className="text-xl font-bold text-white"> Garment Production</h1>
+                  <h1 className="text-xl font-bold text-white">
+                    {" "}
+                    Garment Production
+                  </h1>
                   <p className="text-xs text-blue-100 font-medium">
                     Management System
                   </p>
@@ -74,19 +77,16 @@ export default function RootLayout({
         </header>
 
         {/* Main Content */}
-        <main className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100">
+        <main className="min-h-screen bg-linear-to-br from-gray-50 to-gray-100">
           {children}
         </main>
 
         {/* Footer */}
         <footer className="bg-white border-t-2 border-gray-300 mt-auto shadow-inner">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
-            <div className="flex items-center justify-between">
+            <div className="flex items-center justify-center">
               <p className="text-sm font-semibold text-gray-700">
-                © 2024 Garment Production System
-              </p>
-              <p className="text-xs font-medium text-gray-600">
-                Prototype for Client Demo
+                © 2026 Total Quality Indonesia
               </p>
             </div>
           </div>
