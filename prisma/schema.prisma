@@ -97,6 +97,8 @@ model Order {
   leftoverMaterials     LeftoverMaterial[]
   bundles               Bundle[]
   qrCode                OrderQRCode?
+  orderMaterials        OrderMaterial[]
+  orderAccessories      OrderAccessory[]
   
   createdAt             DateTime @default(now())
   updatedAt             DateTime @updatedAt
@@ -110,6 +112,193 @@ model Order {
   @@index([productionDeadline])
   @@index([deliveryDeadline])
   @@map("orders")
+}
+
+// ==================== INVENTORY MODELS ====================
+
+// Material Master (Bahan Baku)
+model Material {
+  id                String   @id @default(cuid())
+  materialCode      String   @unique
+  name              String
+  category          String   // "fabric", "thread", "interlining", etc
+  unit              String   // "meter", "yard", "kg", "roll"
+  color             String?
+  supplier          String?
+  minimumStock      Float    @default(0)
+  reorderPoint      Float    @default(0)
+  unitPrice         Float?
+  
+  stockTransactions MaterialStockTransaction[]
+  orderMaterials    OrderMaterial[]
+  materialUsages    MaterialUsage[]
+  
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+
+  @@index([category])
+  @@map("materials")
+}
+
+// Accessory Master (Aksesoris)
+model Accessory {
+  id                String   @id @default(cuid())
+  accessoryCode     String   @unique
+  name              String
+  category          String   // "button", "zipper", "label", "thread", etc
+  unit              String   // "pcs", "dozen", "gross", "meter"
+  color             String?
+  size              String?
+  supplier          String?
+  minimumStock      Int      @default(0)
+  reorderPoint      Int      @default(0)
+  unitPrice         Float?
+  
+  stockTransactions AccessoryStockTransaction[]
+  orderAccessories  OrderAccessory[]
+  accessoryUsages   AccessoryUsage[]
+  
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+
+  @@index([category])
+  @@map("accessories")
+}
+
+// Material Stock Transactions (In/Out)
+model MaterialStockTransaction {
+  id              String   @id @default(cuid())
+  materialId      String
+  transactionType String   // "in" (purchase), "out" (issue), "adjustment", "return"
+  quantity        Float
+  unit            String
+  referenceType   String?  // "purchase", "order", "adjustment"
+  referenceId     String?  // PO number, order ID, etc
+  remarks         String?
+  performedBy     String
+  transactionDate DateTime @default(now())
+  
+  material        Material @relation(fields: [materialId], references: [id])
+  
+  createdAt       DateTime @default(now())
+
+  @@index([materialId])
+  @@index([transactionDate])
+  @@map("material_stock_transactions")
+}
+
+// Accessory Stock Transactions
+model AccessoryStockTransaction {
+  id              String   @id @default(cuid())
+  accessoryId     String
+  transactionType String   // "in", "out", "adjustment", "return"
+  quantity        Int
+  unit            String
+  referenceType   String?
+  referenceId     String?
+  remarks         String?
+  performedBy     String
+  transactionDate DateTime @default(now())
+  
+  accessory       Accessory @relation(fields: [accessoryId], references: [id])
+  
+  createdAt       DateTime @default(now())
+
+  @@index([accessoryId])
+  @@index([transactionDate])
+  @@map("accessory_stock_transactions")
+}
+
+// Order Materials (Required materials per order)
+model OrderMaterial {
+  id                String   @id @default(cuid())
+  orderId           String
+  materialId        String
+  quantityRequired  Float    // Total required
+  quantityIssued    Float    @default(0) // Actually issued from warehouse
+  quantityUsed      Float    @default(0) // Used in production
+  quantityReturned  Float    @default(0) // Returned to warehouse
+  quantityWasted    Float    @default(0) // Wasted/damaged
+  unit              String
+  notes             String?
+  
+  order             Order    @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  material          Material @relation(fields: [materialId], references: [id])
+  
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+
+  @@index([orderId])
+  @@index([materialId])
+  @@map("order_materials")
+}
+
+// Order Accessories (Required accessories per order)
+model OrderAccessory {
+  id                String   @id @default(cuid())
+  orderId           String
+  accessoryId       String
+  quantityRequired  Int      // Total required (e.g., buttons = totalQty * buttonsPerPiece)
+  quantityIssued    Int      @default(0)
+  quantityUsed      Int      @default(0)
+  quantityReturned  Int      @default(0)
+  quantityWasted    Int      @default(0)
+  unit              String
+  notes             String?
+  
+  order             Order    @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  accessory         Accessory @relation(fields: [accessoryId], references: [id])
+  
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+
+  @@index([orderId])
+  @@index([accessoryId])
+  @@map("order_accessories")
+}
+
+// Material Usage per Process Step
+model MaterialUsage {
+  id              String   @id @default(cuid())
+  processStepId   String
+  materialId      String
+  quantityUsed    Float
+  quantityWasted  Float    @default(0)
+  unit            String
+  usedBy          String
+  usageDate       DateTime @default(now())
+  notes           String?
+  
+  processStep     ProcessStep @relation(fields: [processStepId], references: [id], onDelete: Cascade)
+  material        Material    @relation(fields: [materialId], references: [id])
+  
+  createdAt       DateTime @default(now())
+
+  @@index([processStepId])
+  @@index([materialId])
+  @@map("material_usages")
+}
+
+// Accessory Usage per Process Step
+model AccessoryUsage {
+  id              String   @id @default(cuid())
+  processStepId   String
+  accessoryId     String
+  quantityUsed    Int
+  quantityWasted  Int      @default(0)
+  unit            String
+  usedBy          String
+  usageDate       DateTime @default(now())
+  notes           String?
+  
+  processStep     ProcessStep @relation(fields: [processStepId], references: [id], onDelete: Cascade)
+  accessory       Accessory   @relation(fields: [accessoryId], references: [id])
+  
+  createdAt       DateTime @default(now())
+
+  @@index([processStepId])
+  @@index([accessoryId])
+  @@map("accessory_usages")
 }
 
 model TransferLog {
@@ -222,6 +411,8 @@ model ProcessStep {
   transitions           ProcessTransition[]
   rejects               RejectLog[]
   transferLogs          TransferLog[]
+  materialUsages        MaterialUsage[]
+  accessoryUsages       AccessoryUsage[]
   
   createdAt             DateTime @default(now())
   updatedAt             DateTime @updatedAt

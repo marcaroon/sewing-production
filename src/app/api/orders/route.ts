@@ -1,5 +1,4 @@
-// src/app/api/orders/route.ts - POST METHOD UPDATED
-// Create order dengan Process Template System
+// src/app/api/orders/route.ts - COMPLETE VERSION with Materials & Accessories
 
 import { NextRequest, NextResponse } from "next/server";
 import prisma from "@/lib/prisma";
@@ -20,8 +19,10 @@ export async function POST(request: NextRequest) {
       sizeBreakdown,
       createdBy,
       notes,
-      processTemplateId, // NEW: Template ID
-      customProcessFlow, // NEW: Custom flow (opsional)
+      processTemplateId,
+      customProcessFlow,
+      selectedMaterials,    // NEW: Array of { materialId, quantityRequired }
+      selectedAccessories,  // NEW: Array of { accessoryId, quantityRequired }
     } = body;
 
     // Validate deadlines
@@ -41,12 +42,10 @@ export async function POST(request: NextRequest) {
     let totalProcessSteps: number;
 
     if (customProcessFlow && customProcessFlow.length > 0) {
-      // Custom flow provided
       processFlow = customProcessFlow;
       templateId = "custom";
       totalProcessSteps = processFlow.length;
     } else if (processTemplateId) {
-      // Use template
       const template = getTemplateById(processTemplateId);
       if (!template) {
         return NextResponse.json(
@@ -58,11 +57,60 @@ export async function POST(request: NextRequest) {
       templateId = template.id;
       totalProcessSteps = processFlow.length;
     } else {
-      // Default: use full process
       const defaultTemplate = PROCESS_TEMPLATES.full_process;
       processFlow = defaultTemplate.processes;
       templateId = defaultTemplate.id;
       totalProcessSteps = processFlow.length;
+    }
+
+    // ==================== VALIDATE MATERIALS (if provided) ====================
+    if (selectedMaterials && selectedMaterials.length > 0) {
+      // Check if all materials exist
+      const materialIds = selectedMaterials.map((m: any) => m.materialId);
+      const materialsExist = await prisma.material.findMany({
+        where: { id: { in: materialIds } },
+      });
+
+      if (materialsExist.length !== materialIds.length) {
+        return NextResponse.json(
+          { success: false, error: "Some materials do not exist" },
+          { status: 400 }
+        );
+      }
+
+      // Validate quantities
+      for (const sm of selectedMaterials) {
+        if (!sm.quantityRequired || sm.quantityRequired <= 0) {
+          return NextResponse.json(
+            { success: false, error: "Material quantities must be greater than 0" },
+            { status: 400 }
+          );
+        }
+      }
+    }
+
+    // ==================== VALIDATE ACCESSORIES (if provided) ====================
+    if (selectedAccessories && selectedAccessories.length > 0) {
+      const accessoryIds = selectedAccessories.map((a: any) => a.accessoryId);
+      const accessoriesExist = await prisma.accessory.findMany({
+        where: { id: { in: accessoryIds } },
+      });
+
+      if (accessoriesExist.length !== accessoryIds.length) {
+        return NextResponse.json(
+          { success: false, error: "Some accessories do not exist" },
+          { status: 400 }
+        );
+      }
+
+      for (const sa of selectedAccessories) {
+        if (!sa.quantityRequired || sa.quantityRequired <= 0) {
+          return NextResponse.json(
+            { success: false, error: "Accessory quantities must be greater than 0" },
+            { status: 400 }
+          );
+        }
+      }
     }
 
     // ==================== CREATE ORDER WITH PROCESS STEPS ====================
@@ -84,20 +132,20 @@ export async function POST(request: NextRequest) {
           productionDeadline: new Date(productionDeadline),
           deliveryDeadline: new Date(deliveryDeadline),
           totalQuantity,
-          
-          // NEW: Process Template Fields
+
+          // Process Template Fields
           processTemplate: templateId,
           processFlow: JSON.stringify(processFlow),
           totalProcessSteps,
-          
+
           // Current state
           currentPhase: "production",
-          currentProcess: processFlow[0], // First process
+          currentProcess: processFlow[0],
           currentState: "at_ppic",
-          
+
           createdBy,
           notes: notes || null,
-          
+
           sizeBreakdowns: {
             create: sizeBreakdown.map((sb: any) => ({
               size: sb.size,
@@ -115,15 +163,14 @@ export async function POST(request: NextRequest) {
         },
       });
 
-      // ==================== CREATE ALL PROCESS STEPS ====================
+      // ==================== CREATE PROCESS STEPS ====================
       const now = new Date();
       const processSteps = [];
 
       for (let i = 0; i < processFlow.length; i++) {
         const processName = processFlow[i];
         const isFirstProcess = i === 0;
-        
-        // Determine phase
+
         const isDeliveryProcess = [
           "packing",
           "final_inspection",
@@ -132,7 +179,7 @@ export async function POST(request: NextRequest) {
           "delivered",
         ].includes(processName);
         const processPhase = isDeliveryProcess ? "delivery" : "production";
-        
+
         const department = PROCESS_DEPARTMENT_MAP[processName] || "PPIC";
 
         const processStep = await tx.processStep.create({
@@ -145,8 +192,8 @@ export async function POST(request: NextRequest) {
             status: "pending",
             quantityReceived: isFirstProcess ? totalQuantity : 0,
             arrivedAtPpicTime: isFirstProcess ? now : null,
-            notes: isFirstProcess 
-              ? `Order created with template: ${templateId}` 
+            notes: isFirstProcess
+              ? `Order created with template: ${templateId}`
               : null,
           },
         });
@@ -171,7 +218,88 @@ export async function POST(request: NextRequest) {
         }
       }
 
-      return { order, processSteps };
+      // ==================== CREATE ORDER MATERIALS ====================
+      const createdMaterials = [];
+      if (selectedMaterials && selectedMaterials.length > 0) {
+        // Get material details for unit info
+        const materialDetails = await tx.material.findMany({
+          where: { id: { in: selectedMaterials.map((m: any) => m.materialId) } },
+        });
+
+        for (const sm of selectedMaterials) {
+          const material = materialDetails.find((m) => m.id === sm.materialId);
+          if (!material) continue;
+
+          const orderMaterial = await tx.orderMaterial.create({
+            data: {
+              orderId: order.id,
+              materialId: sm.materialId,
+              quantityRequired: sm.quantityRequired,
+              quantityIssued: 0,
+              quantityUsed: 0,
+              quantityReturned: 0,
+              quantityWasted: 0,
+              unit: material.unit,
+              notes: sm.notes || null,
+            },
+          });
+
+          createdMaterials.push({
+            ...orderMaterial,
+            material: {
+              id: material.id,
+              name: material.name,
+              materialCode: material.materialCode,
+              unit: material.unit,
+            },
+          });
+        }
+      }
+
+      // ==================== CREATE ORDER ACCESSORIES ====================
+      const createdAccessories = [];
+      if (selectedAccessories && selectedAccessories.length > 0) {
+        // Get accessory details for unit info
+        const accessoryDetails = await tx.accessory.findMany({
+          where: { id: { in: selectedAccessories.map((a: any) => a.accessoryId) } },
+        });
+
+        for (const sa of selectedAccessories) {
+          const accessory = accessoryDetails.find((a) => a.id === sa.accessoryId);
+          if (!accessory) continue;
+
+          const orderAccessory = await tx.orderAccessory.create({
+            data: {
+              orderId: order.id,
+              accessoryId: sa.accessoryId,
+              quantityRequired: sa.quantityRequired,
+              quantityIssued: 0,
+              quantityUsed: 0,
+              quantityReturned: 0,
+              quantityWasted: 0,
+              unit: accessory.unit,
+              notes: sa.notes || null,
+            },
+          });
+
+          createdAccessories.push({
+            ...orderAccessory,
+            accessory: {
+              id: accessory.id,
+              name: accessory.name,
+              accessoryCode: accessory.accessoryCode,
+              unit: accessory.unit,
+            },
+          });
+        }
+      }
+
+      return { 
+        order, 
+        processSteps, 
+        materials: createdMaterials, 
+        accessories: createdAccessories 
+      };
     });
 
     // Transform response
@@ -213,12 +341,14 @@ export async function POST(request: NextRequest) {
       createdBy: result.order.createdBy,
       notes: result.order.notes || undefined,
       processSteps: result.processSteps,
+      materials: result.materials,
+      accessories: result.accessories,
     };
 
     return NextResponse.json({
       success: true,
       data: transformedOrder,
-      message: `Order created with ${processFlow.length} process steps`,
+      message: `Order created with ${processFlow.length} process steps, ${result.materials.length} materials, ${result.accessories.length} accessories`,
     });
   } catch (error) {
     console.error("Error creating order:", error);

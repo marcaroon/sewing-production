@@ -11,6 +11,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/Card";
 import { Button } from "@/components/ui/Button";
 import { Badge } from "@/components/ui/Badge";
 import apiClient from "@/lib/api-client";
+import { MaterialAccessorySelector } from "@/components/MaterialAccessorySelector";
 
 export default function NewOrderPage() {
   const router = useRouter();
@@ -35,6 +36,20 @@ export default function NewOrderPage() {
   }>({});
 
   const [errors, setErrors] = useState<{ [key: string]: string }>({});
+
+  const [selectedMaterials, setSelectedMaterials] = useState<
+    Array<{
+      materialId: string;
+      quantityRequired: number;
+    }>
+  >([]);
+
+  const [selectedAccessories, setSelectedAccessories] = useState<
+    Array<{
+      accessoryId: string;
+      quantityRequired: number;
+    }>
+  >([]);
 
   // Template options
   const templateOptions = getTemplateOptions();
@@ -373,8 +388,8 @@ export default function NewOrderPage() {
                   <option value="">-- Select Template --</option>
                   {templateOptions.map((template) => (
                     <option key={template.value} value={template.value}>
-                      {template.label} ({template.steps} steps, ~
-                      {template.days} days)
+                      {template.label} ({template.steps} steps, ~{template.days}{" "}
+                      days)
                     </option>
                   ))}
                 </select>
@@ -485,6 +500,22 @@ export default function NewOrderPage() {
                 </div>
               )}
             </div>
+          </CardContent>
+        </Card>
+
+        {/* Material Selection */}
+        <Card>
+          <CardHeader>
+            <CardTitle>6. Materials & Accessories</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <MaterialAccessorySelector
+              totalQuantity={getTotalQuantity()}
+              selectedMaterials={selectedMaterials}
+              selectedAccessories={selectedAccessories}
+              onMaterialsChange={setSelectedMaterials}
+              onAccessoriesChange={setSelectedAccessories}
+            />
           </CardContent>
         </Card>
 
