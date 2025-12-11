@@ -1,3 +1,5 @@
+// src/app/inventory/materials/page.tsx - COMPLETE CRUD
+
 "use client";
 
 import React, { useEffect, useState } from "react";
@@ -5,8 +7,11 @@ import { Material } from "@/lib/types-inventory";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/Card";
 import { Button } from "@/components/ui/Button";
 import { Badge } from "@/components/ui/Badge";
+import { Modal, ModalFooter } from "@/components/ui/Modal";
+import { MaterialForm } from "@/components/MaterialForm";
+import { StockTransactionModal } from "@/components/StockTransactionModal";
 import { formatNumber } from "@/lib/utils";
-import { Package, Plus, AlertTriangle } from "lucide-react";
+import { Package, Plus, AlertTriangle, Edit, Trash2, ArrowDownToLine, ArrowUpFromLine, RefreshCw } from "lucide-react";
 
 export default function MaterialsPage() {
   const [materials, setMaterials] = useState<
@@ -14,6 +19,19 @@ export default function MaterialsPage() {
   >([]);
   const [isLoading, setIsLoading] = useState(true);
   const [showLowStockOnly, setShowLowStockOnly] = useState(false);
+  
+  // Form modals
+  const [isFormOpen, setIsFormOpen] = useState(false);
+  const [selectedMaterial, setSelectedMaterial] = useState<Material | null>(null);
+  
+  // Transaction modal
+  const [isTransactionOpen, setIsTransactionOpen] = useState(false);
+  const [transactionMaterial, setTransactionMaterial] = useState<any>(null);
+  
+  // Delete modal
+  const [isDeleteOpen, setIsDeleteOpen] = useState(false);
+  const [deleteMaterial, setDeleteMaterial] = useState<Material | null>(null);
+  const [isDeleting, setIsDeleting] = useState(false);
 
   useEffect(() => {
     loadMaterials();
@@ -34,6 +52,46 @@ export default function MaterialsPage() {
       console.error("Error loading materials:", error);
     } finally {
       setIsLoading(false);
+    }
+  };
+
+  const handleEdit = (material: Material) => {
+    setSelectedMaterial(material);
+    setIsFormOpen(true);
+  };
+
+  const handleCreate = () => {
+    setSelectedMaterial(null);
+    setIsFormOpen(true);
+  };
+
+  const handleStockIn = (material: any) => {
+    setTransactionMaterial(material);
+    setIsTransactionOpen(true);
+  };
+
+  const handleDelete = async () => {
+    if (!deleteMaterial) return;
+    
+    setIsDeleting(true);
+    try {
+      const response = await fetch(`/api/materials/${deleteMaterial.id}`, {
+        method: "DELETE",
+      });
+
+      const result = await response.json();
+
+      if (result.success) {
+        setIsDeleteOpen(false);
+        setDeleteMaterial(null);
+        loadMaterials();
+      } else {
+        alert(result.error || "Failed to delete material");
+      }
+    } catch (error) {
+      alert("Failed to delete material");
+    } finally {
+      setIsDeleting(false);
     }
   };
 
@@ -62,6 +120,14 @@ export default function MaterialsPage() {
         </div>
         <div className="flex items-center gap-3">
           <Button
+            onClick={() => loadMaterials()}
+            variant="outline"
+            size="sm"
+          >
+            <RefreshCw className="w-4 h-4" />
+            Refresh
+          </Button>
+          <Button
             onClick={() => setShowLowStockOnly(!showLowStockOnly)}
             variant={showLowStockOnly ? "danger" : "outline"}
             size="sm"
@@ -69,7 +135,7 @@ export default function MaterialsPage() {
             <AlertTriangle className="w-4 h-4" />
             Low Stock ({lowStockCount})
           </Button>
-          <Button variant="primary">
+          <Button onClick={handleCreate} variant="primary">
             <Plus className="w-4 h-4" />
             Add Material
           </Button>
@@ -86,7 +152,7 @@ export default function MaterialsPage() {
           >
             <CardHeader>
               <div className="flex items-start justify-between">
-                <div>
+                <div className="flex-1">
                   <CardTitle className="text-lg">{material.name}</CardTitle>
                   <p className="text-sm text-gray-600 mt-1">
                     {material.materialCode}
@@ -133,12 +199,33 @@ export default function MaterialsPage() {
                 )}
               </div>
 
-              <div className="mt-4 pt-4 border-t border-gray-200 flex gap-2">
-                <Button variant="outline" size="sm" className="flex-1">
+              <div className="mt-4 pt-4 border-t border-gray-200 grid grid-cols-2 gap-2">
+                <Button 
+                  variant="success" 
+                  size="sm"
+                  onClick={() => handleStockIn(material)}
+                >
+                  <ArrowDownToLine className="w-4 h-4" />
                   Stock In
                 </Button>
-                <Button variant="outline" size="sm" className="flex-1">
-                  Details
+                <Button 
+                  variant="outline" 
+                  size="sm"
+                  onClick={() => handleEdit(material)}
+                >
+                  <Edit className="w-4 h-4" />
+                  Edit
+                </Button>
+                <Button 
+                  variant="danger" 
+                  size="sm"
+                  onClick={() => {
+                    setDeleteMaterial(material);
+                    setIsDeleteOpen(true);
+                  }}
+                >
+                  <Trash2 className="w-4 h-4" />
+                  Delete
                 </Button>
               </div>
             </CardContent>
@@ -150,10 +237,88 @@ export default function MaterialsPage() {
         <Card>
           <CardContent className="py-12 text-center">
             <Package className="w-16 h-16 mx-auto mb-4 text-gray-400" />
-            <p className="text-gray-600">No materials found</p>
+            <p className="text-gray-600 mb-4">
+              {showLowStockOnly
+                ? "No low stock materials"
+                : "No materials found"}
+            </p>
+            {!showLowStockOnly && (
+              <Button onClick={handleCreate} variant="primary">
+                <Plus className="w-4 h-4" />
+                Add Your First Material
+              </Button>
+            )}
           </CardContent>
         </Card>
       )}
+
+      {/* Material Form Modal */}
+      <MaterialForm
+        isOpen={isFormOpen}
+        onClose={() => {
+          setIsFormOpen(false);
+          setSelectedMaterial(null);
+        }}
+        onSuccess={loadMaterials}
+        material={selectedMaterial}
+      />
+
+      {/* Stock Transaction Modal */}
+      {transactionMaterial && (
+        <StockTransactionModal
+          isOpen={isTransactionOpen}
+          onClose={() => {
+            setIsTransactionOpen(false);
+            setTransactionMaterial(null);
+          }}
+          onSuccess={loadMaterials}
+          item={{
+            id: transactionMaterial.id,
+            code: transactionMaterial.materialCode,
+            name: transactionMaterial.name,
+            unit: transactionMaterial.unit,
+            currentStock: transactionMaterial.currentStock,
+          }}
+          type="material"
+        />
+      )}
+
+      {/* Delete Confirmation Modal */}
+      <Modal
+        isOpen={isDeleteOpen}
+        onClose={() => !isDeleting && setIsDeleteOpen(false)}
+        title="Delete Material"
+        size="sm"
+      >
+        <div className="space-y-4">
+          <p className="text-gray-700">
+            Are you sure you want to delete{" "}
+            <span className="font-bold">{deleteMaterial?.name}</span>?
+          </p>
+          <div className="bg-red-50 border border-red-200 rounded p-3">
+            <p className="text-sm text-red-800">
+              ⚠️ This action cannot be undone. All transaction history will be
+              deleted.
+            </p>
+          </div>
+        </div>
+        <ModalFooter>
+          <Button
+            variant="outline"
+            onClick={() => setIsDeleteOpen(false)}
+            disabled={isDeleting}
+          >
+            Cancel
+          </Button>
+          <Button
+            variant="danger"
+            onClick={handleDelete}
+            disabled={isDeleting}
+          >
+            {isDeleting ? "Deleting..." : "Delete"}
+          </Button>
+        </ModalFooter>
+      </Modal>
     </div>
   );
 }
