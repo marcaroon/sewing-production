@@ -82,6 +82,12 @@ export default function RootLayout({
                   Monitoring
                 </Link>
                 <Link
+                  href="/qr/scanner"
+                  className="text-white hover:bg-blue-500 font-semibold transition-colors px-4 py-2 rounded-lg flex items-center gap-2"
+                >
+                  Scanner
+                </Link>
+                <Link
                   href="/orders/new"
                   className="bg-white text-blue-600 px-4 py-2 rounded-lg hover:bg-blue-50 transition-colors font-bold shadow-md ml-2 flex items-center gap-2"
                 >

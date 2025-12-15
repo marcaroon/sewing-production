@@ -1,5 +1,4 @@
-// app/api/qr/scan/route.ts
-
+// src/app/api/qr/scan/route.ts
 import { NextRequest, NextResponse } from "next/server";
 import prisma from "@/lib/prisma";
 import { parseBarcode } from "@/lib/barcode-utils";
@@ -10,27 +9,40 @@ export async function POST(request: NextRequest) {
     const body = await request.json();
     const { qrCode, scannedBy, location, action, notes, deviceInfo } = body;
 
+    // Validate required fields
     if (!qrCode || !scannedBy || !location || !action) {
       return NextResponse.json(
         {
           success: false,
-          error: "Missing required fields",
+          error: "Missing required fields: qrCode, scannedBy, location, action",
         },
         { status: 400 }
       );
     }
 
-    // Parse QR code to determine type
-    const parsedQR = parseBarcode(qrCode);
+    // Parse barcode to determine type
+    let parsedBarcode;
+    try {
+      parsedBarcode = parseBarcode(qrCode);
+    } catch (parseError) {
+      return NextResponse.json(
+        {
+          success: false,
+          error: `Invalid barcode format: ${qrCode}`,
+        },
+        { status: 400 }
+      );
+    }
 
     let qrData: any = null;
     let qrType: string;
     let qrId: string | null = null;
 
-    // Get data based on QR type
-    if (parsedQR.type === "order") {
+    // Get data based on barcode type
+    if (parsedBarcode.type === "order") {
       qrType = "order";
 
+      // Find order QR code
       const orderQR = await prisma.orderQRCode.findUnique({
         where: { qrCode },
         include: {
@@ -39,7 +51,13 @@ export async function POST(request: NextRequest) {
               buyer: true,
               style: true,
               sizeBreakdowns: true,
-              bundles: true,
+              bundles: {
+                take: 5, // Limit bundles untuk performa
+              },
+              processSteps: {
+                orderBy: { sequenceOrder: "asc" },
+                take: 10,
+              },
             },
           },
         },
@@ -49,7 +67,7 @@ export async function POST(request: NextRequest) {
         return NextResponse.json(
           {
             success: false,
-            error: "QR code not found",
+            error: `Order barcode not found: ${qrCode}`,
           },
           { status: 404 }
         );
@@ -61,9 +79,10 @@ export async function POST(request: NextRequest) {
         qrCode: orderQR.qrCode,
         order: orderQR.order,
       };
-    } else if (parsedQR.type === "bundle") {
+    } else if (parsedBarcode.type === "bundle") {
       qrType = "bundle";
 
+      // Find bundle QR code
       const bundleQR = await prisma.bundleQRCode.findUnique({
         where: { qrCode },
         include: {
@@ -84,7 +103,7 @@ export async function POST(request: NextRequest) {
         return NextResponse.json(
           {
             success: false,
-            error: "QR code not found",
+            error: `Bundle barcode not found: ${qrCode}`,
           },
           { status: 404 }
         );
@@ -101,7 +120,7 @@ export async function POST(request: NextRequest) {
       return NextResponse.json(
         {
           success: false,
-          error: "Invalid QR code type",
+          error: `Invalid barcode type: ${qrCode}`,
         },
         { status: 400 }
       );
@@ -117,14 +136,14 @@ export async function POST(request: NextRequest) {
         scannedBy,
         location,
         action,
-        notes,
-        deviceInfo,
+        notes: notes || null,
+        deviceInfo: deviceInfo || null,
       },
     });
 
     return NextResponse.json({
       success: true,
-      message: "QR code scanned successfully",
+      message: "Barcode scanned successfully",
       data: qrData,
       scanLog: {
         id: scanLog.id,
@@ -132,11 +151,12 @@ export async function POST(request: NextRequest) {
       },
     });
   } catch (error) {
-    console.error("Error scanning QR code:", error);
+    console.error("Error scanning barcode:", error);
     return NextResponse.json(
       {
         success: false,
-        error: "Failed to scan QR code",
+        error: "Failed to process barcode scan",
+        details: error instanceof Error ? error.message : "Unknown error",
       },
       { status: 500 }
     );

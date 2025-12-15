@@ -30,11 +30,13 @@ export function parseBarcode(barcodeString: string): {
   size?: string;
   bundleNumber?: string;
 } {
-  // Order Barcode: ORD202400001 (13 chars)
-  if (barcodeString.length === 13) {
+  const cleanCode = barcodeString.trim().toUpperCase();
+  
+  // Order Barcode: ORD202400001 (13 chars tanpa dash)
+  if (cleanCode.length === 13 && cleanCode.startsWith("ORD")) {
     // Reconstruct order number with dashes
-    const year = barcodeString.substring(3, 7);
-    const num = barcodeString.substring(7, 13);
+    const year = cleanCode.substring(3, 7);
+    const num = cleanCode.substring(7, 13);
     return {
       type: "order",
       orderNumber: `ORD-${year}-${num}`,
@@ -42,11 +44,11 @@ export function parseBarcode(barcodeString: string): {
   }
 
   // Bundle Barcode: ORD202400001M001 (14+ chars)
-  if (barcodeString.length >= 14) {
-    const year = barcodeString.substring(3, 7);
-    const num = barcodeString.substring(7, 13);
-    const size = barcodeString.substring(13, barcodeString.length - 3);
-    const bundleNum = barcodeString.substring(barcodeString.length - 3);
+  if (cleanCode.length >= 14 && cleanCode.startsWith("ORD")) {
+    const year = cleanCode.substring(3, 7);
+    const num = cleanCode.substring(7, 13);
+    const size = cleanCode.substring(13, cleanCode.length - 3);
+    const bundleNum = cleanCode.substring(cleanCode.length - 3);
 
     return {
       type: "bundle",
@@ -56,7 +58,7 @@ export function parseBarcode(barcodeString: string): {
     };
   }
 
-  throw new Error("Invalid barcode format");
+  throw new Error(`Invalid barcode format: ${barcodeString}`);
 }
 
 // Create Barcode Data object untuk simpan di database
