@@ -1,5 +1,4 @@
-// components/QRScanner.tsx
-
+// src/components/BarcodeScanner.tsx
 "use client";
 
 import React, { useEffect, useRef, useState } from "react";
@@ -8,30 +7,25 @@ import { Card, CardContent, CardHeader, CardTitle } from "./ui/Card";
 import { Button } from "./ui/Button";
 import { Badge } from "./ui/Badge";
 
-interface QRScannerProps {
+interface BarcodeScannerProps {
   onScanSuccess: (decodedText: string) => void;
   onScanError?: (error: string) => void;
   fps?: number;
-  qrbox?: number;
-  aspectRatio?: number;
 }
 
-export const QRScanner: React.FC<QRScannerProps> = ({
+export const BarcodeScanner: React.FC<BarcodeScannerProps> = ({
   onScanSuccess,
   onScanError,
   fps = 10,
-  qrbox = 250,
-  aspectRatio = 1,
 }) => {
   const [isScanning, setIsScanning] = useState(false);
   const [lastScan, setLastScan] = useState<string>("");
   const [manualCode, setManualCode] = useState("");
   const scannerRef = useRef<Html5Qrcode | null>(null);
-  const scannerDivId = "qr-reader";
+  const scannerDivId = "barcode-reader";
 
   useEffect(() => {
     return () => {
-      // Cleanup on unmount
       if (scannerRef.current && isScanning) {
         scannerRef.current
           .stop()
@@ -53,24 +47,27 @@ export const QRScanner: React.FC<QRScannerProps> = ({
 
       const config = {
         fps,
-        qrbox,
-        aspectRatio,
+        // Support both QR codes and barcodes
+        qrbox: { width: 300, height: 150 },
+        aspectRatio: 2,
+        // Enable all barcode formats
+        formatsToSupport: [
+          Html5Qrcode.SCAN_TYPE_CAMERA,
+        ],
       };
 
       await scannerRef.current.start(
-        { facingMode: "environment" }, // Use back camera
+        { facingMode: "environment" },
         config,
         (decodedText) => {
-          // Prevent duplicate scans
           if (decodedText !== lastScan) {
             setLastScan(decodedText);
             onScanSuccess(decodedText);
           }
         },
         (errorMessage) => {
-          // Ignore common errors
           if (!errorMessage.includes("NotFoundException")) {
-            console.warn("QR Scan error:", errorMessage);
+            console.warn("Barcode Scan error:", errorMessage);
           }
         }
       );
@@ -108,7 +105,7 @@ export const QRScanner: React.FC<QRScannerProps> = ({
     <Card>
       <CardHeader>
         <div className="flex items-center justify-between">
-          <CardTitle>QR Code Scanner</CardTitle>
+          <CardTitle>Barcode Scanner</CardTitle>
           <Badge variant={isScanning ? "success" : "default"}>
             {isScanning ? "Scanning..." : "Stopped"}
           </Badge>
@@ -202,14 +199,14 @@ export const QRScanner: React.FC<QRScannerProps> = ({
         {/* Manual Input */}
         <div className="border-t border-gray-200 pt-4">
           <p className="text-sm font-medium text-gray-700 mb-2">
-            Or enter code manually:
+            Or enter barcode manually:
           </p>
           <form onSubmit={handleManualSubmit} className="flex gap-2">
             <input
               type="text"
               value={manualCode}
               onChange={(e) => setManualCode(e.target.value)}
-              placeholder="ORD-2024-00001-M-001"
+              placeholder="ORD202400001M001"
               className="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent font-mono text-sm"
             />
             <Button type="submit" variant="primary">

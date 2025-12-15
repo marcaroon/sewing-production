@@ -1,26 +1,24 @@
-// src/app/inventory/dashboard/page.tsx - COMPLETE Inventory Dashboard
+// src/app/inventory/dashboard/page.tsx - REFACTORED & IMPROVED
 
 "use client";
 
 import React, { useEffect, useState } from "react";
 import Link from "next/link";
-import { Material } from "@/lib/types-inventory";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/Card";
 import { Badge } from "@/components/ui/Badge";
 import { Button } from "@/components/ui/Button";
-import { formatNumber } from "@/lib/utils";
+import { formatNumber, formatDateTime } from "@/lib/utils";
 import {
   Package,
   AlertTriangle,
-  TrendingUp,
-  TrendingDown,
   ShoppingCart,
-  Wrench,
   DollarSign,
-  ArrowRight,
   Plus,
+  TrendingUp,
+  RefreshCw,
+  ArrowRight,
+  Clock,
 } from "lucide-react";
-import { MaterialForm } from "@/components/MaterialForm";
 
 interface InventoryStats {
   totalMaterials: number;
@@ -37,46 +35,17 @@ interface InventoryStats {
 export default function InventoryDashboardPage() {
   const [stats, setStats] = useState<InventoryStats | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [isRefreshing, setIsRefreshing] = useState(false);
   const [error, setError] = useState("");
-  const [materials, setMaterials] = useState<
-    (Material & { currentStock?: number; isLowStock?: boolean })[]
-  >([]);
-  const [showLowStockOnly, setShowLowStockOnly] = useState(false);
-
-  const [isFormOpen, setIsFormOpen] = useState(false);
-  const [selectedMaterial, setSelectedMaterial] = useState<Material | null>(
-    null
-  );
 
   useEffect(() => {
     loadDashboard();
   }, []);
 
-  const loadMaterials = async () => {
-    try {
-      const url = showLowStockOnly
-        ? "/api/materials?lowStock=true"
-        : "/api/materials";
-      const response = await fetch(url);
-      const result = await response.json();
-
-      if (result.success) {
-        setMaterials(result.data);
-      }
-    } catch (error) {
-      console.error("Error loading materials:", error);
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  const handleCreate = () => {
-    setSelectedMaterial(null);
-    setIsFormOpen(true);
-  };
-
   const loadDashboard = async () => {
     setIsLoading(true);
+    setError("");
+    
     try {
       const response = await fetch("/api/inventory/dashboard");
       const result = await response.json();
@@ -93,13 +62,19 @@ export default function InventoryDashboardPage() {
     }
   };
 
+  const handleRefresh = async () => {
+    setIsRefreshing(true);
+    await loadDashboard();
+    setIsRefreshing(false);
+  };
+
   if (isLoading) {
     return (
       <div className="max-w-7xl mx-auto px-4 py-8">
         <div className="flex items-center justify-center min-h-[400px]">
           <div className="text-center">
             <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
-            <p className="text-gray-600">Loading dashboard...</p>
+            <p className="text-gray-600 font-medium">Loading dashboard...</p>
           </div>
         </div>
       </div>
@@ -109,18 +84,29 @@ export default function InventoryDashboardPage() {
   if (error || !stats) {
     return (
       <div className="max-w-7xl mx-auto px-4 py-8">
-        <div className="bg-red-50 border border-red-200 rounded-lg p-6">
-          <p className="text-red-800">{error || "Failed to load data"}</p>
-          <button
-            onClick={loadDashboard}
-            className="mt-3 text-sm text-red-800 underline"
-          >
-            Try Again
-          </button>
+        <div className="bg-red-50 border-2 border-red-200 rounded-xl p-6">
+          <div className="flex items-start gap-3">
+            <AlertTriangle className="w-6 h-6 text-red-600 mt-0.5" />
+            <div>
+              <p className="text-sm font-bold text-red-900">Error</p>
+              <p className="text-sm text-red-700 mt-1">
+                {error || "Failed to load data"}
+              </p>
+              <button
+                onClick={loadDashboard}
+                className="mt-3 text-sm text-red-800 font-semibold underline hover:text-red-900"
+              >
+                Try Again
+              </button>
+            </div>
+          </div>
         </div>
       </div>
     );
   }
+
+  const totalLowStock = stats.lowStockMaterials + stats.lowStockAccessories;
+  const totalValue = stats.totalMaterialValue + stats.totalAccessoryValue;
 
   return (
     <div className="max-w-7xl mx-auto px-4 py-8">
@@ -136,12 +122,28 @@ export default function InventoryDashboardPage() {
             </p>
           </div>
           <div className="flex items-center gap-3">
-            <Button onClick={handleCreate} variant="primary">
-              <Plus className="w-4 h-4" />
-              Add Material
+            <Button
+              onClick={handleRefresh}
+              variant="outline"
+              size="sm"
+              disabled={isRefreshing}
+            >
+              <RefreshCw
+                className={`w-4 h-4 ${isRefreshing ? "animate-spin" : ""}`}
+              />
+              Refresh
             </Button>
-            <Link href="/inventory/accessories/new">
-              <Button variant="success">Add Accessory</Button>
+            <Link href="/inventory/materials">
+              <Button variant="primary">
+                <Plus className="w-4 h-4" />
+                Add Material
+              </Button>
+            </Link>
+            <Link href="/inventory/accessories">
+              <Button variant="success">
+                <Plus className="w-4 h-4" />
+                Add Accessory
+              </Button>
             </Link>
           </div>
         </div>
@@ -152,22 +154,26 @@ export default function InventoryDashboardPage() {
         {/* Total Materials */}
         <Card hover>
           <CardContent className="pt-6">
-            <div className="flex items-center justify-between">
-              <div className="flex-1">
-                <p className="text-sm font-semibold text-gray-600 uppercase">
-                  Materials
-                </p>
-                <p className="text-3xl font-bold text-gray-900 mt-2">
-                  {stats.totalMaterials}
-                </p>
-              </div>
-              {/* <div className="bg-blue-100 rounded-full p-3">
+            <div className="flex items-center justify-between mb-4">
+              <div className="bg-blue-100 rounded-full p-3">
                 <Package className="w-8 h-8 text-blue-600" />
-              </div> */}
+              </div>
+              <Badge variant="info" size="sm">
+                Materials
+              </Badge>
+            </div>
+            <div>
+              <p className="text-sm font-semibold text-gray-600 uppercase mb-1">
+                Total Materials
+              </p>
+              <p className="text-3xl font-bold text-gray-900">
+                {stats.totalMaterials}
+              </p>
             </div>
             <Link href="/inventory/materials">
-              <button className="mt-4 text-sm text-blue-600 font-semibold hover:text-blue-800 flex items-center gap-1">
+              <button className="mt-4 text-sm text-blue-600 font-semibold hover:text-blue-800 flex items-center gap-1 group">
                 View All
+                <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
               </button>
             </Link>
           </CardContent>
@@ -176,135 +182,185 @@ export default function InventoryDashboardPage() {
         {/* Total Accessories */}
         <Card hover>
           <CardContent className="pt-6">
-            <div className="flex items-center justify-between">
-              <div className="flex-1">
-                <p className="text-sm font-semibold text-gray-600 uppercase">
-                  Accessories
-                </p>
-                <p className="text-3xl font-bold text-gray-900 mt-2">
-                  {stats.totalAccessories}
-                </p>
+            <div className="flex items-center justify-between mb-4">
+              <div className="bg-green-100 rounded-full p-3">
+                <ShoppingCart className="w-8 h-8 text-green-600" />
               </div>
-              {/* <div className="bg-green-100 rounded-full p-3">
-                <Wrench className="w-8 h-8 text-green-600" />
-              </div> */}
+              <Badge variant="success" size="sm">
+                Accessories
+              </Badge>
+            </div>
+            <div>
+              <p className="text-sm font-semibold text-gray-600 uppercase mb-1">
+                Total Accessories
+              </p>
+              <p className="text-3xl font-bold text-gray-900">
+                {stats.totalAccessories}
+              </p>
             </div>
             <Link href="/inventory/accessories">
-              <button className="mt-4 text-sm text-green-600 font-semibold hover:text-green-800 flex items-center gap-1">
+              <button className="mt-4 text-sm text-green-600 font-semibold hover:text-green-800 flex items-center gap-1 group">
                 View All
+                <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
               </button>
             </Link>
           </CardContent>
         </Card>
 
         {/* Low Stock Alerts */}
-        <Card hover className="border-2 border-red-300">
+        <Card hover className={totalLowStock > 0 ? "border-2 border-red-400" : ""}>
           <CardContent className="pt-6">
-            <div className="flex items-center justify-between">
-              <div className="flex-1">
-                <p className="text-sm font-semibold text-red-600 uppercase">
-                  Low Stock
-                </p>
-                <p className="text-3xl font-bold text-red-600 mt-2">
-                  {stats.lowStockMaterials + stats.lowStockAccessories}
-                </p>
-                <p className="text-xs text-gray-600 mt-1">
-                  {stats.lowStockMaterials} materials,{" "}
-                  {stats.lowStockAccessories} accessories
-                </p>
+            <div className="flex items-center justify-between mb-4">
+              <div className={`rounded-full p-3 ${totalLowStock > 0 ? 'bg-red-100 animate-pulse' : 'bg-orange-100'}`}>
+                <AlertTriangle className={`w-8 h-8 ${totalLowStock > 0 ? 'text-red-600' : 'text-orange-600'}`} />
               </div>
-              {/* <div className="bg-red-100 rounded-full p-3">
-                <AlertTriangle className="w-8 h-8 text-red-600" />
-              </div> */}
+              <Badge variant="danger" size="sm">
+                Alert
+              </Badge>
             </div>
+            <div>
+              <p className="text-sm font-semibold text-gray-600 uppercase mb-1">
+                Low Stock Items
+              </p>
+              <p className={`text-3xl font-bold ${totalLowStock > 0 ? 'text-red-600' : 'text-gray-900'}`}>
+                {totalLowStock}
+              </p>
+              <p className="text-xs text-gray-600 mt-1">
+                {stats.lowStockMaterials} materials · {stats.lowStockAccessories} accessories
+              </p>
+            </div>
+            {totalLowStock > 0 && (
+              <div className="mt-4 flex gap-2">
+                <Link href="/inventory/materials?lowStock=true" className="flex-1">
+                  <button className="w-full text-xs text-red-600 font-semibold hover:text-red-800 border-2 border-red-200 rounded-lg py-1.5 hover:bg-red-50 transition-colors">
+                    Materials
+                  </button>
+                </Link>
+                <Link href="/inventory/accessories?lowStock=true" className="flex-1">
+                  <button className="w-full text-xs text-red-600 font-semibold hover:text-red-800 border-2 border-red-200 rounded-lg py-1.5 hover:bg-red-50 transition-colors">
+                    Accessories
+                  </button>
+                </Link>
+              </div>
+            )}
           </CardContent>
         </Card>
 
         {/* Total Value */}
         <Card hover>
           <CardContent className="pt-6">
-            <div className="flex items-center justify-between">
-              <div className="flex-1">
-                <p className="text-sm font-semibold text-gray-600 uppercase">
-                  Total Value
-                </p>
-                <p className="text-3xl font-bold text-gray-900 mt-2">
-                  Rp{" "}
-                  {formatNumber(
-                    stats.totalMaterialValue + stats.totalAccessoryValue
-                  )}
-                </p>
-                <p className="text-xs text-gray-600 mt-1">
-                  Materials + Accessories
-                </p>
-              </div>
-              {/* <div className="bg-purple-100 rounded-full p-3">
+            <div className="flex items-center justify-between mb-4">
+              <div className="bg-purple-100 rounded-full p-3">
                 <DollarSign className="w-8 h-8 text-purple-600" />
-              </div> */}
+              </div>
+              <Badge variant="purple" size="sm">
+                Value
+              </Badge>
+            </div>
+            <div>
+              <p className="text-sm font-semibold text-gray-600 uppercase mb-1">
+                Total Inventory Value
+              </p>
+              <p className="text-2xl font-bold text-gray-900">
+                Rp {formatNumber(totalValue)}
+              </p>
+              <div className="mt-2 pt-2 border-t border-gray-200">
+                <div className="flex justify-between text-xs text-gray-600">
+                  <span>Materials:</span>
+                  <span className="font-semibold">
+                    Rp {formatNumber(stats.totalMaterialValue)}
+                  </span>
+                </div>
+                <div className="flex justify-between text-xs text-gray-600 mt-1">
+                  <span>Accessories:</span>
+                  <span className="font-semibold">
+                    Rp {formatNumber(stats.totalAccessoryValue)}
+                  </span>
+                </div>
+              </div>
             </div>
           </CardContent>
         </Card>
       </div>
 
       {/* Quick Actions */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
-        <Link href="/inventory/materials?lowStock=true">
-          <Card hover className="cursor-pointer">
-            <CardContent className="pt-6">
-              <div className="flex items-center gap-3">
-                <AlertTriangle className="w-10 h-10 text-orange-600" />
-                <div>
-                  <p className="font-bold text-gray-900">Low Stock Materials</p>
-                  <p className="text-sm text-gray-600">
-                    View items below minimum
-                  </p>
+      <div className="mb-8">
+        <h2 className="text-xl font-bold text-gray-900 mb-4">Quick Actions</h2>
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
+          <Link href="/inventory/materials?lowStock=true">
+            <Card hover className="cursor-pointer border-2 border-transparent hover:border-orange-300 transition-all">
+              <CardContent className="pt-6">
+                <div className="flex items-center gap-4">
+                  <div className="bg-orange-100 rounded-lg p-3">
+                    <AlertTriangle className="w-8 h-8 text-orange-600" />
+                  </div>
+                  <div className="flex-1">
+                    <p className="font-bold text-gray-900 mb-1">
+                      Low Stock Materials
+                    </p>
+                    <p className="text-sm text-gray-600">
+                      {stats.lowStockMaterials} items below minimum
+                    </p>
+                  </div>
+                  <ArrowRight className="w-5 h-5 text-gray-400" />
                 </div>
-              </div>
-            </CardContent>
-          </Card>
-        </Link>
+              </CardContent>
+            </Card>
+          </Link>
 
-        <Link href="/inventory/accessories?lowStock=true">
-          <Card hover className="cursor-pointer">
-            <CardContent className="pt-6">
-              <div className="flex items-center gap-3">
-                <AlertTriangle className="w-10 h-10 text-red-600" />
-                <div>
-                  <p className="font-bold text-gray-900">
-                    Low Stock Accessories
-                  </p>
-                  <p className="text-sm text-gray-600">
-                    View items below minimum
-                  </p>
+          <Link href="/inventory/accessories?lowStock=true">
+            <Card hover className="cursor-pointer border-2 border-transparent hover:border-red-300 transition-all">
+              <CardContent className="pt-6">
+                <div className="flex items-center gap-4">
+                  <div className="bg-red-100 rounded-lg p-3">
+                    <AlertTriangle className="w-8 h-8 text-red-600" />
+                  </div>
+                  <div className="flex-1">
+                    <p className="font-bold text-gray-900 mb-1">
+                      Low Stock Accessories
+                    </p>
+                    <p className="text-sm text-gray-600">
+                      {stats.lowStockAccessories} items below minimum
+                    </p>
+                  </div>
+                  <ArrowRight className="w-5 h-5 text-gray-400" />
                 </div>
-              </div>
-            </CardContent>
-          </Card>
-        </Link>
+              </CardContent>
+            </Card>
+          </Link>
 
-        <Link href="/inventory/transactions">
-          <Card hover className="cursor-pointer">
-            <CardContent className="pt-6">
-              <div className="flex items-center gap-3">
-                <ShoppingCart className="w-10 h-10 text-blue-600" />
-                <div>
-                  <p className="font-bold text-gray-900">Stock Transactions</p>
-                  <p className="text-sm text-gray-600">
-                    View all in/out movements
-                  </p>
+          <Link href="/inventory/transactions">
+            <Card hover className="cursor-pointer border-2 border-transparent hover:border-blue-300 transition-all">
+              <CardContent className="pt-6">
+                <div className="flex items-center gap-4">
+                  <div className="bg-blue-100 rounded-lg p-3">
+                    <Clock className="w-8 h-8 text-blue-600" />
+                  </div>
+                  <div className="flex-1">
+                    <p className="font-bold text-gray-900 mb-1">
+                      Stock Transactions
+                    </p>
+                    <p className="text-sm text-gray-600">
+                      View all in/out movements
+                    </p>
+                  </div>
+                  <ArrowRight className="w-5 h-5 text-gray-400" />
                 </div>
-              </div>
-            </CardContent>
-          </Card>
-        </Link>
+              </CardContent>
+            </Card>
+          </Link>
+        </div>
       </div>
 
       {/* Recent Activity */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
         {/* Top Used Materials */}
         <Card>
           <CardHeader>
-            <CardTitle>Top Used Materials</CardTitle>
+            <div className="flex items-center justify-between">
+              <CardTitle>Top Used Materials</CardTitle>
+              <TrendingUp className="w-5 h-5 text-blue-600" />
+            </div>
           </CardHeader>
           <CardContent>
             {stats.topUsedMaterials && stats.topUsedMaterials.length > 0 ? (
@@ -314,18 +370,23 @@ export default function InventoryDashboardPage() {
                   .map((item: any, idx: number) => (
                     <div
                       key={idx}
-                      className="flex items-center justify-between p-3 bg-gray-50 rounded-lg"
+                      className="flex items-center justify-between p-3 bg-blue-50 border border-blue-200 rounded-lg hover:bg-blue-100 transition-colors"
                     >
-                      <div className="flex-1">
-                        <p className="font-semibold text-gray-900">
-                          {item.name}
-                        </p>
-                        <p className="text-xs text-gray-600">
-                          {item.materialCode}
-                        </p>
+                      <div className="flex items-center gap-3 flex-1">
+                        <div className="bg-blue-600 text-white rounded-full w-8 h-8 flex items-center justify-center font-bold text-sm">
+                          {idx + 1}
+                        </div>
+                        <div className="flex-1">
+                          <p className="font-semibold text-gray-900">
+                            {item.name}
+                          </p>
+                          <p className="text-xs text-gray-600">
+                            {item.materialCode}
+                          </p>
+                        </div>
                       </div>
                       <div className="text-right">
-                        <p className="font-bold text-gray-900">
+                        <p className="font-bold text-blue-900">
                           {formatNumber(item.totalUsed)}
                         </p>
                         <p className="text-xs text-gray-600">{item.unit}</p>
@@ -334,9 +395,13 @@ export default function InventoryDashboardPage() {
                   ))}
               </div>
             ) : (
-              <p className="text-center py-8 text-gray-500">
-                No usage data yet
-              </p>
+              <div className="text-center py-12">
+                <Package className="w-12 h-12 text-gray-300 mx-auto mb-3" />
+                <p className="text-gray-500 font-medium">No usage data yet</p>
+                <p className="text-sm text-gray-400 mt-1">
+                  Material usage will appear here once orders are processed
+                </p>
+              </div>
             )}
           </CardContent>
         </Card>
@@ -344,7 +409,10 @@ export default function InventoryDashboardPage() {
         {/* Top Used Accessories */}
         <Card>
           <CardHeader>
-            <CardTitle>Top Used Accessories</CardTitle>
+            <div className="flex items-center justify-between">
+              <CardTitle>Top Used Accessories</CardTitle>
+              <TrendingUp className="w-5 h-5 text-green-600" />
+            </div>
           </CardHeader>
           <CardContent>
             {stats.topUsedAccessories && stats.topUsedAccessories.length > 0 ? (
@@ -354,18 +422,23 @@ export default function InventoryDashboardPage() {
                   .map((item: any, idx: number) => (
                     <div
                       key={idx}
-                      className="flex items-center justify-between p-3 bg-gray-50 rounded-lg"
+                      className="flex items-center justify-between p-3 bg-green-50 border border-green-200 rounded-lg hover:bg-green-100 transition-colors"
                     >
-                      <div className="flex-1">
-                        <p className="font-semibold text-gray-900">
-                          {item.name}
-                        </p>
-                        <p className="text-xs text-gray-600">
-                          {item.accessoryCode}
-                        </p>
+                      <div className="flex items-center gap-3 flex-1">
+                        <div className="bg-green-600 text-white rounded-full w-8 h-8 flex items-center justify-center font-bold text-sm">
+                          {idx + 1}
+                        </div>
+                        <div className="flex-1">
+                          <p className="font-semibold text-gray-900">
+                            {item.name}
+                          </p>
+                          <p className="text-xs text-gray-600">
+                            {item.accessoryCode}
+                          </p>
+                        </div>
                       </div>
                       <div className="text-right">
-                        <p className="font-bold text-gray-900">
+                        <p className="font-bold text-green-900">
                           {formatNumber(item.totalUsed)}
                         </p>
                         <p className="text-xs text-gray-600">{item.unit}</p>
@@ -374,22 +447,97 @@ export default function InventoryDashboardPage() {
                   ))}
               </div>
             ) : (
-              <p className="text-center py-8 text-gray-500">
-                No usage data yet
-              </p>
+              <div className="text-center py-12">
+                <ShoppingCart className="w-12 h-12 text-gray-300 mx-auto mb-3" />
+                <p className="text-gray-500 font-medium">No usage data yet</p>
+                <p className="text-sm text-gray-400 mt-1">
+                  Accessory usage will appear here once orders are processed
+                </p>
+              </div>
             )}
           </CardContent>
         </Card>
       </div>
-      <MaterialForm
-        isOpen={isFormOpen}
-        onClose={() => {
-          setIsFormOpen(false);
-          setSelectedMaterial(null);
-        }}
-        onSuccess={loadMaterials}
-        material={selectedMaterial}
-      />
+
+      {/* Recent Transactions */}
+      {stats.recentTransactions && stats.recentTransactions.length > 0 && (
+        <Card>
+          <CardHeader>
+            <div className="flex items-center justify-between">
+              <CardTitle>Recent Transactions</CardTitle>
+              <Link href="/inventory/transactions">
+                <button className="text-sm text-blue-600 font-semibold hover:text-blue-800 flex items-center gap-1">
+                  View All
+                  <ArrowRight className="w-4 h-4" />
+                </button>
+              </Link>
+            </div>
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-2">
+              {stats.recentTransactions.slice(0, 10).map((tx: any, idx: number) => (
+                <div
+                  key={idx}
+                  className="flex items-center justify-between p-3 bg-gray-50 hover:bg-gray-100 rounded-lg transition-colors"
+                >
+                  <div className="flex items-center gap-3 flex-1">
+                    <div
+                      className={`rounded-full p-2 ${
+                        tx.transactionType === "in"
+                          ? "bg-green-100"
+                          : tx.transactionType === "out"
+                          ? "bg-red-100"
+                          : "bg-yellow-100"
+                      }`}
+                    >
+                      {tx.transactionType === "in" ? (
+                        <Package className="w-4 h-4 text-green-600" />
+                      ) : (
+                        <ShoppingCart className="w-4 h-4 text-red-600" />
+                      )}
+                    </div>
+                    <div className="flex-1">
+                      <p className="font-semibold text-gray-900 text-sm">
+                        {tx.type === "material"
+                          ? tx.material?.name
+                          : tx.accessory?.name}
+                      </p>
+                      <p className="text-xs text-gray-600">
+                        {formatDateTime(tx.transactionDate)}
+                      </p>
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-4">
+                    <Badge
+                      variant={
+                        tx.transactionType === "in"
+                          ? "success"
+                          : tx.transactionType === "out"
+                          ? "danger"
+                          : "warning"
+                      }
+                      size="sm"
+                    >
+                      {tx.transactionType}
+                    </Badge>
+                    <div className="text-right">
+                      <p
+                        className={`font-bold ${
+                          tx.quantity > 0 ? "text-green-600" : "text-red-600"
+                        }`}
+                      >
+                        {tx.quantity > 0 ? "+" : ""}
+                        {formatNumber(tx.quantity)}
+                      </p>
+                      <p className="text-xs text-gray-600">{tx.unit}</p>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </CardContent>
+        </Card>
+      )}
     </div>
   );
 }

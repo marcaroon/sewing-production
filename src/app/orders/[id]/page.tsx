@@ -7,7 +7,7 @@ import { useRouter, useParams } from "next/navigation";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/Card";
 import { Badge } from "@/components/ui/Badge";
 import { Button } from "@/components/ui/Button";
-import { QRCodeDisplay } from "@/components/QRCodeDisplay";
+import { BarcodeDisplay } from "@/components/BarcodeDisplay";
 import { ProcessStepCard } from "@/components/ProcessStepCards";
 import { PPICAssignmentModal } from "@/components/PPICAssignmentModal";
 import { DualProgressBarsFull } from "@/components/DualProgressBars";
@@ -57,7 +57,7 @@ export default function OrderDetailPage() {
       setOrder(orderData);
       setProcessSteps(stepsData);
 
-      // Check if order has QR codes
+      // Check if order has Barcodes
       if ((orderData as any).qrCode) {
         setQrCodes({
           orderQR: (orderData as any).qrCode,
@@ -96,15 +96,15 @@ export default function OrderDetailPage() {
     try {
       const result = await apiClient.generateOrderQR(order.id);
       alert(
-        `QR codes generated successfully!\nOrder QR: 1\nBundle QRs: ${
+        `Barcodes generated successfully!\nOrder QR: 1\nBundle QRs: ${
           result.bundleQRCodes?.length || 0
         }`
       );
-      // Reload to get QR codes
+      // Reload to get Barcodes
       await loadOrderData();
     } catch (err) {
-      console.error("Error generating QR codes:", err);
-      alert("Failed to generate QR codes. Please try again.");
+      console.error("Error generating Barcodes:", err);
+      alert("Failed to generate Barcodes. Please try again.");
     } finally {
       setIsGeneratingQR(false);
     }
@@ -305,7 +305,7 @@ export default function OrderDetailPage() {
                   {tab === "process-steps" && "Process Steps"}
                   {tab === "transfers" && "Transfers"}
                   {tab === "details" && "Details"}
-                  {tab === "qr" && "QR Codes"}
+                  {tab === "qr" && "Barcodes"}
                 </button>
               )
             )}
@@ -938,7 +938,7 @@ export default function OrderDetailPage() {
                       />
                     </svg>
                     <p className="text-gray-600 mb-4">
-                      No QR codes generated yet
+                      No Barcodes generated yet
                     </p>
                     <Button
                       onClick={handleGenerateQR}
@@ -951,7 +951,7 @@ export default function OrderDetailPage() {
                           Generating...
                         </>
                       ) : (
-                        "Generate QR Codes"
+                        "Generate Barcodes"
                       )}
                     </Button>
                   </div>
@@ -971,7 +971,7 @@ export default function OrderDetailPage() {
                         variant="primary"
                         size="sm"
                       >
-                        Print All QR Codes
+                        Print All Barcodes
                       </Button>
                     </div>
 
@@ -980,20 +980,20 @@ export default function OrderDetailPage() {
                       <h3 className="text-lg font-semibold text-gray-900 mb-4">
                         Order QR Code
                       </h3>
-                      <QRCodeDisplay
-                        qrCode={qrCodes.orderQR.qrCode}
+                      <BarcodeDisplay
+                        barcodeValue={qrCodes.orderQR.qrCode}
                         title={order.orderNumber}
                         subtitle={`${order.buyer.name} - ${order.style.name}`}
                         type="order"
                       />
                     </div>
 
-                    {/* Bundle QR Codes */}
+                    {/* Bundle Barcodes */}
                     {qrCodes.bundleQRs && qrCodes.bundleQRs.length > 0 && (
                       <div>
                         <div className="flex items-center justify-between mb-4">
                           <h3 className="text-lg font-semibold text-gray-900">
-                            Bundle QR Codes ({qrCodes.bundleQRs.length})
+                            Bundle Barcodes ({qrCodes.bundleQRs.length})
                           </h3>
                           <Button
                             onClick={() => handlePrintQR("bundle")}
@@ -1009,9 +1009,9 @@ export default function OrderDetailPage() {
                               (b: any) => b.qrCode?.id === bundleQR.id
                             );
                             return (
-                              <QRCodeDisplay
+                              <BarcodeDisplay
                                 key={bundleQR.id}
-                                qrCode={bundleQR.qrCode}
+                                barcodeValue={bundleQR.qrCode}
                                 title={bundle?.bundleNumber || bundleQR.qrCode}
                                 subtitle={
                                   bundle
@@ -1019,7 +1019,7 @@ export default function OrderDetailPage() {
                                     : undefined
                                 }
                                 type="bundle"
-                                size={150}
+                                // size={150}
                               />
                             );
                           })}

@@ -62,51 +62,12 @@ export default function RootLayout({
                   Orders
                 </Link>
 
-                {/* NEW: Inventory Dropdown */}
-                <div className="relative group">
-                  <button className="text-white hover:bg-blue-500 font-semibold transition-colors px-4 py-2 rounded-lg flex items-center gap-2">
-                    Inventory
-                    <svg
-                      className="w-4 h-4"
-                      fill="none"
-                      stroke="currentColor"
-                      viewBox="0 0 24 24"
-                    >
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        strokeWidth={2}
-                        d="M19 9l-7 7-7-7"
-                      />
-                    </svg>
-                  </button>
-                  <div className="absolute top-full left-0 mt-1 bg-white rounded-lg shadow-xl border-2 border-blue-200 min-w-[200px] opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all">
-                    <Link
-                      href="/inventory/materials"
-                      className="block px-4 py-3 text-gray-900 hover:bg-blue-50 font-semibold text-sm border-b border-gray-200"
-                    >
-                      Materials
-                    </Link>
-                    <Link
-                      href="/inventory/accessories"
-                      className="block px-4 py-3 text-gray-900 hover:bg-blue-50 font-semibold text-sm border-b border-gray-200"
-                    >
-                      Accessories
-                    </Link>
-                    <Link
-                      href="/inventory/transactions"
-                      className="block px-4 py-3 text-gray-900 hover:bg-blue-50 font-semibold text-sm border-b border-gray-200"
-                    >
-                      Transactions
-                    </Link>
-                    <Link
-                      href="/inventory/dashboard"
-                      className="block px-4 py-3 text-gray-900 hover:bg-blue-50 font-semibold text-sm"
-                    >
-                      Inventory Dashboard
-                    </Link>
-                  </div>
-                </div>
+                <Link
+                  href="/inventory/dashboard"
+                  className="text-white hover:bg-blue-500 font-semibold transition-colors px-4 py-2 rounded-lg flex items-center gap-2"
+                >
+                  Inventory
+                </Link>
 
                 <Link
                   href="/waiting-list"

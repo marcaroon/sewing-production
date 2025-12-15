@@ -2,7 +2,7 @@
 
 import { NextRequest, NextResponse } from "next/server";
 import prisma from "@/lib/prisma";
-import { parseQRCode } from "@/lib/qr-utils";
+import { parseBarcode } from "@/lib/barcode-utils";
 
 // POST /api/qr/scan
 export async function POST(request: NextRequest) {
@@ -21,7 +21,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Parse QR code to determine type
-    const parsedQR = parseQRCode(qrCode);
+    const parsedQR = parseBarcode(qrCode);
 
     let qrData: any = null;
     let qrType: string;

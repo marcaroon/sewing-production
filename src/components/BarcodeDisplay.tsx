@@ -1,67 +1,84 @@
-// components/QRCodeDisplay.tsx - IMPROVED VERSION
-
+// src/components/BarcodeDisplay.tsx
 "use client";
 
-import React, { useEffect, useState } from "react";
-import QRCodeSVG from "react-qr-code";
+import React, { useEffect, useRef } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "./ui/Card";
 import { Button } from "./ui/Button";
 import { Badge } from "./ui/Badge";
 import { Download, Printer, Package, FileText } from "lucide-react";
 
-interface QRCodeDisplayProps {
-  qrCode: string;
+interface BarcodeDisplayProps {
+  barcodeValue: string;
   title?: string;
   subtitle?: string;
   type?: "order" | "bundle";
-  size?: number;
+  width?: number;
+  height?: number;
   showDownload?: boolean;
 }
 
-export const QRCodeDisplay: React.FC<QRCodeDisplayProps> = ({
-  qrCode,
+export const BarcodeDisplay: React.FC<BarcodeDisplayProps> = ({
+  barcodeValue,
   title,
   subtitle,
   type = "order",
-  size = 200,
+  width = 2,
+  height = 60,
   showDownload = true,
 }) => {
-  const [downloadUrl, setDownloadUrl] = useState<string>("");
+  const barcodeRef = useRef<SVGSVGElement>(null);
 
   useEffect(() => {
-    if (showDownload) {
-      const svg = document.getElementById(`qr-${qrCode}`);
-      if (svg) {
-        const svgData = new XMLSerializer().serializeToString(svg);
-        const blob = new Blob([svgData], { type: "image/svg+xml" });
-        const url = URL.createObjectURL(blob);
-        setDownloadUrl(url);
-      }
-    }
+    if (barcodeRef.current && typeof window !== "undefined") {
+      // Dynamically load JsBarcode
+      const script = document.createElement("script");
+      script.src =
+        "https://cdn.jsdelivr.net/npm/jsbarcode@3.11.5/dist/JsBarcode.all.min.js";
+      script.onload = () => {
+        // @ts-ignore
+        if (window.JsBarcode) {
+          // @ts-ignore
+          window.JsBarcode(barcodeRef.current, barcodeValue, {
+            format: "CODE128",
+            width: width,
+            height: height,
+            displayValue: true,
+            fontSize: 14,
+            margin: 10,
+          });
+        }
+      };
+      document.head.appendChild(script);
 
-    return () => {
-      if (downloadUrl) {
-        URL.revokeObjectURL(downloadUrl);
-      }
-    };
-  }, [qrCode, showDownload]);
+      return () => {
+        document.head.removeChild(script);
+      };
+    }
+  }, [barcodeValue, width, height]);
 
   const handleDownload = () => {
+    if (!barcodeRef.current) return;
+
+    const svgData = new XMLSerializer().serializeToString(barcodeRef.current);
+    const blob = new Blob([svgData], { type: "image/svg+xml" });
+    const url = URL.createObjectURL(blob);
     const link = document.createElement("a");
-    link.href = downloadUrl;
-    link.download = `qr-${qrCode}.svg`;
+    link.href = url;
+    link.download = `barcode-${barcodeValue}.svg`;
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
+    URL.revokeObjectURL(url);
   };
 
   const handlePrint = () => {
-    const printWindow = window.open("", "", "width=600,height=600");
-    if (printWindow) {
+    const printWindow = window.open("", "", "width=600,height=400");
+    if (printWindow && barcodeRef.current) {
+      const svgData = new XMLSerializer().serializeToString(barcodeRef.current);
       printWindow.document.write(`
         <html>
           <head>
-            <title>Print QR Code - ${qrCode}</title>
+            <title>Print Barcode - ${barcodeValue}</title>
             <style>
               body {
                 display: flex;
@@ -72,7 +89,7 @@ export const QRCodeDisplay: React.FC<QRCodeDisplayProps> = ({
                 margin: 0;
                 font-family: Arial, sans-serif;
               }
-              .qr-container {
+              .barcode-container {
                 text-align: center;
                 padding: 20px;
                 border: 3px solid #000;
@@ -95,8 +112,8 @@ export const QRCodeDisplay: React.FC<QRCodeDisplayProps> = ({
             </style>
           </head>
           <body>
-            <div class="qr-container">
-              ${document.getElementById(`qr-${qrCode}`)?.outerHTML || ""}
+            <div class="barcode-container">
+              ${svgData}
               ${title ? `<div class="title">${title}</div>` : ""}
               ${subtitle ? `<div class="subtitle">${subtitle}</div>` : ""}
             </div>
@@ -125,7 +142,7 @@ export const QRCodeDisplay: React.FC<QRCodeDisplayProps> = ({
             ) : (
               <Package className="w-5 h-5 text-green-600" />
             )}
-            <CardTitle>{title || "QR Code"}</CardTitle>
+            <CardTitle>{title || "Barcode"}</CardTitle>
           </div>
           <Badge variant={type === "order" ? "info" : "success"} size="sm">
             {type === "order" ? "Order" : "Bundle"}
@@ -134,20 +151,15 @@ export const QRCodeDisplay: React.FC<QRCodeDisplayProps> = ({
       </CardHeader>
       <CardContent>
         <div className="flex flex-col items-center space-y-4">
-          {/* QR Code */}
+          {/* Barcode */}
           <div className="bg-white p-5 rounded-lg border-4 border-gray-300 shadow-sm">
-            <QRCodeSVG
-              id={`qr-${qrCode}`}
-              value={qrCode}
-              size={size}
-              level="H"
-            />
+            <svg ref={barcodeRef}></svg>
           </div>
 
           {/* Labels */}
           <div className="text-center w-full">
             <p className="font-mono text-sm font-bold text-gray-900 bg-gray-100 border-2 border-gray-300 rounded px-3 py-2">
-              {qrCode}
+              {barcodeValue}
             </p>
             {subtitle && (
               <p className="text-xs font-semibold text-gray-700 mt-2 bg-blue-50 border border-blue-200 rounded px-2 py-1">
@@ -163,7 +175,6 @@ export const QRCodeDisplay: React.FC<QRCodeDisplayProps> = ({
                 variant="outline"
                 size="sm"
                 onClick={handleDownload}
-                disabled={!downloadUrl}
                 className="flex-1"
               >
                 <Download className="w-4 h-4" />
@@ -186,9 +197,9 @@ export const QRCodeDisplay: React.FC<QRCodeDisplayProps> = ({
   );
 };
 
-// Grid component untuk menampilkan multiple QR codes
-interface QRCodeGridProps {
-  qrCodes: Array<{
+// Grid component untuk menampilkan multiple barcodes
+interface BarcodeGridProps {
+  barcodes: Array<{
     code: string;
     title: string;
     subtitle?: string;
@@ -197,8 +208,8 @@ interface QRCodeGridProps {
   columns?: number;
 }
 
-export const QRCodeGrid: React.FC<QRCodeGridProps> = ({
-  qrCodes,
+export const BarcodeGrid: React.FC<BarcodeGridProps> = ({
+  barcodes,
   columns = 3,
 }) => {
   return (
@@ -208,14 +219,15 @@ export const QRCodeGrid: React.FC<QRCodeGridProps> = ({
         gridTemplateColumns: `repeat(${columns}, minmax(0, 1fr))`,
       }}
     >
-      {qrCodes.map((qr, index) => (
-        <QRCodeDisplay
+      {barcodes.map((barcode, index) => (
+        <BarcodeDisplay
           key={index}
-          qrCode={qr.code}
-          title={qr.title}
-          subtitle={qr.subtitle}
-          type={qr.type}
-          size={150}
+          barcodeValue={barcode.code}
+          title={barcode.title}
+          subtitle={barcode.subtitle}
+          type={barcode.type}
+          width={1.5}
+          height={50}
         />
       ))}
     </div>

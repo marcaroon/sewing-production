@@ -4,7 +4,7 @@
 
 import React, { useState } from "react";
 import { useRouter } from "next/navigation";
-import { QRScanner } from "@/components/QRScanner";
+import { BarcodeScanner } from "@/components/BarcodeScanner";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/Card";
 import { Button } from "@/components/ui/Button";
 import { Badge } from "@/components/ui/Badge";
@@ -112,7 +112,7 @@ export default function QRScannerPage() {
       {/* Scanner */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         <div className="lg:col-span-2">
-          <QRScanner
+          <BarcodeScanner
             onScanSuccess={handleScanSuccess}
             onScanError={(err) => setError(err)}
           />

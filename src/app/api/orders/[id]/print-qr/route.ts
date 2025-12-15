@@ -2,7 +2,7 @@
 
 import { NextRequest, NextResponse } from "next/server";
 import prisma from "@/lib/prisma";
-import { generateBulkQRLabels } from "@/lib/qr-utils";
+import { generateBulkBarcodeLabels } from "@/lib/barcode-utils";
 
 // GET /api/orders/[id]/print-qr?type=order|bundle|all
 export async function GET(
@@ -72,7 +72,7 @@ export async function GET(
     }
 
     // Generate HTML for printing
-    const html = await generateBulkQRLabels(labels);
+    const html = await generateBulkBarcodeLabels(labels);
 
     return new NextResponse(html, {
       headers: {

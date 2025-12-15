@@ -3,10 +3,10 @@
 import { NextRequest, NextResponse } from "next/server";
 import prisma from "@/lib/prisma";
 import {
-  generateOrderQRCode,
-  generateBundleQRCode,
-  createQRData,
-} from "@/lib/qr-utils";
+  generateOrderBarcode,
+  generateBundleBarcode,
+  createBarcodeData,
+} from "@/lib/barcode-utils";
 
 // POST /api/orders/[id]/generate-qr
 export async function POST(
@@ -60,8 +60,8 @@ export async function POST(
         };
       }) => {
         // 1. Generate Order Level QR Code
-        const orderQRCode = generateOrderQRCode(order.orderNumber);
-        const orderQRData = createQRData("order", orderQRCode, {
+        const orderQRCode = generateOrderBarcode(order.orderNumber);
+        const orderQRData = createBarcodeData("order", orderQRCode, {
           orderId: order.id,
           orderNumber: order.orderNumber,
           buyer: order.buyer.name,
@@ -97,13 +97,13 @@ export async function POST(
         const bundleQRs = [];
 
         for (const bundle of order.bundles) {
-          const bundleQRCode = generateBundleQRCode(
+          const bundleQRCode = generateBundleBarcode(
             order.orderNumber,
             bundle.size,
             parseInt(bundle.bundleNumber.split("-").pop() || "0")
           );
 
-          const bundleQRData = createQRData("bundle", bundleQRCode, {
+          const bundleQRData = createBarcodeData("bundle", bundleQRCode, {
             bundleId: bundle.id,
             bundleNumber: bundle.bundleNumber,
             orderId: order.id,
