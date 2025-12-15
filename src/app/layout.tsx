@@ -32,12 +32,12 @@ export default function RootLayout({
               >
                 <div className="bg-white rounded-full flex justify-center p-2 w-15 h-15 shadow-md">
                   <Image
-                    src="/dbg-logo.png" // ganti sesuai path yang kamu mau
+                    src="/dbg-logo.png"
                     alt="Logo"
-                    width={50} // bebas, nanti tinggal sesuaikan
+                    width={50}
                     height={50}
                     className="object-fit"
-                    priority // biar cepat muncul di header
+                    priority
                   />
                 </div>
 

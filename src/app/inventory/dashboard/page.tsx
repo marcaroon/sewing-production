@@ -4,6 +4,7 @@
 
 import React, { useEffect, useState } from "react";
 import Link from "next/link";
+import { Material } from "@/lib/types-inventory";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/Card";
 import { Badge } from "@/components/ui/Badge";
 import { Button } from "@/components/ui/Button";
@@ -19,6 +20,7 @@ import {
   ArrowRight,
   Plus,
 } from "lucide-react";
+import { MaterialForm } from "@/components/MaterialForm";
 
 interface InventoryStats {
   totalMaterials: number;
@@ -36,10 +38,42 @@ export default function InventoryDashboardPage() {
   const [stats, setStats] = useState<InventoryStats | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState("");
+  const [materials, setMaterials] = useState<
+    (Material & { currentStock?: number; isLowStock?: boolean })[]
+  >([]);
+  const [showLowStockOnly, setShowLowStockOnly] = useState(false);
+
+  const [isFormOpen, setIsFormOpen] = useState(false);
+  const [selectedMaterial, setSelectedMaterial] = useState<Material | null>(
+    null
+  );
 
   useEffect(() => {
     loadDashboard();
   }, []);
+
+  const loadMaterials = async () => {
+    try {
+      const url = showLowStockOnly
+        ? "/api/materials?lowStock=true"
+        : "/api/materials";
+      const response = await fetch(url);
+      const result = await response.json();
+
+      if (result.success) {
+        setMaterials(result.data);
+      }
+    } catch (error) {
+      console.error("Error loading materials:", error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleCreate = () => {
+    setSelectedMaterial(null);
+    setIsFormOpen(true);
+  };
 
   const loadDashboard = async () => {
     setIsLoading(true);
@@ -102,17 +136,12 @@ export default function InventoryDashboardPage() {
             </p>
           </div>
           <div className="flex items-center gap-3">
-            <Link href="/inventory/materials/new">
-              <Button variant="primary">
-                <Plus className="w-4 h-4" />
-                Add Material
-              </Button>
-            </Link>
+            <Button onClick={handleCreate} variant="primary">
+              <Plus className="w-4 h-4" />
+              Add Material
+            </Button>
             <Link href="/inventory/accessories/new">
-              <Button variant="success">
-                <Plus className="w-4 h-4" />
-                Add Accessory
-              </Button>
+              <Button variant="success">Add Accessory</Button>
             </Link>
           </div>
         </div>
@@ -132,13 +161,13 @@ export default function InventoryDashboardPage() {
                   {stats.totalMaterials}
                 </p>
               </div>
-              <div className="bg-blue-100 rounded-full p-3">
+              {/* <div className="bg-blue-100 rounded-full p-3">
                 <Package className="w-8 h-8 text-blue-600" />
-              </div>
+              </div> */}
             </div>
             <Link href="/inventory/materials">
               <button className="mt-4 text-sm text-blue-600 font-semibold hover:text-blue-800 flex items-center gap-1">
-                View All <ArrowRight className="w-4 h-4" />
+                View All
               </button>
             </Link>
           </CardContent>
@@ -156,13 +185,13 @@ export default function InventoryDashboardPage() {
                   {stats.totalAccessories}
                 </p>
               </div>
-              <div className="bg-green-100 rounded-full p-3">
+              {/* <div className="bg-green-100 rounded-full p-3">
                 <Wrench className="w-8 h-8 text-green-600" />
-              </div>
+              </div> */}
             </div>
             <Link href="/inventory/accessories">
               <button className="mt-4 text-sm text-green-600 font-semibold hover:text-green-800 flex items-center gap-1">
-                View All <ArrowRight className="w-4 h-4" />
+                View All
               </button>
             </Link>
           </CardContent>
@@ -184,9 +213,9 @@ export default function InventoryDashboardPage() {
                   {stats.lowStockAccessories} accessories
                 </p>
               </div>
-              <div className="bg-red-100 rounded-full p-3">
+              {/* <div className="bg-red-100 rounded-full p-3">
                 <AlertTriangle className="w-8 h-8 text-red-600" />
-              </div>
+              </div> */}
             </div>
           </CardContent>
         </Card>
@@ -209,9 +238,9 @@ export default function InventoryDashboardPage() {
                   Materials + Accessories
                 </p>
               </div>
-              <div className="bg-purple-100 rounded-full p-3">
+              {/* <div className="bg-purple-100 rounded-full p-3">
                 <DollarSign className="w-8 h-8 text-purple-600" />
-              </div>
+              </div> */}
             </div>
           </CardContent>
         </Card>
@@ -352,6 +381,15 @@ export default function InventoryDashboardPage() {
           </CardContent>
         </Card>
       </div>
+      <MaterialForm
+        isOpen={isFormOpen}
+        onClose={() => {
+          setIsFormOpen(false);
+          setSelectedMaterial(null);
+        }}
+        onSuccess={loadMaterials}
+        material={selectedMaterial}
+      />
     </div>
   );
 }
