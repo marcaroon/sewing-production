@@ -918,7 +918,7 @@ export default function OrderDetailPage() {
           {/* QR Code Actions */}
           <Card>
             <CardHeader>
-              <CardTitle>QR Code Management</CardTitle>
+              <CardTitle>Barcode Management</CardTitle>
             </CardHeader>
             <CardContent>
               <div className="space-y-4">
@@ -964,7 +964,7 @@ export default function OrderDetailPage() {
                         size="sm"
                         disabled={isGeneratingQR}
                       >
-                        {isGeneratingQR ? "Regenerating..." : "Regenerate QR"}
+                        {isGeneratingQR ? "Regenerating..." : "Regenerate Barcode"}
                       </Button>
                       <Button
                         onClick={() => handlePrintQR("all")}
@@ -978,7 +978,7 @@ export default function OrderDetailPage() {
                     {/* Order QR Code */}
                     <div className="mb-6">
                       <h3 className="text-lg font-semibold text-gray-900 mb-4">
-                        Order QR Code
+                        Order Barcode
                       </h3>
                       <BarcodeDisplay
                         barcodeValue={qrCodes.orderQR.qrCode}
@@ -1000,7 +1000,7 @@ export default function OrderDetailPage() {
                             variant="outline"
                             size="sm"
                           >
-                            Print Bundle QRs
+                            Print Bundle Barcodes
                           </Button>
                         </div>
                         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
@@ -1033,6 +1033,7 @@ export default function OrderDetailPage() {
           </Card>
         </div>
       )}
+
       {activeTab === "process-steps" && (
         <div className="space-y-6">
           <Card>

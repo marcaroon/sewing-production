@@ -8,9 +8,16 @@ export interface BarcodeData {
   metadata?: Record<string, any>;
 }
 
+/**
+ * Normalize barcode string - remove dashes and spaces
+ */
+function normalizeBarcode(barcodeString: string): string {
+  return barcodeString.trim().replace(/[-\s]/g, "").toUpperCase();
+}
+
 // Generate Barcode string untuk Order
 export function generateOrderBarcode(orderNumber: string): string {
-  return orderNumber.replace(/-/g, ''); // Remove dashes for barcode
+  return normalizeBarcode(orderNumber);
 }
 
 // Generate Barcode string untuk Bundle
@@ -19,8 +26,9 @@ export function generateBundleBarcode(
   size: string,
   bundleIndex: number
 ): string {
+  const normalized = normalizeBarcode(orderNumber);
   const bundleNum = bundleIndex.toString().padStart(3, "0");
-  return `${orderNumber.replace(/-/g, '')}${size}${bundleNum}`;
+  return `${normalized}${size}${bundleNum}`;
 }
 
 // Parse Barcode string untuk mendapatkan info
@@ -32,23 +40,29 @@ export function parseBarcode(barcodeString: string): {
 } {
   const cleanCode = barcodeString.trim().toUpperCase();
   
-  // Order Barcode: ORD202400001 (13 chars tanpa dash)
-  if (cleanCode.length === 13 && cleanCode.startsWith("ORD")) {
-    // Reconstruct order number with dashes
-    const year = cleanCode.substring(3, 7);
-    const num = cleanCode.substring(7, 13);
+  // ✅ FIX: Support both formats (with and without dashes)
+  // Order Barcode: ORD-2025-00001 OR ORD202500001
+  const orderPattern = /^ORD[-]?(\d{4})[-]?(\d{5})$/;
+  const orderMatch = cleanCode.match(orderPattern);
+  
+  if (orderMatch) {
+    const year = orderMatch[1];
+    const num = orderMatch[2];
     return {
       type: "order",
       orderNumber: `ORD-${year}-${num}`,
     };
   }
 
-  // Bundle Barcode: ORD202400001M001 (14+ chars)
-  if (cleanCode.length >= 14 && cleanCode.startsWith("ORD")) {
-    const year = cleanCode.substring(3, 7);
-    const num = cleanCode.substring(7, 13);
-    const size = cleanCode.substring(13, cleanCode.length - 3);
-    const bundleNum = cleanCode.substring(cleanCode.length - 3);
+  // Bundle Barcode: ORD-2025-00001-M-001 OR ORD202500001M001
+  const bundlePattern = /^ORD[-]?(\d{4})[-]?(\d{5})[-]?([A-Z]+)[-]?(\d{3})$/;
+  const bundleMatch = cleanCode.match(bundlePattern);
+  
+  if (bundleMatch) {
+    const year = bundleMatch[1];
+    const num = bundleMatch[2];
+    const size = bundleMatch[3];
+    const bundleNum = bundleMatch[4];
 
     return {
       type: "bundle",
@@ -58,7 +72,7 @@ export function parseBarcode(barcodeString: string): {
     };
   }
 
-  throw new Error(`Invalid barcode format: ${barcodeString}`);
+  throw new Error(`Invalid barcode format: ${barcodeString}. Expected: ORD-YYYY-NNNNN or ORD-YYYY-NNNNN-S-NNN`);
 }
 
 // Create Barcode Data object untuk simpan di database
@@ -111,7 +125,11 @@ export function generateBarcodeLabelHTML(
       <div style="font-size: 14px; font-weight: bold; text-align: center; margin-top: 10px;">
         ${labelText}
       </div>
-      ${subtitle ? `<div style="font-size: 10px; text-align: center; color: #666; margin-top: 5px;">${subtitle}</div>` : ""}
+      ${
+        subtitle
+          ? `<div style="font-size: 10px; text-align: center; color: #666; margin-top: 5px;">${subtitle}</div>`
+          : ""
+      }
     </div>
     <script>
       JsBarcode("#barcode-${barcodeValue}", "${barcodeValue}", {

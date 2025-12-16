@@ -1,7 +1,7 @@
 // src/app/qr/scanner/page.tsx - COMPLETE VERSION
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { BarcodeScanner } from "@/components/BarcodeScanner";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/Card";
@@ -36,12 +36,52 @@ export default function QRScannerPage() {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string>("");
 
+  const [currentUser, setCurrentUser] = useState<{
+    name: string;
+    department: string;
+  } | null>(null);
+
+  const loadCurrentUser = async () => {
+    try {
+      const response = await fetch("/api/auth/me");
+      const result = await response.json();
+
+      if (result.success && result.user) {
+        setCurrentUser({
+          name: result.user.name,
+          department: result.user.department,
+        });
+      } else {
+        // Default fallback if auth not implemented yet
+        setCurrentUser({
+          name: "Anonymous User",
+          department: "Production Floor",
+        });
+      }
+    } catch (err) {
+      console.error("Error loading user:", err);
+      // Fallback
+      setCurrentUser({
+        name: "Anonymous User",
+        department: "Production Floor",
+      });
+    }
+  };
+
+  useEffect(() => {
+    loadCurrentUser();
+  }, []);
+
   const handleScanSuccess = async (decodedText: string) => {
     setIsLoading(true);
     setError("");
 
+    // ✅ Wait for user to load if not yet loaded
+    if (!currentUser) {
+      await loadCurrentUser();
+    }
+
     try {
-      // Call scan API
       const response = await fetch("/api/qr/scan", {
         method: "POST",
         headers: {
@@ -49,8 +89,8 @@ export default function QRScannerPage() {
         },
         body: JSON.stringify({
           qrCode: decodedText,
-          scannedBy: "Scanner User", // TODO: Get from auth
-          location: "Production Floor", // TODO: Get from device/user
+          scannedBy: currentUser?.name || "Unknown User",
+          location: currentUser?.department || "Production Floor",
           action: "view",
           deviceInfo: navigator.userAgent,
         }),
@@ -64,13 +104,19 @@ export default function QRScannerPage() {
         setError("");
       } else {
         // User-friendly error messages
-        if (result.error.includes("not found")) {
+        if (
+          result.error.includes("not found") ||
+          result.error.includes("Not found")
+        ) {
           setError(
             `❌ Barcode tidak ditemukan di sistem.\n\nCode: ${decodedText}\n\nPastikan barcode sudah di-generate untuk order ini.`
           );
         } else if (result.error.includes("Invalid barcode format")) {
           setError(
-            `❌ Format barcode tidak valid.\n\nCode: ${decodedText}\n\nFormat yang benar:\n• Order: ORD202400001\n• Bundle: ORD202400001M001`
+            `❌ Format barcode tidak valid.\n\nCode: ${decodedText}\n\n${
+              result.hint ||
+              "Format yang benar:\n• Order: ORD-2025-00001\n• Bundle: ORD-2025-00001-M-001"
+            }`
           );
         } else {
           setError(result.error || "Failed to scan barcode");
@@ -109,12 +155,6 @@ export default function QRScannerPage() {
       {/* Header */}
       <div className="mb-8">
         <div className="flex items-center gap-3 mb-4">
-          <button
-            onClick={() => router.push("/")}
-            className="text-gray-600 hover:text-gray-900 transition-colors"
-          >
-            <ArrowRight className="w-6 h-6 rotate-180" />
-          </button>
           <div>
             <h1 className="text-3xl font-bold text-gray-900 flex items-center gap-3">
               <Camera className="w-8 h-8 text-blue-600" />
@@ -123,6 +163,13 @@ export default function QRScannerPage() {
             <p className="text-gray-600 mt-1">
               Scan barcodes untuk tracking orders dan bundles
             </p>
+            {currentUser && (
+              <p className="text-sm text-gray-500 mt-1">
+                Logged in as:{" "}
+                <span className="font-semibold">{currentUser.name}</span> (
+                {currentUser.department})
+              </p>
+            )}
           </div>
         </div>
       </div>
@@ -167,7 +214,9 @@ export default function QRScannerPage() {
               <div className="flex items-center gap-4">
                 <div className="animate-spin rounded-full h-8 w-8 border-b-3 border-blue-600"></div>
                 <div>
-                  <p className="font-bold text-blue-900">Processing Barcode...</p>
+                  <p className="font-bold text-blue-900">
+                    Processing Barcode...
+                  </p>
                   <p className="text-sm text-blue-700 mt-1">
                     Fetching data from database
                   </p>
@@ -189,9 +238,7 @@ export default function QRScannerPage() {
             </CardHeader>
             <CardContent className="space-y-4 text-sm">
               <div className="bg-blue-50 border-2 border-blue-200 rounded-lg p-3">
-                <p className="font-bold text-blue-900 mb-2">
-                  📦 Order Barcode
-                </p>
+                <p className="font-bold text-blue-900 mb-2">📦 Order Barcode</p>
                 <p className="text-blue-800 mb-1 font-mono text-xs">
                   ORD202400001
                 </p>
@@ -350,9 +397,7 @@ export default function QRScannerPage() {
                     </p>
                   </div>
                   <div className="col-span-2 bg-white rounded-lg p-3 border border-blue-200">
-                    <p className="text-blue-700 font-semibold mb-2">
-                      Deadline
-                    </p>
+                    <p className="text-blue-700 font-semibold mb-2">Deadline</p>
                     <div className="flex items-center gap-2">
                       <Calendar className="w-4 h-4 text-blue-600" />
                       <p className="font-bold text-blue-900">

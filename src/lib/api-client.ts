@@ -167,14 +167,14 @@ class ApiClient {
       .filter((s) => s.status === "completed")
       .map((s) => s.processName);
   }
-  
+
   async getInProgressProcesses(orderId: string): Promise<string[]> {
     const steps = await this.getProcessStepsByOrderId(orderId);
     return steps
       .filter((s) => s.status === "in_progress" || s.status === "pending")
       .map((s) => s.processName);
   }
-  
+
   async getAllUnavailableProcesses(orderId: string): Promise<{
     completed: string[];
     inProgress: string[];
@@ -350,7 +350,7 @@ class ApiClient {
 
   async generateOrderQR(orderId: string): Promise<any> {
     const response = await this.request<{ success: boolean; data: any }>(
-      `/orders/${orderId}/generate-qr`,
+      `/orders/${orderId}/generate-barcode`,
       { method: "POST" }
     );
     return response.data;

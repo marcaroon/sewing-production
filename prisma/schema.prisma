@@ -562,19 +562,48 @@ model Bundle {
   @@map("bundles")
 }
 
-// User Model (unchanged)
 model User {
-  id         String   @id @default(cuid())
-  name       String
-  department String
-  role       String
-  email      String?  @unique
-  createdAt  DateTime @default(now())
-  updatedAt  DateTime @updatedAt
+  id            String   @id @default(cuid())
+  email         String   @unique
+  password      String   // Hashed password
+  name          String
+  department    String
+  role          String   // "admin", "ppic", "cutting", "sewing", "qc", "warehouse", "packing", "shipping"
+  
+  // Auth fields
+  emailVerified Boolean  @default(false)
+  isActive      Boolean  @default(true)
+  lastLogin     DateTime?
+  
+  // Profile
+  phone         String?
+  avatar        String?
+  
+  // Timestamps
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
 
+  @@index([email])
   @@index([department])
   @@index([role])
+  @@index([isActive])
   @@map("users")
+}
+
+// Session Model untuk track login sessions
+model Session {
+  id           String   @id @default(cuid())
+  userId       String
+  token        String   @unique
+  expiresAt    DateTime
+  ipAddress    String?
+  userAgent    String?
+  createdAt    DateTime @default(now())
+  
+  @@index([userId])
+  @@index([token])
+  @@index([expiresAt])
+  @@map("sessions")
 }
 
 // QR Code Models (unchanged)

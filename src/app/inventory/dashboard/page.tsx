@@ -45,7 +45,7 @@ export default function InventoryDashboardPage() {
   const loadDashboard = async () => {
     setIsLoading(true);
     setError("");
-    
+
     try {
       const response = await fetch("/api/inventory/dashboard");
       const result = await response.json();
@@ -150,7 +150,7 @@ export default function InventoryDashboardPage() {
       </div>
 
       {/* Stats Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
         {/* Total Materials */}
         <Card hover>
           <CardContent className="pt-6">
@@ -208,11 +208,24 @@ export default function InventoryDashboardPage() {
         </Card>
 
         {/* Low Stock Alerts */}
-        <Card hover className={totalLowStock > 0 ? "border-2 border-red-400" : ""}>
+        <Card
+          hover
+          className={totalLowStock > 0 ? "border-2 border-red-400" : ""}
+        >
           <CardContent className="pt-6">
             <div className="flex items-center justify-between mb-4">
-              <div className={`rounded-full p-3 ${totalLowStock > 0 ? 'bg-red-100 animate-pulse' : 'bg-orange-100'}`}>
-                <AlertTriangle className={`w-8 h-8 ${totalLowStock > 0 ? 'text-red-600' : 'text-orange-600'}`} />
+              <div
+                className={`rounded-full p-3 ${
+                  totalLowStock > 0
+                    ? "bg-red-100 animate-pulse"
+                    : "bg-orange-100"
+                }`}
+              >
+                <AlertTriangle
+                  className={`w-8 h-8 ${
+                    totalLowStock > 0 ? "text-red-600" : "text-orange-600"
+                  }`}
+                />
               </div>
               <Badge variant="danger" size="sm">
                 Alert
@@ -222,63 +235,38 @@ export default function InventoryDashboardPage() {
               <p className="text-sm font-semibold text-gray-600 uppercase mb-1">
                 Low Stock Items
               </p>
-              <p className={`text-3xl font-bold ${totalLowStock > 0 ? 'text-red-600' : 'text-gray-900'}`}>
+              <p
+                className={`text-3xl font-bold ${
+                  totalLowStock > 0 ? "text-red-600" : "text-gray-900"
+                }`}
+              >
                 {totalLowStock}
               </p>
               <p className="text-xs text-gray-600 mt-1">
-                {stats.lowStockMaterials} materials · {stats.lowStockAccessories} accessories
+                {stats.lowStockMaterials} materials ·{" "}
+                {stats.lowStockAccessories} accessories
               </p>
             </div>
             {totalLowStock > 0 && (
               <div className="mt-4 flex gap-2">
-                <Link href="/inventory/materials?lowStock=true" className="flex-1">
+                <Link
+                  href="/inventory/materials?lowStock=true"
+                  className="flex-1"
+                >
                   <button className="w-full text-xs text-red-600 font-semibold hover:text-red-800 border-2 border-red-200 rounded-lg py-1.5 hover:bg-red-50 transition-colors">
                     Materials
                   </button>
                 </Link>
-                <Link href="/inventory/accessories?lowStock=true" className="flex-1">
+                <Link
+                  href="/inventory/accessories?lowStock=true"
+                  className="flex-1"
+                >
                   <button className="w-full text-xs text-red-600 font-semibold hover:text-red-800 border-2 border-red-200 rounded-lg py-1.5 hover:bg-red-50 transition-colors">
                     Accessories
                   </button>
                 </Link>
               </div>
             )}
-          </CardContent>
-        </Card>
-
-        {/* Total Value */}
-        <Card hover>
-          <CardContent className="pt-6">
-            <div className="flex items-center justify-between mb-4">
-              <div className="bg-purple-100 rounded-full p-3">
-                <DollarSign className="w-8 h-8 text-purple-600" />
-              </div>
-              <Badge variant="purple" size="sm">
-                Value
-              </Badge>
-            </div>
-            <div>
-              <p className="text-sm font-semibold text-gray-600 uppercase mb-1">
-                Total Inventory Value
-              </p>
-              <p className="text-2xl font-bold text-gray-900">
-                Rp {formatNumber(totalValue)}
-              </p>
-              <div className="mt-2 pt-2 border-t border-gray-200">
-                <div className="flex justify-between text-xs text-gray-600">
-                  <span>Materials:</span>
-                  <span className="font-semibold">
-                    Rp {formatNumber(stats.totalMaterialValue)}
-                  </span>
-                </div>
-                <div className="flex justify-between text-xs text-gray-600 mt-1">
-                  <span>Accessories:</span>
-                  <span className="font-semibold">
-                    Rp {formatNumber(stats.totalAccessoryValue)}
-                  </span>
-                </div>
-              </div>
-            </div>
           </CardContent>
         </Card>
       </div>
@@ -288,7 +276,10 @@ export default function InventoryDashboardPage() {
         <h2 className="text-xl font-bold text-gray-900 mb-4">Quick Actions</h2>
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
           <Link href="/inventory/materials?lowStock=true">
-            <Card hover className="cursor-pointer border-2 border-transparent hover:border-orange-300 transition-all">
+            <Card
+              hover
+              className="cursor-pointer border-2 border-transparent hover:border-orange-300 transition-all"
+            >
               <CardContent className="pt-6">
                 <div className="flex items-center gap-4">
                   <div className="bg-orange-100 rounded-lg p-3">
@@ -309,7 +300,10 @@ export default function InventoryDashboardPage() {
           </Link>
 
           <Link href="/inventory/accessories?lowStock=true">
-            <Card hover className="cursor-pointer border-2 border-transparent hover:border-red-300 transition-all">
+            <Card
+              hover
+              className="cursor-pointer border-2 border-transparent hover:border-red-300 transition-all"
+            >
               <CardContent className="pt-6">
                 <div className="flex items-center gap-4">
                   <div className="bg-red-100 rounded-lg p-3">
@@ -330,7 +324,10 @@ export default function InventoryDashboardPage() {
           </Link>
 
           <Link href="/inventory/transactions">
-            <Card hover className="cursor-pointer border-2 border-transparent hover:border-blue-300 transition-all">
+            <Card
+              hover
+              className="cursor-pointer border-2 border-transparent hover:border-blue-300 transition-all"
+            >
               <CardContent className="pt-6">
                 <div className="flex items-center gap-4">
                   <div className="bg-blue-100 rounded-lg p-3">
@@ -475,65 +472,67 @@ export default function InventoryDashboardPage() {
           </CardHeader>
           <CardContent>
             <div className="space-y-2">
-              {stats.recentTransactions.slice(0, 10).map((tx: any, idx: number) => (
-                <div
-                  key={idx}
-                  className="flex items-center justify-between p-3 bg-gray-50 hover:bg-gray-100 rounded-lg transition-colors"
-                >
-                  <div className="flex items-center gap-3 flex-1">
-                    <div
-                      className={`rounded-full p-2 ${
-                        tx.transactionType === "in"
-                          ? "bg-green-100"
-                          : tx.transactionType === "out"
-                          ? "bg-red-100"
-                          : "bg-yellow-100"
-                      }`}
-                    >
-                      {tx.transactionType === "in" ? (
-                        <Package className="w-4 h-4 text-green-600" />
-                      ) : (
-                        <ShoppingCart className="w-4 h-4 text-red-600" />
-                      )}
-                    </div>
-                    <div className="flex-1">
-                      <p className="font-semibold text-gray-900 text-sm">
-                        {tx.type === "material"
-                          ? tx.material?.name
-                          : tx.accessory?.name}
-                      </p>
-                      <p className="text-xs text-gray-600">
-                        {formatDateTime(tx.transactionDate)}
-                      </p>
-                    </div>
-                  </div>
-                  <div className="flex items-center gap-4">
-                    <Badge
-                      variant={
-                        tx.transactionType === "in"
-                          ? "success"
-                          : tx.transactionType === "out"
-                          ? "danger"
-                          : "warning"
-                      }
-                      size="sm"
-                    >
-                      {tx.transactionType}
-                    </Badge>
-                    <div className="text-right">
-                      <p
-                        className={`font-bold ${
-                          tx.quantity > 0 ? "text-green-600" : "text-red-600"
+              {stats.recentTransactions
+                .slice(0, 10)
+                .map((tx: any, idx: number) => (
+                  <div
+                    key={idx}
+                    className="flex items-center justify-between p-3 bg-gray-50 hover:bg-gray-100 rounded-lg transition-colors"
+                  >
+                    <div className="flex items-center gap-3 flex-1">
+                      <div
+                        className={`rounded-full p-2 ${
+                          tx.transactionType === "in"
+                            ? "bg-green-100"
+                            : tx.transactionType === "out"
+                            ? "bg-red-100"
+                            : "bg-yellow-100"
                         }`}
                       >
-                        {tx.quantity > 0 ? "+" : ""}
-                        {formatNumber(tx.quantity)}
-                      </p>
-                      <p className="text-xs text-gray-600">{tx.unit}</p>
+                        {tx.transactionType === "in" ? (
+                          <Package className="w-4 h-4 text-green-600" />
+                        ) : (
+                          <ShoppingCart className="w-4 h-4 text-red-600" />
+                        )}
+                      </div>
+                      <div className="flex-1">
+                        <p className="font-semibold text-gray-900 text-sm">
+                          {tx.type === "material"
+                            ? tx.material?.name
+                            : tx.accessory?.name}
+                        </p>
+                        <p className="text-xs text-gray-600">
+                          {formatDateTime(tx.transactionDate)}
+                        </p>
+                      </div>
+                    </div>
+                    <div className="flex items-center gap-4">
+                      <Badge
+                        variant={
+                          tx.transactionType === "in"
+                            ? "success"
+                            : tx.transactionType === "out"
+                            ? "danger"
+                            : "warning"
+                        }
+                        size="sm"
+                      >
+                        {tx.transactionType}
+                      </Badge>
+                      <div className="text-right">
+                        <p
+                          className={`font-bold ${
+                            tx.quantity > 0 ? "text-green-600" : "text-red-600"
+                          }`}
+                        >
+                          {tx.quantity > 0 ? "+" : ""}
+                          {formatNumber(tx.quantity)}
+                        </p>
+                        <p className="text-xs text-gray-600">{tx.unit}</p>
+                      </div>
                     </div>
                   </div>
-                </div>
-              ))}
+                ))}
             </div>
           </CardContent>
         </Card>
