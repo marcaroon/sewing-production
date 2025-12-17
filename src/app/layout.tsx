@@ -6,6 +6,7 @@ import "./globals.css";
 import { getCurrentUser } from "@/lib/auth";
 import Sidebar from "@/components/Sidebar";
 import RealtimeClock from "@/components/RealTimeClock";
+import { AuthProvider } from "@/context/AuthContext";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -35,59 +36,61 @@ export default async function RootLayout({
   return (
     <html lang="id">
       <body className={inter.className}>
-        {showLayout && user ? (
-          // Authenticated Layout with Sidebar
-          <div className="flex h-screen overflow-hidden bg-gray-50">
-            {/* Sidebar */}
-            <Sidebar user={user} />
+        <AuthProvider>
+          {showLayout && user ? (
+            // Authenticated Layout with Sidebar
+            <div className="flex h-screen overflow-hidden bg-gray-50">
+              {/* Sidebar */}
+              <Sidebar user={user} />
 
-            {/* Main Content Area */}
-            <div className="flex-1 flex flex-col overflow-hidden">
-              {/* Top Header - Minimalis & Clean */}
-              <header className="bg-white border-b border-gray-200 shadow-sm">
-                <div className="px-6 py-4">
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <h2 className="text-lg font-bold text-gray-900">
-                        Welcome back, {user.name}
-                      </h2>
-                      <p className="text-sm text-gray-500">
-                        <RealtimeClock />
-                      </p>
-                    </div>
-
-                    {/* Quick Actions */}
-                    <div className="flex items-center gap-3">
-                      <div className="text-right">
-                        <p className="text-xs text-gray-500">
-                          {user.department}
+              {/* Main Content Area */}
+              <div className="flex-1 flex flex-col overflow-hidden">
+                {/* Top Header - Minimalis & Clean */}
+                <header className="bg-white border-b border-gray-200 shadow-sm">
+                  <div className="px-6 py-4">
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <h2 className="text-lg font-bold text-gray-900">
+                          Welcome back, {user.name}
+                        </h2>
+                        <p className="text-sm text-gray-500">
+                          <RealtimeClock />
                         </p>
+                      </div>
+
+                      {/* Quick Actions */}
+                      <div className="flex items-center gap-3">
+                        <div className="text-right">
+                          <p className="text-xs text-gray-500">
+                            {user.department}
+                          </p>
+                        </div>
                       </div>
                     </div>
                   </div>
-                </div>
-              </header>
+                </header>
 
-              {/* Main Content with Padding */}
-              <main className="flex-1 overflow-y-auto p-6 bg-gray-50">
-                <div className="max-w-7xl mx-auto">{children}</div>
-              </main>
+                {/* Main Content with Padding */}
+                <main className="flex-1 overflow-y-auto p-6 bg-gray-50">
+                  <div className="max-w-7xl mx-auto">{children}</div>
+                </main>
 
-              {/* Footer - Minimalis */}
-              <footer className="bg-white border-t border-gray-200 py-3 px-6">
-                <div className="flex items-center justify-between">
-                  <p className="text-xs text-gray-500">
-                    © 2025 Total Quality Indonesia
-                  </p>
-                  <p className="text-xs text-gray-400">Version 1.0.0</p>
-                </div>
-              </footer>
+                {/* Footer - Minimalis */}
+                <footer className="bg-white border-t border-gray-200 py-3 px-6">
+                  <div className="flex items-center justify-between">
+                    <p className="text-xs text-gray-500">
+                      © 2025 Total Quality Indonesia
+                    </p>
+                    <p className="text-xs text-gray-400">Version 1.0.0</p>
+                  </div>
+                </footer>
+              </div>
             </div>
-          </div>
-        ) : (
-          // Unauthenticated - Landing/Login/Register pages
-          <div className="min-h-screen">{children}</div>
-        )}
+          ) : (
+            // Unauthenticated - Landing/Login/Register pages
+            <div className="min-h-screen">{children}</div>
+          )}
+        </AuthProvider>
       </body>
     </html>
   );

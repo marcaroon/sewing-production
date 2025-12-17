@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
+import { useAuth } from "@/context/AuthContext";
 import { Modal, ModalFooter } from "./ui/Modal";
 import { Button } from "./ui/Button";
 import { Badge } from "./ui/Badge";
@@ -29,6 +30,7 @@ export const PPICAssignmentModal: React.FC<PPICAssignmentModalProps> = ({
   currentProcess,
   onSuccess,
 }) => {
+  const { user, checkPermission } = useAuth();
   const [completedProcesses, setCompletedProcesses] = useState<ProcessName[]>(
     []
   );
@@ -40,6 +42,18 @@ export const PPICAssignmentModal: React.FC<PPICAssignmentModalProps> = ({
   const [notes, setNotes] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState("");
+
+  const canAssign = checkPermission("canAssignProcess");
+
+  if (!canAssign) {
+    return null;
+  }
+
+  useEffect(() => {
+    if (user && isOpen) {
+      setAssignedBy(user.name);
+    }
+  }, [user, isOpen]);
 
   useEffect(() => {
     if (isOpen && orderId) {
@@ -243,12 +257,12 @@ export const PPICAssignmentModal: React.FC<PPICAssignmentModalProps> = ({
             <input
               type="text"
               value={assignedBy}
-              onChange={(e) => setAssignedBy(e.target.value)}
-              className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-              placeholder="Enter your name"
-              required
-              disabled={isSubmitting}
+              className="w-full px-4 py-2.5 border border-gray-300 rounded-lg bg-gray-100 font-medium text-gray-900"
+              disabled
             />
+            <p className="text-xs text-gray-600 mt-1">
+              Automatically filled with your name
+            </p>
           </div>
 
           {/* Notes */}

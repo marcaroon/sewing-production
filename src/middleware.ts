@@ -58,6 +58,9 @@ export async function middleware(request: NextRequest) {
       return NextResponse.redirect(loginUrl);
     }
 
+    if (pathname.startsWith("/admin")) {
+    }
+
     // Validate session token (optional: call API to validate)
     // For now, just check if token exists
     // You can add more validation by calling an API endpoint

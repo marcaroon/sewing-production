@@ -1,7 +1,9 @@
 // components/ProcessStepCards.tsx - IMPROVED VERSION
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
+import { useAuth } from "@/context/AuthContext";
+import { canModifyProcess } from "@/lib/permissions";
 import {
   ProcessState,
   ProcessStep,
@@ -53,6 +55,8 @@ export const ProcessStepCard: React.FC<ProcessStepCardProps> = ({
   processStep,
   onUpdate,
 }) => {
+  const { user, checkPermission } = useAuth();
+  const [availableUsers, setAvailableUsers] = useState<any[]>([]);
   const [isTransitionModalOpen, setIsTransitionModalOpen] = useState(false);
   const [isRejectModalOpen, setIsRejectModalOpen] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -167,6 +171,41 @@ export const ProcessStepCard: React.FC<ProcessStepCardProps> = ({
   const getStateLabel = (state: string): string => {
     return PROCESS_STATE_LABELS[state as ProcessState] || state;
   };
+
+  useEffect(() => {
+    if (transitionData.newState === "assigned") {
+      loadAvailableUsers();
+    }
+  }, [transitionData.newState, processStep.processName]);
+
+  const loadAvailableUsers = async () => {
+    try {
+      const response = await fetch(
+        `/api/users/by-role?processName=${processStep.processName}`
+      );
+      const result = await response.json();
+
+      if (result.success) {
+        setAvailableUsers(result.data);
+      }
+    } catch (error) {
+      console.error("Failed to load users:", error);
+    }
+  };
+
+  const canModify = user
+    ? canModifyProcess(user.role as any, processStep.processName as any)
+    : false;
+
+  // Auto-fill performedBy dengan current user
+  useEffect(() => {
+    if (user && !transitionData.performedBy) {
+      setTransitionData((prev) => ({
+        ...prev,
+        performedBy: user.name,
+      }));
+    }
+  }, [user]);
 
   const completionRate =
     processStep.quantityReceived > 0
@@ -365,28 +404,38 @@ export const ProcessStepCard: React.FC<ProcessStepCardProps> = ({
             </div>
           )}
 
-          {/* Actions */}
-          {currentState !== "completed" && validNextStates.length > 0 && (
-            <div className="flex gap-2 pt-3">
-              <Button
-                onClick={() => setIsTransitionModalOpen(true)}
-                variant="primary"
-                size="md"
-                className="flex-1"
-              >
-                <ArrowRight className="w-4 h-4" />
-                Next: {PROCESS_STATE_LABELS[validNextStates[0]]}
-              </Button>
-              {currentState === "in_progress" && (
+          {canModify &&
+            currentState !== "completed" &&
+            validNextStates.length > 0 && (
+              <div className="flex gap-2 pt-3">
                 <Button
-                  onClick={() => setIsRejectModalOpen(true)}
-                  variant="danger"
+                  onClick={() => setIsTransitionModalOpen(true)}
+                  variant="primary"
                   size="md"
+                  className="flex-1"
                 >
-                  <AlertCircle className="w-4 h-4" />
-                  Reject
+                  <ArrowRight className="w-4 h-4" />
+                  Next: {PROCESS_STATE_LABELS[validNextStates[0]]}
                 </Button>
-              )}
+                {currentState === "in_progress" && (
+                  <Button
+                    onClick={() => setIsRejectModalOpen(true)}
+                    variant="danger"
+                    size="md"
+                  >
+                    <AlertCircle className="w-4 h-4" />
+                    Reject
+                  </Button>
+                )}
+              </div>
+            )}
+
+          {/* Read-only message jika tidak bisa modify */}
+          {!canModify && (
+            <div className="mt-4 p-3 bg-gray-50 border border-gray-200 rounded-lg">
+              <p className="text-sm text-gray-600 text-center">
+                👁️ View Only - You don't have permission to modify this process
+              </p>
             </div>
           )}
         </CardContent>
@@ -617,23 +666,16 @@ export const ProcessStepCard: React.FC<ProcessStepCardProps> = ({
             {/* Performed By */}
             <div>
               <label className="block text-sm font-medium text-gray-900 mb-2">
-                Your Name (Performed By) *
+                Performed By (You) *
               </label>
               <input
                 type="text"
                 value={transitionData.performedBy}
-                onChange={(e) =>
-                  setTransitionData({
-                    ...transitionData,
-                    performedBy: e.target.value,
-                  })
-                }
-                className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                placeholder="Enter your name"
-                required
+                className="w-full px-4 py-2.5 border border-gray-300 rounded-lg bg-gray-100 font-medium text-gray-900"
+                disabled
               />
               <p className="text-xs text-gray-600 mt-1">
-                Person responsible for this transition
+                Automatically filled with your name
               </p>
             </div>
 
@@ -648,8 +690,7 @@ export const ProcessStepCard: React.FC<ProcessStepCardProps> = ({
                   <label className="block text-sm font-medium text-gray-900 mb-2">
                     Assign To (Operator/PIC) *
                   </label>
-                  <input
-                    type="text"
+                  <select
                     value={transitionData.assignedTo}
                     onChange={(e) =>
                       setTransitionData({
@@ -658,12 +699,21 @@ export const ProcessStepCard: React.FC<ProcessStepCardProps> = ({
                       })
                     }
                     className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
-                    placeholder="Operator or PIC name"
                     required
-                  />
+                  >
+                    <option value="">-- Select User --</option>
+                    {availableUsers.map((user) => (
+                      <option key={user.id} value={user.name}>
+                        {user.name} ({user.role} - {user.department})
+                      </option>
+                    ))}
+                  </select>
+                  <p className="text-xs text-purple-700 mt-1">
+                    Only users with access to this process are shown
+                  </p>
                 </div>
 
-                {/* SEWING LINE - Only show for "sewing" process */}
+                {/* Sewing Line selection - only for sewing process */}
                 {processStep.processName === "sewing" && (
                   <div>
                     <label className="block text-sm font-medium text-gray-900 mb-2">
@@ -686,9 +736,6 @@ export const ProcessStepCard: React.FC<ProcessStepCardProps> = ({
                       <option value="SL-03">Sewing Line 3 (SL-03)</option>
                       <option value="SL-04">Sewing Line 4 (SL-04)</option>
                     </select>
-                    <p className="text-xs text-purple-700 mt-1">
-                      ⚠️ Sewing line selection is required for sewing process
-                    </p>
                   </div>
                 )}
               </div>
@@ -972,18 +1019,17 @@ export const ProcessStepCard: React.FC<ProcessStepCardProps> = ({
             {/* Reported By */}
             <div>
               <label className="block text-sm font-medium text-gray-900 mb-2">
-                Reported By *
+                Reported By (You) *
               </label>
               <input
                 type="text"
-                value={rejectData.reportedBy}
-                onChange={(e) =>
-                  setRejectData({ ...rejectData, reportedBy: e.target.value })
-                }
-                className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-transparent"
-                placeholder="Your name"
-                required
+                value={user?.name || ""}
+                className="w-full px-4 py-2.5 border border-gray-300 rounded-lg bg-gray-100 font-medium text-gray-900"
+                disabled
               />
+              <p className="text-xs text-gray-600 mt-1">
+                Automatically filled with your name
+              </p>
             </div>
 
             {/* Summary */}

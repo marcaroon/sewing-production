@@ -21,9 +21,11 @@ import {
   GARMENT_CATEGORIES,
 } from "@/lib/constants-new";
 import { formatDate, formatDateTime, formatNumber } from "@/lib/utils";
+import { useAuth } from "@/context/AuthContext";
 import { TransferLogList } from "@/components/TransferLogList";
 
 export default function OrderDetailPage() {
+  const { user, checkPermission } = useAuth();
   const router = useRouter();
   const params = useParams();
   const id = params.id as string;
@@ -38,6 +40,9 @@ export default function OrderDetailPage() {
   const [error, setError] = useState<string>("");
   const [isGeneratingQR, setIsGeneratingQR] = useState(false);
   const [isPPICModalOpen, setIsPPICModalOpen] = useState(false);
+
+  const canEdit = checkPermission("canEditOrder");
+  const canAssign = checkPermission("canAssignProcess");
 
   useEffect(() => {
     loadOrderData();
@@ -236,7 +241,7 @@ export default function OrderDetailPage() {
               {BUYER_TYPE_LABELS[order.buyer.type]}
             </Badge>
             {/* Show Assign button only if currentState is at_ppic */}
-            {order.currentState === "at_ppic" && (
+            {canAssign && order.currentState === "at_ppic" && (
               <Button
                 onClick={() => setIsPPICModalOpen(true)}
                 variant="primary"
@@ -964,7 +969,9 @@ export default function OrderDetailPage() {
                         size="sm"
                         disabled={isGeneratingQR}
                       >
-                        {isGeneratingQR ? "Regenerating..." : "Regenerate Barcode"}
+                        {isGeneratingQR
+                          ? "Regenerating..."
+                          : "Regenerate Barcode"}
                       </Button>
                       <Button
                         onClick={() => handlePrintQR("all")}
