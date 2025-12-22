@@ -3,29 +3,38 @@
 
 import { NextRequest, NextResponse } from "next/server";
 import prisma from "@/lib/prisma";
-import { 
+import {
   isValidStateTransition,
   getNextProcess,
   getNextPhase,
-  PROCESS_DEPARTMENT_MAP 
+  PROCESS_DEPARTMENT_MAP,
 } from "@/lib/constants-new";
+import { canExecuteProcess, UserRole } from "@/lib/permissions";
+import { ProcessName } from "@/lib/types-new";
+import { getCurrentUser } from "@/lib/auth";
 
 export async function POST(
   request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    const currentUser = await getCurrentUser();
+
+    if (!currentUser) {
+      return NextResponse.json(
+        {
+          success: false,
+          error: "Authentication required. Please log in.",
+        },
+        { status: 401 }
+      );
+    }
+
     const processStepId = (await params).id;
     const body = await request.json();
-    
-    const { 
-      newState, 
-      performedBy, 
-      assignedTo, 
-      assignedLine,
-      quantity,
-      notes 
-    } = body;
+
+    const { newState, performedBy, assignedTo, assignedLine, quantity, notes } =
+      body;
 
     if (!newState || !performedBy) {
       return NextResponse.json(
@@ -55,6 +64,21 @@ export async function POST(
       );
     }
 
+    if (
+      !canExecuteProcess(
+        currentUser.role as UserRole,
+        processStep.processName as ProcessName
+      )
+    ) {
+      return NextResponse.json(
+        {
+          success: false,
+          error: `You don't have permission to execute ${processStep.processName}...`,
+        },
+        { status: 403 }
+      );
+    }
+
     // Determine current state
     let currentState = "at_ppic";
     if (processStep.completedTime) currentState = "completed";
@@ -64,7 +88,10 @@ export async function POST(
 
     if (!isValidStateTransition(currentState as any, newState)) {
       return NextResponse.json(
-        { success: false, error: `Invalid transition from ${currentState} to ${newState}` },
+        {
+          success: false,
+          error: `Invalid transition from ${currentState} to ${newState}`,
+        },
         { status: 400 }
       );
     }
@@ -99,11 +126,11 @@ export async function POST(
         case "completed":
           updateData.completedTime = now;
           updateData.status = "completed";
-          
+
           // IMPORTANT: Set quantityCompleted from quantity parameter
           const completedQty = quantity || processStep.quantityReceived;
           updateData.quantityCompleted = completedQty;
-          
+
           // Calculate durations
           if (processStep.startedTime) {
             const procStart = new Date(processStep.startedTime);
@@ -149,15 +176,15 @@ export async function POST(
       // ====== WHEN COMPLETED: Update Order totalCompleted & Create Transfer Log ======
       if (newState === "completed") {
         const completedQty = quantity || processStep.quantityReceived;
-        
+
         // CRITICAL FIX: Update Order's totalCompleted
         // This is what makes the progress bar work!
         await tx.order.update({
           where: { id: processStep.orderId },
-          data: { 
+          data: {
             currentState: "at_ppic",
             totalCompleted: completedQty, // Update total completed for progress bar
-            updatedAt: now 
+            updatedAt: now,
           },
         });
 
@@ -177,18 +204,24 @@ export async function POST(
           const count = await tx.transferLog.count({
             where: { transferNumber: { startsWith: `TRF-${year}` } },
           });
-          const transferNumber = `TRF-${year}-${String(count + 1).padStart(5, "0")}`;
+          const transferNumber = `TRF-${year}-${String(count + 1).padStart(
+            5,
+            "0"
+          )}`;
 
           // Prepare reject summary
-          const rejectSummary = processStep.rejects.length > 0 
-            ? JSON.stringify(processStep.rejects.map(r => ({
-                type: r.rejectType,
-                category: r.rejectCategory,
-                quantity: r.quantity,
-                description: r.description,
-                action: r.action,
-              })))
-            : null;
+          const rejectSummary =
+            processStep.rejects.length > 0
+              ? JSON.stringify(
+                  processStep.rejects.map((r) => ({
+                    type: r.rejectType,
+                    category: r.rejectCategory,
+                    quantity: r.quantity,
+                    description: r.description,
+                    action: r.action,
+                  }))
+                )
+              : null;
 
           // Create Transfer Log (Surat Jalan)
           transferLog = await tx.transferLog.create({
@@ -210,7 +243,9 @@ export async function POST(
               processingDuration: updatedProcessStep.processingDuration,
               waitingDuration: updatedProcessStep.waitingDuration,
               status: "pending",
-              notes: notes || `Transfer from ${processStep.processName} to ${nextProcess}`,
+              notes:
+                notes ||
+                `Transfer from ${processStep.processName} to ${nextProcess}`,
             },
           });
 

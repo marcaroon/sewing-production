@@ -56,7 +56,9 @@ function LoginForm() {
           <div className="inline-flex items-center justify-center bg-blue-600 rounded-full p-4 mb-4 shadow-xl">
             <Factory className="w-12 h-12 text-white" />
           </div>
-          <h1 className="text-3xl font-bold text-gray-900 mb-2">Welcome Back</h1>
+          <h1 className="text-3xl font-bold text-gray-900 mb-2">
+            Welcome Back
+          </h1>
           <p className="text-gray-600">
             Login to your Production Management System
           </p>
@@ -73,7 +75,9 @@ function LoginForm() {
                 <div className="bg-red-50 border-2 border-red-300 rounded-lg p-4 flex items-start gap-3">
                   <AlertCircle className="w-5 h-5 text-red-600 mt-0.5" />
                   <div>
-                    <p className="text-sm font-bold text-red-900">Login Failed</p>
+                    <p className="text-sm font-bold text-red-900">
+                      Login Failed
+                    </p>
                     <p className="text-sm text-red-800 mt-1">{error}</p>
                   </div>
                 </div>
@@ -92,7 +96,7 @@ function LoginForm() {
                     onChange={(e) =>
                       setFormData({ ...formData, email: e.target.value })
                     }
-                    className="w-full pl-12 pr-4 py-3 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 font-medium"
+                    className="w-full pl-12 pr-4 py-3 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-gray-400 font-medium"
                     placeholder="your.email@company.com"
                     required
                     disabled={isSubmitting}
@@ -113,7 +117,7 @@ function LoginForm() {
                     onChange={(e) =>
                       setFormData({ ...formData, password: e.target.value })
                     }
-                    className="w-full pl-12 pr-4 py-3 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 font-medium"
+                    className="w-full pl-12 pr-4 py-3 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-gray-400 font-medium"
                     placeholder="••••••••"
                     required
                     disabled={isSubmitting}

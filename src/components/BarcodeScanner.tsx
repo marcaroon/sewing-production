@@ -1,7 +1,7 @@
-// src/components/BarcodeScanner.tsx - FIXED WITH ZXING
 "use client";
 
 import React, { useEffect, useRef, useState } from "react";
+import { Html5Qrcode } from "html5-qrcode";
 import { Card, CardContent, CardHeader, CardTitle } from "./ui/Card";
 import { Button } from "./ui/Button";
 import { Badge } from "./ui/Badge";
@@ -18,239 +18,178 @@ export const BarcodeScanner: React.FC<BarcodeScannerProps> = ({
   onScanError,
   fps = 10,
 }) => {
+  const scannerRef = useRef<Html5Qrcode | null>(null);
   const [isScanning, setIsScanning] = useState(false);
-  const [isCameraReady, setIsCameraReady] = useState(false);
-  const [lastScan, setLastScan] = useState<string>("");
+  const [cameraError, setCameraError] = useState("");
+  const [lastScan, setLastScan] = useState("");
   const [manualCode, setManualCode] = useState("");
-  const [cameraError, setCameraError] = useState<string>("");
-
-  const videoRef = useRef<HTMLVideoElement>(null);
-  const canvasRef = useRef<HTMLCanvasElement>(null);
-  const streamRef = useRef<MediaStream | null>(null);
-  const scanIntervalRef = useRef<number | null>(null);
+  const [debugInfo, setDebugInfo] = useState<string[]>([]);
   const isMountedRef = useRef(true);
-  const codeReaderRef = useRef<any>(null);
+
+  const scannerId = "html5qr-code-full-region";
+
+  const addDebugLog = (message: string) => {
+    console.log("[Scanner Debug]", message);
+    setDebugInfo((prev) => [
+      ...prev.slice(-4),
+      `${new Date().toLocaleTimeString()}: ${message}`,
+    ]);
+  };
 
   useEffect(() => {
     isMountedRef.current = true;
-
-    // Load ZXing library
-    const script = document.createElement("script");
-    script.src = "https://unpkg.com/@zxing/library@0.20.0/umd/index.min.js";
-    script.async = true;
-    script.onload = () => {
-      console.log("✅ ZXing library loaded");
-    };
-    document.body.appendChild(script);
+    addDebugLog("Component mounted");
 
     return () => {
       isMountedRef.current = false;
-      cleanupScanner();
-      if (document.body.contains(script)) {
-        document.body.removeChild(script);
-      }
+      addDebugLog("Component unmounting, cleaning up...");
+      stopScanning();
     };
   }, []);
 
-  const cleanupScanner = () => {
-    // Stop scanning interval
-    if (scanIntervalRef.current) {
-      clearInterval(scanIntervalRef.current);
-      scanIntervalRef.current = null;
-    }
+  const stopScanning = async () => {
+    try {
+      if (scannerRef.current) {
+        addDebugLog("Stopping scanner...");
+        const scanner = scannerRef.current;
 
-    // Stop media stream
-    if (streamRef.current) {
-      streamRef.current.getTracks().forEach((track) => track.stop());
-      streamRef.current = null;
-    }
+        if (scanner.isScanning) {
+          await scanner.stop();
+          addDebugLog("Scanner stopped");
+        }
 
-    // Clear video
-    if (videoRef.current) {
-      videoRef.current.srcObject = null;
+        await scanner.clear();
+        scannerRef.current = null;
+        addDebugLog("Scanner cleared");
+      }
+    } catch (err: any) {
+      console.error("Error stopping scanner:", err);
+      addDebugLog(`Stop error: ${err.message}`);
+    } finally {
+      if (isMountedRef.current) {
+        setIsScanning(false);
+      }
     }
-
-    codeReaderRef.current = null;
   };
 
   const startScanning = async () => {
     setCameraError("");
-    setIsCameraReady(false);
-
-    // Wait for ZXing to load
-    if (typeof (window as any).ZXing === "undefined") {
-      setCameraError("Scanner library loading... Please wait.");
-      setTimeout(startScanning, 1000);
-      return;
-    }
+    addDebugLog("Start scanning initiated...");
 
     try {
-      cleanupScanner();
-      await new Promise((resolve) => setTimeout(resolve, 200));
-
-      if (!isMountedRef.current) return;
-
-      // Initialize ZXing BrowserMultiFormatReader
-      const { BrowserMultiFormatReader } = (window as any).ZXing;
-      codeReaderRef.current = new BrowserMultiFormatReader();
-
-      // Get video devices
-      const devices = await navigator.mediaDevices.enumerateDevices();
-      const videoDevices = devices.filter((d) => d.kind === "videoinput");
-
-      if (videoDevices.length === 0) {
-        throw new Error("No camera found");
-      }
-
-      // Prefer back camera
-      const backCamera =
-        videoDevices.find((d) =>
-          d.label.toLowerCase().includes("back")
-        ) || videoDevices[0];
-
-      // Get camera stream
-      const constraints = {
-        video: {
-          deviceId: backCamera.deviceId,
-          facingMode: "environment",
-          width: { ideal: 1280 },
-          height: { ideal: 720 },
-        },
-      };
-
-      const stream = await navigator.mediaDevices.getUserMedia(constraints);
-      streamRef.current = stream;
+      // Stop existing scanner first
+      await stopScanning();
+      await new Promise((resolve) => setTimeout(resolve, 150));
 
       if (!isMountedRef.current) {
-        stream.getTracks().forEach((track) => track.stop());
+        addDebugLog("Component unmounted, aborting start");
         return;
       }
 
-      // Set video stream
-      if (videoRef.current) {
-        videoRef.current.srcObject = stream;
-        await videoRef.current.play();
+      addDebugLog("Getting cameras...");
+      const devices = await Html5Qrcode.getCameras();
+
+      if (!devices || devices.length === 0) {
+        throw new Error("No camera found on this device");
       }
 
-      setIsScanning(true);
-      setIsCameraReady(true);
-      setCameraError("");
+      addDebugLog(
+        `Found ${devices.length} camera(s): ${devices
+          .map((d) => d.label)
+          .join(", ")}`
+      );
 
-      // Start scanning loop
-      scanIntervalRef.current = window.setInterval(() => {
-        scanFrame();
-      }, 1000 / fps);
+      scannerRef.current = new Html5Qrcode(scannerId);
+      addDebugLog("Scanner instance created");
+
+      const backCamera = devices.find(
+        (device) =>
+          device.label.toLowerCase().includes("back") ||
+          device.label.toLowerCase().includes("rear")
+      );
+      const environmentCamera = devices.find((device) =>
+        device.label.toLowerCase().includes("environment")
+      );
+
+      const selectedCamera = backCamera || environmentCamera || devices[0];
+      addDebugLog(`Selected camera: ${selectedCamera.label}`);
+
+      const config = {
+        fps: fps,
+        qrbox: { width: 600, height: 250 },
+        // aspectRatio: 1.0,
+      };
+
+      addDebugLog("Starting camera with config...");
+
+      await scannerRef.current.start(
+        selectedCamera.id,
+        config,
+        (decodedText, decodedResult) => {
+          const normalized = decodedText.trim().toUpperCase();
+          addDebugLog(`🟢Scanned: ${normalized}`);
+          console.log("Full scan result:", decodedResult);
+
+          if (normalized !== lastScan) {
+            setLastScan(normalized);
+            onScanSuccess(normalized);
+            addDebugLog(`Callback triggered for: ${normalized}`);
+          } else {
+            addDebugLog("Duplicate scan, ignored");
+          }
+        },
+        (errorMessage) => {
+          if (Math.random() < 0.01) {
+            console.log("Scan frame (no code detected)");
+          }
+        }
+      );
+
+      if (isMountedRef.current) {
+        setIsScanning(true);
+        addDebugLog("🟢 Scanner started successfully!");
+      }
     } catch (err: any) {
-      console.error("Camera error:", err);
+      console.error("Scanner start error:", err);
+      addDebugLog(`Start failed: ${err.message}`);
 
       if (isMountedRef.current) {
         setIsScanning(false);
-        setIsCameraReady(false);
 
-        let errorMsg = "Failed to start camera";
+        let errorMessage = "Failed to start camera";
 
         if (err.name === "NotAllowedError") {
-          errorMsg = "❌ Camera access denied. Please allow camera permissions.";
+          errorMessage =
+            "Camera permission denied. Please allow camera access in browser settings.";
         } else if (err.name === "NotFoundError") {
-          errorMsg = "❌ No camera found. Please connect a camera.";
+          errorMessage = "No camera found on this device.";
         } else if (err.name === "NotReadableError") {
-          errorMsg = "❌ Camera is being used by another app.";
+          errorMessage = "Camera is already in use by another application.";
+        } else if (err.name === "OverconstrainedError") {
+          errorMessage =
+            "Camera constraints could not be satisfied. Try using a different camera.";
         } else if (err.message) {
-          errorMsg = err.message;
+          errorMessage = err.message;
         }
 
-        setCameraError(errorMsg);
-        if (onScanError) onScanError(errorMsg);
+        setCameraError(errorMessage);
+        if (onScanError) {
+          onScanError(errorMessage);
+        }
       }
-
-      cleanupScanner();
     }
-  };
-
-  const scanFrame = () => {
-    if (
-      !videoRef.current ||
-      !canvasRef.current ||
-      !codeReaderRef.current ||
-      !isMountedRef.current
-    ) {
-      return;
-    }
-
-    try {
-      const video = videoRef.current;
-      const canvas = canvasRef.current;
-      const context = canvas.getContext("2d");
-
-      if (!context || video.readyState !== video.HAVE_ENOUGH_DATA) {
-        return;
-      }
-
-      // Set canvas size to video size
-      canvas.width = video.videoWidth;
-      canvas.height = video.videoHeight;
-
-      // Draw video frame to canvas
-      context.drawImage(video, 0, 0, canvas.width, canvas.height);
-
-      // Get image data
-      const imageData = context.getImageData(0, 0, canvas.width, canvas.height);
-
-      // Decode barcode
-      codeReaderRef.current
-        .decodeFromImageData(imageData)
-        .then((result: any) => {
-          if (result && result.text && isMountedRef.current) {
-            const decodedText = result.text.trim().toUpperCase();
-
-            if (decodedText !== lastScan) {
-              console.log("✅ Scanned:", decodedText);
-              setLastScan(decodedText);
-              onScanSuccess(decodedText);
-
-              // Play beep
-              try {
-                const audio = new Audio(
-                  "data:audio/wav;base64,UklGRnoGAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YQoGAACBhYqFbF1fdJivrJBhNjVgodDbq2EcBj+a2/LDciUFLIHO8tiJNwgZaLvt559NEAxQp+PwtmMcBjiR1/LMeSwFJHfH8N2QQAoUXrTp66hVFApGn+DyvmwhBTGH0fPTgjMGHm7A7+OZRQ0PVqzn77BdGAg+ltryxnMpBSl+zPLaizsIGGS57OaVSAwOUKXh8bllHAU2j9Xx0H0vBSF1xe/glEILElyt5O+rWBUIQ5zb8sFuJAUuhM/z1YU2Bhxqvu7mnUoPDlOo5O+zYBoGPJPU8tN+LQUie8rx3I4+CRZiturqpVITC0mi3vK8aB8GM4nP8tiJOQcZZr3s5qBLDRBVq+Xxtnwj"
-                );
-                audio.play().catch(() => {});
-              } catch {}
-            }
-          }
-        })
-        .catch((err: any) => {
-          // Expected errors during scanning
-          if (
-            err.message &&
-            !err.message.includes("NotFoundException") &&
-            !err.message.includes("No MultiFormat")
-          ) {
-            console.warn("Decode warning:", err.message);
-          }
-        });
-    } catch (err) {
-      console.warn("Scan frame error:", err);
-    }
-  };
-
-  const stopScanning = () => {
-    setIsScanning(false);
-    setIsCameraReady(false);
-    cleanupScanner();
   };
 
   const handleManualSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    
-    // Normalize input: remove spaces and dashes, convert to uppercase
+
     const normalized = manualCode.trim().replace(/[-\s]/g, "").toUpperCase();
-    
-    if (normalized) {
-      console.log("📝 Manual input:", normalized);
-      setLastScan(normalized);
-      onScanSuccess(normalized);
-      setManualCode("");
-    }
+    if (!normalized) return;
+
+    addDebugLog(`Manual input: ${normalized}`);
+    setLastScan(normalized);
+    onScanSuccess(normalized);
+    setManualCode("");
   };
 
   return (
@@ -261,65 +200,61 @@ export const BarcodeScanner: React.FC<BarcodeScannerProps> = ({
             <Camera className="w-5 h-5 text-blue-600" />
             <CardTitle>Barcode Scanner</CardTitle>
           </div>
-          <div className="flex items-center gap-2">
-            {isCameraReady && (
-              <Badge variant="success" size="sm" className="animate-pulse">
-                <CheckCircle className="w-3 h-3 mr-1" />
-                Ready
-              </Badge>
-            )}
-            <Badge variant={isScanning ? "success" : "default"} size="sm">
-              {isScanning ? "Scanning" : "Stopped"}
-            </Badge>
-          </div>
+          <Badge variant={isScanning ? "success" : "default"}>
+            {isScanning ? "🟢 Scanning" : "⚫ Stopped"}
+          </Badge>
         </div>
       </CardHeader>
 
       <CardContent className="space-y-4">
-        {/* Camera Error */}
+        {/* Error */}
         {cameraError && (
-          <div className="bg-red-50 border-2 border-red-300 rounded-lg p-4">
-            <div className="flex items-start gap-3">
-              <AlertTriangle className="w-5 h-5 text-red-600 mt-0.5" />
-              <div>
-                <p className="text-sm font-bold text-red-900">Camera Error</p>
-                <p className="text-sm text-red-800 mt-1">{cameraError}</p>
-              </div>
+          <div className="bg-red-50 border border-red-300 rounded p-3 flex gap-2">
+            <AlertTriangle className="w-4 h-4 text-red-600 shrink-0 mt-0.5" />
+            <div className="flex-1">
+              <p className="text-sm text-red-700 font-semibold">Camera Error</p>
+              <p className="text-sm text-red-600 mt-1">{cameraError}</p>
             </div>
           </div>
         )}
 
-        {/* Scanner Area */}
-        <div className="relative">
-          <video
-            ref={videoRef}
-            className={`w-full rounded-lg ${!isScanning ? "hidden" : ""}`}
-            playsInline
-            muted
-            style={{ maxHeight: "400px", objectFit: "cover" }}
-          />
-          <canvas ref={canvasRef} className="hidden" />
+        {/* Debug Info */}
+        {debugInfo.length > 0 && (
+          <div className="bg-gray-50 border border-gray-300 rounded p-3">
+            <p className="text-xs font-semibold text-gray-700 mb-2">
+              Debug Log:
+            </p>
+            <div className="space-y-1">
+              {debugInfo.map((log, idx) => (
+                <p key={idx} className="text-xs text-gray-600 font-mono">
+                  {log}
+                </p>
+              ))}
+            </div>
+          </div>
+        )}
 
+        {/* Scanner Container - SIMPLIFIED */}
+        <div className="w-full">
           {!isScanning && (
-            <div className="flex flex-col items-center justify-center bg-gray-100 rounded-xl p-12 border-2 border-dashed border-gray-400">
-              <Camera className="w-20 h-20 text-gray-400 mb-4" />
-              <p className="text-gray-700 font-semibold mb-2">Ready to Scan</p>
-              <p className="text-gray-500 text-sm">
-                Click Start to activate camera
+            <div className="w-full h-100 flex flex-col items-center justify-center bg-gray-100 rounded-lg border-2 border-gray-300">
+              <Camera className="w-16 h-16 text-gray-400 mb-3" />
+              <p className="font-semibold text-gray-700 text-lg">
+                Ready to Scan
+              </p>
+              <p className="text-sm text-gray-500 mt-2">
+                Click "Start Scanning" below
               </p>
             </div>
           )}
 
-          {isScanning && !isCameraReady && (
-            <div className="absolute inset-0 flex items-center justify-center bg-gray-900 bg-opacity-50 rounded-lg">
-              <div className="bg-white rounded-lg p-6">
-                <div className="animate-spin rounded-full h-12 w-12 border-b-4 border-blue-600 mx-auto mb-4"></div>
-                <p className="text-sm font-semibold text-gray-700">
-                  Starting camera...
-                </p>
-              </div>
-            </div>
-          )}
+          {/* Scanner renders here */}
+          <div
+            id={scannerId}
+            style={{
+              display: isScanning ? "block" : "none",
+            }}
+          />
         </div>
 
         {/* Controls */}
@@ -329,59 +264,42 @@ export const BarcodeScanner: React.FC<BarcodeScannerProps> = ({
               onClick={startScanning}
               variant="primary"
               className="flex-1"
-              size="lg"
             >
-              <Camera className="w-5 h-5 mr-2" />
-              Start Scanning
+              <Camera className="mr-2 w-4 h-4" /> Start Scanning
             </Button>
           ) : (
-            <Button
-              onClick={stopScanning}
-              variant="danger"
-              className="flex-1"
-              size="lg"
-            >
-              <X className="w-5 h-5 mr-2" />
-              Stop
+            <Button onClick={stopScanning} variant="danger" className="flex-1">
+              <X className="mr-2 w-4 h-4" /> Stop Scanning
             </Button>
           )}
         </div>
 
         {/* Manual Input */}
-        <div className="border-t-2 border-gray-200 pt-4">
-          <p className="text-sm font-bold text-gray-900 mb-3">
-            Or enter manually:
+        <div className="pt-4 border-t">
+          <p className="text-sm font-semibold text-gray-700 mb-2">
+            Manual Entry (for testing):
           </p>
           <form onSubmit={handleManualSubmit} className="flex gap-2">
             <input
-              type="text"
               value={manualCode}
               onChange={(e) => setManualCode(e.target.value.toUpperCase())}
-              placeholder="ORD202400001 or ORD-2024-00001"
-              className="flex-1 px-4 py-3 border-2 border-gray-300 rounded-lg font-mono font-bold text-sm"
+              className="flex-1 border rounded px-3 py-2 font-mono text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+              placeholder="ORD202400001 or ORD202400001M001"
             />
-            <Button
-              type="submit"
-              variant="primary"
-              size="lg"
-              disabled={!manualCode.trim()}
-            >
+            <Button type="submit" disabled={!manualCode.trim()}>
               Submit
             </Button>
           </form>
-          <p className="text-xs text-gray-500 mt-2">
-            💡 Tip: You can enter with or without dashes (e.g., ORD202400001 or ORD-2024-00001)
-          </p>
         </div>
 
         {/* Last Scan */}
         {lastScan && (
-          <div className="bg-green-50 border-2 border-green-300 rounded-lg p-4">
+          <div className="bg-green-50 border-2 border-green-400 rounded p-4">
             <div className="flex items-center gap-2 mb-2">
               <CheckCircle className="w-5 h-5 text-green-600" />
-              <p className="text-sm font-bold text-green-900">Last Scanned:</p>
+              <p className="font-bold text-green-800">Last Scanned Code:</p>
             </div>
-            <p className="font-mono font-bold text-green-900 bg-white border border-green-200 rounded px-3 py-2">
+            <p className="font-mono text-lg text-green-900 bg-white rounded px-3 py-2 border border-green-300">
               {lastScan}
             </p>
           </div>

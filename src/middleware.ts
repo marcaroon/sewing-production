@@ -37,6 +37,18 @@ export async function middleware(request: NextRequest) {
     pathname.startsWith(route)
   );
 
+  for (const [route, allowedRoles] of Object.entries(PROTECTED_ROUTES)) {
+    if (pathname.startsWith(route)) {
+      // Validate user role (you'd need to decode token or call API)
+      // For now, we'll rely on frontend checks
+      // But ideally, verify role from session token here
+      // Example: const userRole = await getUserRoleFromToken(sessionToken);
+      // if (!allowedRoles.includes(userRole)) {
+      //   return NextResponse.redirect(new URL("/unauthorized", request.url));
+      // }
+    }
+  }
+
   // If public route, allow access
   if (isPublicRoute) {
     // If user is logged in and tries to access login/register, redirect to dashboard

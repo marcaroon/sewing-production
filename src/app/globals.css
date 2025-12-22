@@ -24,3 +24,22 @@ body {
   color: var(--foreground);
   font-family: Arial, Helvetica, sans-serif;
 }
+
+/* Fix untuk html5-qrcode video display */
+#html5qr-code-full-region video {
+  width: 100% !important;
+  height: auto !important;
+  display: block !important;
+  object-fit: cover !important;
+}
+
+#html5qr-code-full-region {
+  width: 100% !important;
+  min-height: 400px !important;
+}
+
+/* Canvas untuk scanner box */
+#html5qr-code-full-region canvas {
+  width: 100% !important;
+  height: auto !important;
+}

@@ -152,7 +152,7 @@ export const AccessoryForm: React.FC<AccessoryFormProps> = ({
                 onChange={(e) =>
                   setFormData({ ...formData, accessoryCode: e.target.value })
                 }
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                className="w-full px-4 py-2 text-gray-400 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
                 placeholder="ACC-001"
                 required
                 disabled={isEdit || isSubmitting}
@@ -168,7 +168,7 @@ export const AccessoryForm: React.FC<AccessoryFormProps> = ({
                 onChange={(e) =>
                   setFormData({ ...formData, name: e.target.value })
                 }
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                className="w-full px-4 py-2 text-gray-400 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
                 placeholder="Plastic Button"
                 required
                 disabled={isSubmitting}
@@ -187,7 +187,7 @@ export const AccessoryForm: React.FC<AccessoryFormProps> = ({
                 onChange={(e) =>
                   setFormData({ ...formData, category: e.target.value })
                 }
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                className="w-full px-4 py-2 text-gray-400 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
                 required
                 disabled={isSubmitting}
               >
@@ -207,7 +207,7 @@ export const AccessoryForm: React.FC<AccessoryFormProps> = ({
                 onChange={(e) =>
                   setFormData({ ...formData, unit: e.target.value })
                 }
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                className="w-full px-4 py-2 text-gray-400 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
                 required
                 disabled={isSubmitting}
               >
@@ -232,7 +232,7 @@ export const AccessoryForm: React.FC<AccessoryFormProps> = ({
                 onChange={(e) =>
                   setFormData({ ...formData, color: e.target.value })
                 }
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                className="w-full px-4 py-2 text-gray-400 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
                 placeholder="Black, White, etc"
                 disabled={isSubmitting}
               />
@@ -247,7 +247,7 @@ export const AccessoryForm: React.FC<AccessoryFormProps> = ({
                 onChange={(e) =>
                   setFormData({ ...formData, size: e.target.value })
                 }
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                className="w-full px-4 py-2 text-gray-400 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
                 placeholder="10mm, 15mm, etc"
                 disabled={isSubmitting}
               />
@@ -265,7 +265,7 @@ export const AccessoryForm: React.FC<AccessoryFormProps> = ({
               onChange={(e) =>
                 setFormData({ ...formData, supplier: e.target.value })
               }
-              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+              className="w-full px-4 py-2 text-gray-400 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
               placeholder="Supplier name"
               disabled={isSubmitting}
             />
@@ -286,7 +286,7 @@ export const AccessoryForm: React.FC<AccessoryFormProps> = ({
                     minimumStock: parseInt(e.target.value) || 0,
                   })
                 }
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                className="w-full px-4 py-2 text-gray-400 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
                 min="0"
                 required
                 disabled={isSubmitting}
@@ -305,7 +305,7 @@ export const AccessoryForm: React.FC<AccessoryFormProps> = ({
                     reorderPoint: parseInt(e.target.value) || 0,
                   })
                 }
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                className="w-full px-4 py-2 text-gray-400 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
                 min="0"
                 required
                 disabled={isSubmitting}
@@ -328,7 +328,7 @@ export const AccessoryForm: React.FC<AccessoryFormProps> = ({
                     unitPrice: parseFloat(e.target.value) || 0,
                   })
                 }
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                className="w-full px-4 py-2 text-gray-400 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
                 step="0.01"
                 min="0"
                 disabled={isSubmitting}
@@ -348,7 +348,7 @@ export const AccessoryForm: React.FC<AccessoryFormProps> = ({
                       initialStock: parseInt(e.target.value) || 0,
                     })
                   }
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                  className="w-full px-4 py-2 text-gray-400 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
                   min="0"
                   disabled={isSubmitting}
                 />

@@ -91,12 +91,8 @@ export async function getCurrentUser(): Promise<SessionUser | null> {
       return null;
     }
 
-    // Find session
     const session = await prisma.session.findUnique({
       where: { token },
-      include: {
-        // Note: We'll need to add relation in schema
-      },
     });
 
     if (!session || session.expiresAt < new Date()) {
@@ -158,7 +154,10 @@ export async function logout(): Promise<void> {
 /**
  * Check if user has permission
  */
-export function hasPermission(user: SessionUser, requiredRole: string): boolean {
+export function hasPermission(
+  user: SessionUser,
+  requiredRole: string
+): boolean {
   const roleHierarchy = {
     admin: 5,
     ppic: 4,
@@ -171,7 +170,8 @@ export function hasPermission(user: SessionUser, requiredRole: string): boolean 
   };
 
   const userLevel = roleHierarchy[user.role as keyof typeof roleHierarchy] || 0;
-  const requiredLevel = roleHierarchy[requiredRole as keyof typeof roleHierarchy] || 0;
+  const requiredLevel =
+    roleHierarchy[requiredRole as keyof typeof roleHierarchy] || 0;
 
   return userLevel >= requiredLevel;
 }

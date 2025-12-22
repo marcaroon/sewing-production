@@ -49,9 +49,12 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
     const permissionFn = Permissions[permission];
     if (typeof permissionFn === "function") {
-      // Cast to any to allow dynamic parameter passing
-      // This is safe because we're just forwarding the arguments
-      return (permissionFn as any)(user.role as UserRole, ...args);
+      try {
+        return (permissionFn as any)(user.role as UserRole, ...args);
+      } catch (error) {
+        console.error("Permission check error:", error);
+        return false;
+      }
     }
 
     return false;

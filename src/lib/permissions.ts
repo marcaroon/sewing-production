@@ -16,8 +16,8 @@ export type UserRole =
 
 // Mapping Role ke Process yang mereka handle
 export const ROLE_PROCESS_MAP: Record<UserRole, ProcessName[]> = {
-  admin: [], // Admin bisa semua
-  ppic: ["draft", "material_request"], // PPIC handle assignment
+  admin: [], // Admin bisa semua - akan di-handle khusus
+  ppic: ["draft", "material_request"],
   warehouse: ["material_issued"],
   cutting: ["cutting"],
   numbering: ["numbering"],
@@ -29,30 +29,31 @@ export const ROLE_PROCESS_MAP: Record<UserRole, ProcessName[]> = {
   shipping: ["loading", "shipping", "delivered"],
 };
 
-// Check if user can modify a specific process
 export function canModifyProcess(
   userRole: UserRole,
   processName: ProcessName
 ): boolean {
-  // Admin dapat modify semua
   if (userRole === "admin") return true;
 
-  // PPIC dapat assign process
-  if (userRole === "ppic") return true;
+  if (userRole === "ppic") {
+    // PPIC hanya bisa modify draft dan material_request
+    return ["draft", "material_request"].includes(processName);
+  }
 
-  // Check if process is in user's role mapping
-  return ROLE_PROCESS_MAP[userRole]?.includes(processName) || false;
+  const allowedProcesses = ROLE_PROCESS_MAP[userRole] || [];
+  return allowedProcesses.includes(processName);
 }
 
-// Check if user can view process (semua bisa view)
 export function canViewProcess(
   userRole: UserRole,
   processName: ProcessName
 ): boolean {
-  return true; // Semua role bisa view
+  if (userRole === "admin" || userRole === "ppic") return true;
+
+  const allowedProcesses = ROLE_PROCESS_MAP[userRole] || [];
+  return allowedProcesses.includes(processName);
 }
 
-// Get users by process (untuk dropdown assign)
 export function getRoleForProcess(processName: ProcessName): UserRole[] {
   const roles: UserRole[] = ["admin", "ppic"]; // Admin dan PPIC selalu included
 
@@ -65,26 +66,53 @@ export function getRoleForProcess(processName: ProcessName): UserRole[] {
   return roles;
 }
 
+export function canExecuteProcess(
+  userRole: UserRole,
+  processName: ProcessName
+): boolean {
+  if (userRole === "admin") return true;
+
+  if (userRole === "ppic") return false;
+
+  const allowedProcesses = ROLE_PROCESS_MAP[userRole] || [];
+  return allowedProcesses.includes(processName);
+}
+
 // Permission helpers
 export const Permissions = {
-  // Order permissions
   canCreateOrder: (role: UserRole) => ["admin", "ppic"].includes(role),
   canEditOrder: (role: UserRole) => ["admin", "ppic"].includes(role),
   canDeleteOrder: (role: UserRole) => ["admin"].includes(role),
-  canViewOrder: (role: UserRole) => true,
+  canViewOrder: (role: UserRole) => true, // Semua bisa view
 
-  // Process permissions
   canAssignProcess: (role: UserRole) => ["admin", "ppic"].includes(role),
-  canTransitionProcess: (role: UserRole, processName: ProcessName) =>
-    canModifyProcess(role, processName),
-  canRecordReject: (role: UserRole, processName: ProcessName) =>
-    canModifyProcess(role, processName),
+
+  canTransitionProcess: (role: UserRole, processName: ProcessName) => {
+    // Admin bisa transition semua
+    if (role === "admin") return true;
+    // PPIC tidak bisa transition (hanya assign)
+    if (role === "ppic") return false;
+    // User lain check mapping
+    return canExecuteProcess(role, processName);
+  },
+
+  canRecordReject: (role: UserRole, processName: ProcessName) => {
+    // Admin bisa record reject semua
+    if (role === "admin") return true;
+    // PPIC tidak bisa record reject
+    if (role === "ppic") return false;
+    // User lain check mapping
+    return canExecuteProcess(role, processName);
+  },
+
+  canViewProcess: (role: UserRole, processName: ProcessName) =>
+    canViewProcess(role, processName),
 
   // Transfer permissions
   canCreateTransfer: (role: UserRole, processName: ProcessName) =>
-    canModifyProcess(role, processName),
+    canExecuteProcess(role, processName),
   canReceiveTransfer: (role: UserRole, processName: ProcessName) =>
-    canModifyProcess(role, processName),
+    canExecuteProcess(role, processName),
 
   // Inventory permissions
   canManageInventory: (role: UserRole) => ["admin", "warehouse"].includes(role),

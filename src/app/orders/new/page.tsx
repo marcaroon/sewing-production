@@ -256,7 +256,7 @@ export default function NewOrderPage() {
                   onChange={(e) =>
                     setFormData({ ...formData, buyerId: e.target.value })
                   }
-                  className={`w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent ${
+                  className={`w-full px-4 py-2 text-gray-400 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent ${
                     errors.buyerId ? "border-red-500" : "border-gray-300"
                   }`}
                   disabled={isSubmitting}
@@ -322,7 +322,7 @@ export default function NewOrderPage() {
                   onChange={(e) =>
                     setFormData({ ...formData, styleId: e.target.value })
                   }
-                  className={`w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent ${
+                  className={`w-full px-4 py-2 text-gray-400 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent ${
                     errors.styleId ? "border-red-500" : "border-gray-300"
                   }`}
                   disabled={isSubmitting}
@@ -378,7 +378,7 @@ export default function NewOrderPage() {
                       processTemplateId: e.target.value,
                     })
                   }
-                  className={`w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent ${
+                  className={`w-full px-4 py-2 text-gray-400 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent ${
                     errors.processTemplateId
                       ? "border-red-500"
                       : "border-gray-300"
@@ -536,7 +536,7 @@ export default function NewOrderPage() {
                   onChange={(e) =>
                     setFormData({ ...formData, orderDate: e.target.value })
                   }
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  className="w-full px-4 py-2 text-gray-400 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                   disabled={isSubmitting}
                 />
               </div>
@@ -554,7 +554,7 @@ export default function NewOrderPage() {
                       productionDeadline: e.target.value,
                     })
                   }
-                  className={`w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent ${
+                  className={`w-full px-4 py-2 text-gray-400 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent ${
                     errors.productionDeadline
                       ? "border-red-500"
                       : "border-gray-300"
@@ -581,7 +581,7 @@ export default function NewOrderPage() {
                       deliveryDeadline: e.target.value,
                     })
                   }
-                  className={`w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent ${
+                  className={`w-full px-4 py-2 text-gray-400 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent ${
                     errors.deliveryDeadline
                       ? "border-red-500"
                       : "border-gray-300"
@@ -614,7 +614,7 @@ export default function NewOrderPage() {
                 onChange={(e) =>
                   setFormData({ ...formData, createdBy: e.target.value })
                 }
-                className={`w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent ${
+                className={`w-full px-4 py-2 text-gray-400 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent ${
                   errors.createdBy ? "border-red-500" : "border-gray-300"
                 }`}
                 placeholder="Your name"
@@ -634,7 +634,7 @@ export default function NewOrderPage() {
                   setFormData({ ...formData, notes: e.target.value })
                 }
                 rows={4}
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                className="w-full px-4 py-2 border text-gray-400 border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                 placeholder="Any special instructions or notes..."
                 disabled={isSubmitting}
               />

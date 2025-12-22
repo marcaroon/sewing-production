@@ -26,6 +26,7 @@ import {
   SlidersHorizontal,
   ChevronDown,
 } from "lucide-react";
+import { useAuth } from "@/context/AuthContext";
 
 interface FilterState {
   searchTerm: string;
@@ -52,6 +53,8 @@ interface FilterState {
 }
 
 export default function AdvancedOrdersPage() {
+  const { user } = useAuth();
+  const canCreateOrder = ["admin", "ppic"].includes(user?.role || "");
   const [orders, setOrders] = useState<Order[]>([]);
   const [filteredOrders, setFilteredOrders] = useState<Order[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -429,11 +432,13 @@ export default function AdvancedOrdersPage() {
             >
               Export CSV
             </button>
-            <Link href="/orders/new">
-              <button className="bg-blue-600 text-white px-6 py-3 rounded-lg hover:bg-blue-700 transition-all font-semibold shadow-sm hover:shadow-md flex items-center gap-2">
-                New Order
-              </button>
-            </Link>
+            {canCreateOrder && (
+              <Link href="/orders/new">
+                <button className="bg-blue-600 text-white px-6 py-3 rounded-lg hover:bg-blue-700 transition-all font-semibold shadow-sm hover:shadow-md flex items-center gap-2">
+                  New Order
+                </button>
+              </Link>
+            )}
           </div>
         </div>
 

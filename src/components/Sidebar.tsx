@@ -21,6 +21,7 @@ import {
 
 type SidebarProps = {
   user: {
+    role: string;
     name: string;
     department: string;
   };
@@ -43,6 +44,8 @@ export default function Sidebar({ user }: SidebarProps) {
     await fetch("/api/auth/logout", { method: "POST" });
     window.location.href = "/";
   };
+
+  const canCreateOrder = ["admin", "ppic"].includes(user?.role || "");
 
   return (
     <>
@@ -115,15 +118,16 @@ export default function Sidebar({ user }: SidebarProps) {
               );
             })}
 
-            {/* New Order Button */}
-            <Link
-              href="/orders/new"
-              onClick={() => setMobileOpen(false)}
-              className="flex items-center gap-3 px-4 py-3 rounded-xl bg-blue-600 text-white font-semibold shadow-lg hover:bg-blue-700 transition-all mt-4"
-            >
-              <Plus className="w-5 h-5" />
-              <span>New Order</span>
-            </Link>
+            {canCreateOrder && (
+              <Link
+                href="/orders/new"
+                onClick={() => setMobileOpen(false)}
+                className="flex items-center gap-3 px-4 py-3 rounded-xl bg-blue-600 text-white font-semibold shadow-lg hover:bg-blue-700 transition-all mt-4"
+              >
+                <Plus className="w-5 h-5" />
+                <span>New Order</span>
+              </Link>
+            )}
           </nav>
 
           {/* User Section */}

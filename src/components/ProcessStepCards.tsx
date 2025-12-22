@@ -207,6 +207,30 @@ export const ProcessStepCard: React.FC<ProcessStepCardProps> = ({
     }
   }, [user]);
 
+  const canView = user
+    ? checkPermission("canViewProcess", processStep.processName)
+    : false;
+
+  const canExecute = user
+    ? checkPermission("canTransitionProcess", processStep.processName)
+    : false;
+
+  const canReject = user
+    ? checkPermission("canRecordReject", processStep.processName)
+    : false;
+
+  if (!canView) {
+    return (
+      <Card className="border-l-4 border-l-gray-400">
+        <CardContent className="py-8 text-center">
+          <p className="text-gray-600">
+            You don't have permission to view this process
+          </p>
+        </CardContent>
+      </Card>
+    );
+  }
+
   const completionRate =
     processStep.quantityReceived > 0
       ? Math.round(
@@ -404,7 +428,7 @@ export const ProcessStepCard: React.FC<ProcessStepCardProps> = ({
             </div>
           )}
 
-          {canModify &&
+          {canExecute &&
             currentState !== "completed" &&
             validNextStates.length > 0 && (
               <div className="flex gap-2 pt-3">
@@ -417,7 +441,7 @@ export const ProcessStepCard: React.FC<ProcessStepCardProps> = ({
                   <ArrowRight className="w-4 h-4" />
                   Next: {PROCESS_STATE_LABELS[validNextStates[0]]}
                 </Button>
-                {currentState === "in_progress" && (
+                {canReject && currentState === "in_progress" && (
                   <Button
                     onClick={() => setIsRejectModalOpen(true)}
                     variant="danger"
@@ -430,12 +454,36 @@ export const ProcessStepCard: React.FC<ProcessStepCardProps> = ({
               </div>
             )}
 
-          {/* Read-only message jika tidak bisa modify */}
-          {!canModify && (
+          {/* ✅ PERBAIKAN: Message yang lebih jelas */}
+          {!canExecute && (
             <div className="mt-4 p-3 bg-gray-50 border border-gray-200 rounded-lg">
-              <p className="text-sm text-gray-600 text-center">
-                👁️ View Only - You don't have permission to modify this process
-              </p>
+              <div className="flex items-center gap-2 text-sm text-gray-600">
+                <svg
+                  className="w-4 h-4"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"
+                  />
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"
+                  />
+                </svg>
+                <span>
+                  {user?.role === "ppic"
+                    ? "You can assign but cannot execute this process"
+                    : "View Only - This process is handled by " +
+                      processStep.department}
+                </span>
+              </div>
             </div>
           )}
         </CardContent>

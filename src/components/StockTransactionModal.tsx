@@ -144,7 +144,7 @@ export const StockTransactionModal: React.FC<StockTransactionModalProps> = ({
               onChange={(e) =>
                 setFormData({ ...formData, transactionType: e.target.value })
               }
-              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+              className="w-full px-4 py-2 text-gray-400 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
               required
               disabled={isSubmitting}
             >
@@ -174,7 +174,7 @@ export const StockTransactionModal: React.FC<StockTransactionModalProps> = ({
                         : parseInt(e.target.value) || 0,
                   })
                 }
-                className="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                className="flex-1 px-4 py-2 text-gray-400 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
                 step={type === "material" ? "0.01" : "1"}
                 min="0"
                 required
@@ -198,7 +198,7 @@ export const StockTransactionModal: React.FC<StockTransactionModalProps> = ({
                 onChange={(e) =>
                   setFormData({ ...formData, referenceType: e.target.value })
                 }
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                className="w-full px-4 py-2 text-gray-400 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
                 placeholder="Purchase, Order, etc"
                 disabled={isSubmitting}
               />
@@ -213,7 +213,7 @@ export const StockTransactionModal: React.FC<StockTransactionModalProps> = ({
                 onChange={(e) =>
                   setFormData({ ...formData, referenceId: e.target.value })
                 }
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                className="w-full px-4 py-2 text-gray-400 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
                 placeholder="PO#, Order#, etc"
                 disabled={isSubmitting}
               />
@@ -230,7 +230,7 @@ export const StockTransactionModal: React.FC<StockTransactionModalProps> = ({
               onChange={(e) =>
                 setFormData({ ...formData, remarks: e.target.value })
               }
-              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+              className="w-full px-4 py-2 text-gray-400 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
               rows={3}
               placeholder="Additional notes..."
               disabled={isSubmitting}

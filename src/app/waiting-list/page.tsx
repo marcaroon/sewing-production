@@ -2,11 +2,14 @@
 
 import { useEffect, useState } from "react";
 import apiClient from "@/lib/api-client";
-import { ProcessStep } from "@/lib/types-new";
+import { ProcessName, ProcessStep } from "@/lib/types-new";
 import { ProcessStepCard } from "@/components/ProcessStepCards";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/Card";
+import { useAuth } from "@/context/AuthContext";
+import { canModifyProcess, UserRole } from "@/lib/permissions";
 
 export default function WaitingListPage() {
+  const { user } = useAuth();
   const [waitingItems, setWaitingItems] = useState<ProcessStep[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState("");
@@ -21,7 +24,21 @@ export default function WaitingListPage() {
     
     try {
       const items = await apiClient.getWaitingList();
-      setWaitingItems(items);
+      
+      const filteredItems = items.filter(item => {
+        // Admin dan PPIC lihat semua
+        if (["admin", "ppic"].includes(user?.role || "")) {
+          return true;
+        }
+        
+        // User lain hanya lihat process mereka
+        return canModifyProcess(
+          user?.role as UserRole, 
+          item.processName as ProcessName
+        );
+      });
+      
+      setWaitingItems(filteredItems);
     } catch (err) {
       console.error("Error loading waiting list:", err);
       setError("Failed to load waiting list");
