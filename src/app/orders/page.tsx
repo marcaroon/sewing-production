@@ -383,10 +383,10 @@ export default function AdvancedOrdersPage() {
   if (isLoading) {
     return (
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <div className="flex items-center justify-center min-h-[400px]">
+        <div className="flex items-center justify-center min-h-100">
           <div className="text-center">
             <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
-            <p className="text-gray-700 font-medium">Loading orders...</p>
+            <p className="text-gray-700 font-medium">Memuat semua order...</p>
           </div>
         </div>
       </div>
@@ -406,7 +406,7 @@ export default function AdvancedOrdersPage() {
                 onClick={loadOrders}
                 className="mt-3 text-sm text-red-800 font-semibold underline hover:text-red-900"
               >
-                Try Again
+                Coba lagi
               </button>
             </div>
           </div>
@@ -422,7 +422,7 @@ export default function AdvancedOrdersPage() {
         <div className="flex items-center justify-between mb-4">
           <div>
             <h1 className="text-3xl font-bold text-gray-900 mb-2">
-              All Orders
+              Semua Order
             </h1>
           </div>
           <div className="flex items-center gap-3">
@@ -430,12 +430,12 @@ export default function AdvancedOrdersPage() {
               onClick={exportToCSV}
               className="bg-green-600 text-white px-4 py-2.5 rounded-lg hover:bg-green-700 transition-all font-semibold shadow-sm hover:shadow-md flex items-center gap-2"
             >
-              Export CSV
+              Ekspor CSV
             </button>
             {canCreateOrder && (
               <Link href="/orders/new">
                 <button className="bg-blue-600 text-white px-6 py-3 rounded-lg hover:bg-blue-700 transition-all font-semibold shadow-sm hover:shadow-md flex items-center gap-2">
-                  New Order
+                  Order Baru
                 </button>
               </Link>
             )}
@@ -465,7 +465,7 @@ export default function AdvancedOrdersPage() {
                 <Factory className="w-8 h-8 text-orange-600" />
                 <div>
                   <p className="text-xs font-semibold text-gray-600 uppercase">
-                    In Progress
+                    Sedang Berjalan
                   </p>
                   <p className="text-2xl font-bold text-orange-600">
                     {inProgress}
@@ -480,7 +480,7 @@ export default function AdvancedOrdersPage() {
                 <CheckCircle2 className="w-8 h-8 text-green-600" />
                 <div>
                   <p className="text-xs font-semibold text-gray-600 uppercase">
-                    Completed
+                    Selesai
                   </p>
                   <p className="text-2xl font-bold text-green-600">
                     {completed}
@@ -495,7 +495,7 @@ export default function AdvancedOrdersPage() {
                 <PauseCircle className="w-8 h-8 text-red-600" />
                 <div>
                   <p className="text-xs font-semibold text-gray-600 uppercase">
-                    On Hold
+                    Ditahan
                   </p>
                   <p className="text-2xl font-bold text-red-600">{onHold}</p>
                 </div>
@@ -513,7 +513,7 @@ export default function AdvancedOrdersPage() {
             {/* Search */}
             <div>
               <label className="text-sm font-bold text-gray-900 mb-2 flex items-center gap-2">
-                Search
+                Pencarian
               </label>
               <input
                 type="text"
@@ -529,7 +529,7 @@ export default function AdvancedOrdersPage() {
             {/* Process Filter */}
             <div>
               <label className="text-sm font-bold text-gray-900 mb-2 flex items-center gap-2">
-                Process
+                Proses
               </label>
               <select
                 value={filters.processFilter}
@@ -541,7 +541,7 @@ export default function AdvancedOrdersPage() {
                 }
                 className="w-full px-4 py-2.5 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-gray-900 font-medium"
               >
-                <option value="all">All Processes</option>
+                <option value="all">Semua Proses</option>
                 {processOptions.slice(1).map((process) => (
                   <option key={process} value={process}>
                     {PROCESS_LABELS[process as ProcessName]}
@@ -553,7 +553,7 @@ export default function AdvancedOrdersPage() {
             {/* Date Range Type */}
             <div>
               <label className="text-sm font-bold text-gray-900 mb-2 flex items-center gap-2">
-                Date Range
+                Rentan Tanggal
               </label>
               <select
                 value={filters.dateRange.type}
@@ -568,11 +568,11 @@ export default function AdvancedOrdersPage() {
                 }
                 className="w-full px-4 py-2.5 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-gray-900 font-medium"
               >
-                <option value="all">All Time</option>
-                <option value="today">Today</option>
-                <option value="week">Last 7 Days</option>
-                <option value="month">Last Month</option>
-                <option value="year">Last Year</option>
+                <option value="all">Semua Waktu </option>
+                <option value="today">Hari ini</option>
+                <option value="week">7 Hari Terakhir</option>
+                <option value="month">Sebulan Terakhir</option>
+                <option value="year">Setahun Terakhir</option>
                 <option value="custom">Custom Range</option>
               </select>
             </div>
@@ -580,7 +580,7 @@ export default function AdvancedOrdersPage() {
             {/* Sort By */}
             <div>
               <label className="text-sm font-bold text-gray-900 mb-2 flex items-center gap-2">
-                Sort By
+                Urutkan Berdasarkan
               </label>
               <div className="flex gap-2">
                 <select
@@ -588,12 +588,12 @@ export default function AdvancedOrdersPage() {
                   onChange={(e) => handleSort(e.target.value as any)}
                   className="flex-1 px-4 py-2.5 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-gray-900 font-medium"
                 >
-                  <option value="date">Order Date</option>
-                  <option value="deadline">Deadline</option>
-                  <option value="process">Process</option>
+                  <option value="date">Tanggal Order</option>
+                  <option value="deadline">Batas Waktu</option>
+                  <option value="process">Proses</option>
                   <option value="buyer">Buyer</option>
-                  <option value="completion">Completion</option>
-                  <option value="quantity">Quantity</option>
+                  <option value="completion">Penyelesaian</option>
+                  <option value="quantity">Jumlah</option>
                 </select>
                 <button
                   onClick={() =>
@@ -608,7 +608,7 @@ export default function AdvancedOrdersPage() {
                   }
                 >
                   <ChevronDown
-                    className={`w-5 h-5 transition-transform ${
+                    className={`w-5 h-5 transition-transform text-gray-600 ${
                       sortConfig.direction === "asc" ? "rotate-180" : ""
                     }`}
                   />
@@ -622,7 +622,7 @@ export default function AdvancedOrdersPage() {
             <div className="grid grid-cols-2 gap-4 mb-4 p-4 bg-blue-50 border-2 border-blue-200 rounded-lg">
               <div>
                 <label className="block text-sm font-semibold text-blue-900 mb-2">
-                  Start Date
+                  Tanggal Mulai
                 </label>
                 <input
                   type="date"
@@ -641,7 +641,7 @@ export default function AdvancedOrdersPage() {
               </div>
               <div>
                 <label className="block text-sm font-semibold text-blue-900 mb-2">
-                  End Date
+                  Tanggal Selesai
                 </label>
                 <input
                   type="date"

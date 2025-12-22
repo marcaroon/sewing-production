@@ -142,12 +142,11 @@ export const PPICAssignmentModal: React.FC<PPICAssignmentModalProps> = ({
             </h4>
             <div className="text-sm space-y-1">
               <p className="text-blue-800">
-                <span className="font-medium">Just Completed:</span>{" "}
+                <span className="font-medium">Telah Selesai:</span>{" "}
                 {PROCESS_LABELS[currentProcess as ProcessName]}
               </p>
               <p className="text-blue-800">
-                <span className="font-medium">Status:</span> Awaiting PPIC
-                assignment
+                <span className="font-medium">Status:</span> Menunggu PPIC
               </p>
             </div>
           </div>
@@ -156,10 +155,10 @@ export const PPICAssignmentModal: React.FC<PPICAssignmentModalProps> = ({
           {completedProcesses.length > 0 && (
             <div className="bg-green-50 border border-green-200 rounded-lg p-4">
               <h4 className="font-semibold text-green-900 mb-3">
-                🚫 Unavailable Processes
+                🚫 Proses tidak tersedia
               </h4>
               <p className="text-xs text-green-700 mb-2">
-                These processes are either completed or currently in progress
+                Proses ini telah selesai atau sedang dalam progres
               </p>
               <div className="flex flex-wrap gap-2">
                 {completedProcesses.map((process) => (
@@ -169,7 +168,7 @@ export const PPICAssignmentModal: React.FC<PPICAssignmentModalProps> = ({
                 ))}
               </div>
               <p className="text-xs text-green-700 mt-2">
-                These processes cannot be selected again
+                Proses ini tidak bisa dipilih lagi
               </p>
             </div>
           )}
@@ -177,7 +176,7 @@ export const PPICAssignmentModal: React.FC<PPICAssignmentModalProps> = ({
           {/* Process Selection */}
           <div>
             <label className="block text-sm font-medium text-gray-900 mb-2">
-              Select Next Process *
+              Pilih Proses Selanjutnya *
             </label>
             <select
               value={selectedProcess}
@@ -188,7 +187,7 @@ export const PPICAssignmentModal: React.FC<PPICAssignmentModalProps> = ({
               required
               disabled={isSubmitting}
             >
-              <option value="">-- Select Process --</option>
+              <option value="">-- Pilih Proses --</option>
 
               {/* Production Processes */}
               <optgroup label="📦 Production Phase">
@@ -215,7 +214,7 @@ export const PPICAssignmentModal: React.FC<PPICAssignmentModalProps> = ({
 
             {availableProcesses.length === 0 && (
               <p className="text-sm text-red-600 mt-2">
-                ⚠️ No more processes available. Order might be completed.
+                ⚠️ Tidak ada lagi proses tersedia. Order telah selesai.
               </p>
             )}
           </div>
@@ -224,23 +223,23 @@ export const PPICAssignmentModal: React.FC<PPICAssignmentModalProps> = ({
           {selectedProcess && (
             <div className="bg-purple-50 border border-purple-200 rounded-lg p-4">
               <h4 className="font-semibold text-purple-900 mb-3">
-                🎯 Assignment Details
+                🎯 Detail Assignment
               </h4>
               <div className="space-y-2 text-sm">
                 <div className="flex justify-between">
-                  <span className="text-purple-800">Process:</span>
+                  <span className="text-purple-800">Proses:</span>
                   <span className="font-semibold text-purple-900">
                     {PROCESS_LABELS[selectedProcess]}
                   </span>
                 </div>
                 <div className="flex justify-between">
-                  <span className="text-purple-800">Department:</span>
+                  <span className="text-purple-800">Departemen:</span>
                   <span className="font-semibold text-purple-900">
                     {selectedDepartment}
                   </span>
                 </div>
                 <div className="flex justify-between">
-                  <span className="text-purple-800">Phase:</span>
+                  <span className="text-purple-800">Fase:</span>
                   <Badge variant={isProductionProcess ? "info" : "success"}>
                     {isProductionProcess ? "Production" : "Delivery"}
                   </Badge>
@@ -252,7 +251,7 @@ export const PPICAssignmentModal: React.FC<PPICAssignmentModalProps> = ({
           {/* Assigned By */}
           <div>
             <label className="block text-sm font-medium text-gray-900 mb-2">
-              Your Name (PPIC Staff) *
+              Nama (Staf PPIC) *
             </label>
             <input
               type="text"
@@ -261,14 +260,14 @@ export const PPICAssignmentModal: React.FC<PPICAssignmentModalProps> = ({
               disabled
             />
             <p className="text-xs text-gray-600 mt-1">
-              Automatically filled with your name
+              Otomatis terisi dengan nama anda
             </p>
           </div>
 
           {/* Notes */}
           <div>
             <label className="block text-sm font-medium text-gray-900 mb-2">
-              Notes (Optional)
+              Catatan (Opsional)
             </label>
             <textarea
               value={notes}
@@ -284,13 +283,13 @@ export const PPICAssignmentModal: React.FC<PPICAssignmentModalProps> = ({
           <div className="bg-yellow-50 border border-yellow-300 rounded-lg p-4">
             <div className="space-y-2">
               <p className="text-sm text-yellow-800">
-                ⚠️ <strong>Important:</strong> This assignment cannot be undone.
-                Make sure you select the correct next process.
+                ⚠️ <strong>Penting:</strong> Assignment tidak dapat dibatalkan.
+                Pastikan proses berikutnya sudah benar.
               </p>
               <p className="text-xs text-yellow-700">
-                ℹ️ <strong>Note:</strong> You can only assign to processes that
-                haven't been completed yet. Processes are automatically filtered
-                based on order history.
+                ℹ️ <strong>Catatan:</strong> Penetapan hanya dapat dilakukan
+                pada proses yang belum selesai. Proses akan otomatis difilter
+                berdasarkan riwayat pesanan.
               </p>
             </div>
           </div>
@@ -303,7 +302,7 @@ export const PPICAssignmentModal: React.FC<PPICAssignmentModalProps> = ({
             onClick={onClose}
             disabled={isSubmitting}
           >
-            Cancel
+            Batal
           </Button>
           <Button
             type="submit"

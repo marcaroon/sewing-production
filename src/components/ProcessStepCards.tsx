@@ -225,7 +225,7 @@ export const ProcessStepCard: React.FC<ProcessStepCardProps> = ({
       <Card className="border-l-4 border-l-gray-400">
         <CardContent className="py-8 text-center">
           <p className="text-gray-600">
-            You don't have permission to view this process
+            Anda tidak memmiliki akses ke proses ini
           </p>
         </CardContent>
       </Card>
@@ -277,7 +277,7 @@ export const ProcessStepCard: React.FC<ProcessStepCardProps> = ({
             <div className="flex items-center gap-3 p-3 bg-blue-50 border border-blue-200 rounded-lg">
               <Package className="w-5 h-5 text-blue-600" />
               <div>
-                <p className="text-xs font-semibold text-blue-700">Received</p>
+                <p className="text-xs font-semibold text-blue-700">Diterima</p>
                 <p className="text-lg font-bold text-blue-900">
                   {formatNumber(processStep.quantityReceived)}
                 </p>
@@ -317,7 +317,7 @@ export const ProcessStepCard: React.FC<ProcessStepCardProps> = ({
           {/* Progress Bar */}
           <div>
             <div className="flex justify-between items-center text-xs font-bold text-gray-700 mb-2">
-              <span>Progress</span>
+              <span>Progres</span>
               <span className="text-blue-600">{completionRate}%</span>
             </div>
             <div className="w-full bg-gray-200 rounded-full h-3 overflow-hidden">
@@ -340,7 +340,7 @@ export const ProcessStepCard: React.FC<ProcessStepCardProps> = ({
                   <div className="flex items-center gap-2">
                     <Calendar className="w-4 h-4 text-gray-600" />
                     <span className="font-semibold text-gray-700">
-                      At PPIC:
+                      Di PPIC:
                     </span>
                   </div>
                   <span className="font-bold text-gray-900">
@@ -353,7 +353,7 @@ export const ProcessStepCard: React.FC<ProcessStepCardProps> = ({
                   <div className="flex items-center gap-2">
                     <Clock className="w-4 h-4 text-gray-600" />
                     <span className="font-semibold text-gray-700">
-                      Waiting:
+                      Menunggu:
                     </span>
                   </div>
                   <span className="font-bold text-gray-900">
@@ -379,7 +379,7 @@ export const ProcessStepCard: React.FC<ProcessStepCardProps> = ({
                   <div className="flex items-center gap-2">
                     <PlayCircle className="w-4 h-4 text-gray-600" />
                     <span className="font-semibold text-gray-700">
-                      Started:
+                      Dimulai:
                     </span>
                   </div>
                   <span className="font-bold text-gray-900">
@@ -392,7 +392,7 @@ export const ProcessStepCard: React.FC<ProcessStepCardProps> = ({
                   <div className="flex items-center gap-2">
                     <CheckCircle2 className="w-4 h-4 text-gray-600" />
                     <span className="font-semibold text-gray-700">
-                      Completed:
+                      Selesai:
                     </span>
                   </div>
                   <span className="font-bold text-gray-900">
@@ -517,7 +517,7 @@ export const ProcessStepCard: React.FC<ProcessStepCardProps> = ({
                     d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
                   />
                 </svg>
-                Transition Details
+                Detail Transisi
               </h4>
 
               <div className="space-y-4">
@@ -530,7 +530,7 @@ export const ProcessStepCard: React.FC<ProcessStepCardProps> = ({
                       {PROCESS_LABELS[processStep.processName]}
                     </p>
                     <p className="text-sm text-gray-700">
-                      📂 Department:{" "}
+                      📂 Departemen:{" "}
                       <span className="font-semibold">
                         {processStep.department}
                       </span>
@@ -586,11 +586,11 @@ export const ProcessStepCard: React.FC<ProcessStepCardProps> = ({
                     {transitionData.newState === "at_ppic" && (
                       <div className="mt-2 bg-blue-50 rounded p-2">
                         <p className="text-sm text-blue-900">
-                          📋 Will arrive at:{" "}
+                          📋 Akan tiba di:{" "}
                           <span className="font-bold">PPIC Department</span>
                         </p>
                         <p className="text-xs text-blue-700">
-                          For review and next process planning
+                          Untuk review dan perencanaan proses selanjutnya
                         </p>
                       </div>
                     )}
@@ -598,13 +598,13 @@ export const ProcessStepCard: React.FC<ProcessStepCardProps> = ({
                     {transitionData.newState === "waiting" && (
                       <div className="mt-2 bg-yellow-50 rounded p-2">
                         <p className="text-sm text-yellow-900">
-                          ⏳ Will be added to:{" "}
+                          ⏳ Akan ditambahkan ke:{" "}
                           <span className="font-bold">
                             {processStep.department} Waiting List
                           </span>
                         </p>
                         <p className="text-xs text-yellow-700">
-                          Waiting to be assigned to operator
+                          Menunggu dimasukkan oleh operator
                         </p>
                       </div>
                     )}
@@ -612,13 +612,13 @@ export const ProcessStepCard: React.FC<ProcessStepCardProps> = ({
                     {transitionData.newState === "assigned" && (
                       <div className="mt-2 bg-purple-50 rounded p-2">
                         <p className="text-sm text-purple-900">
-                          👤 Will be assigned at:{" "}
+                          👤 Akan dimasukkan ke:{" "}
                           <span className="font-bold">
                             {processStep.department}
                           </span>
                         </p>
                         <p className="text-xs text-purple-700">
-                          Specify operator/PIC below
+                          Deskripsikan Operator/PIC dibawah
                         </p>
                       </div>
                     )}
@@ -626,13 +626,13 @@ export const ProcessStepCard: React.FC<ProcessStepCardProps> = ({
                     {transitionData.newState === "in_progress" && (
                       <div className="mt-2 bg-orange-50 rounded p-2">
                         <p className="text-sm text-orange-900">
-                          ⚙️ Work will start at:{" "}
+                          ⚙️ Akan dimulai dari:{" "}
                           <span className="font-bold">
                             {processStep.department}
                           </span>
                         </p>
                         <p className="text-xs text-orange-700">
-                          By: {processStep.assignedTo || "Assigned operator"}
+                          Oleh: {processStep.assignedTo || "Assigned operator"}
                           {processStep.assignedLine &&
                             ` (${processStep.assignedLine})`}
                         </p>
@@ -642,7 +642,7 @@ export const ProcessStepCard: React.FC<ProcessStepCardProps> = ({
                     {transitionData.newState === "completed" && (
                       <div className="mt-2 bg-green-50 rounded p-2">
                         <p className="text-sm text-green-900">
-                          ✅ Will complete at:{" "}
+                          ✅ Akan selesai di:{" "}
                           <span className="font-bold">
                             {processStep.department}
                           </span>
@@ -650,7 +650,7 @@ export const ProcessStepCard: React.FC<ProcessStepCardProps> = ({
                         {nextProcess && nextDepartment ? (
                           <div className="mt-2 pt-2 border-t border-green-200">
                             <p className="text-xs text-green-800 font-semibold">
-                              📦 Then transfer to:
+                              📦 Kemudian dipindahkan ke:
                             </p>
                             <p className="text-sm text-green-900">
                               →{" "}
@@ -660,13 +660,13 @@ export const ProcessStepCard: React.FC<ProcessStepCardProps> = ({
                               ({nextDepartment})
                             </p>
                             <p className="text-xs text-green-700 mt-1">
-                              ℹ️ Surat Jalan will be auto-generated
+                              ℹ️ Surat Jalan akan auto-generated
                             </p>
                           </div>
                         ) : (
                           <p className="text-xs text-green-700 mt-1">
-                            🎉 This is the final process - Order will be marked
-                            as delivered
+                            Ini adalah proses terakhir - Order akan ditandai
+                            sebagai terkirim
                           </p>
                         )}
                       </div>
@@ -679,7 +679,7 @@ export const ProcessStepCard: React.FC<ProcessStepCardProps> = ({
             {/* New State Selection */}
             <div>
               <label className="block text-sm font-medium text-gray-900 mb-2">
-                Select Next State *
+                Pilih State Selanjutnya *
               </label>
               <select
                 value={transitionData.newState}
@@ -689,7 +689,7 @@ export const ProcessStepCard: React.FC<ProcessStepCardProps> = ({
                     newState: e.target.value as ProcessState,
                   })
                 }
-                className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-base"
+                className="w-full px-4 py-2.5 text-gray-900 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-base"
                 required
               >
                 {validNextStates.map((state: ProcessState) => (
@@ -699,7 +699,7 @@ export const ProcessStepCard: React.FC<ProcessStepCardProps> = ({
                 ))}
               </select>
               <p className="text-xs text-gray-600 mt-1">
-                Current: {getStateLabel(currentState)} → Next:{" "}
+                Saat ini: {getStateLabel(currentState)} → Selanjutnya:{" "}
                 {getStateLabel(transitionData.newState)}
               </p>
             </div>
@@ -712,20 +712,18 @@ export const ProcessStepCard: React.FC<ProcessStepCardProps> = ({
               <input
                 type="text"
                 value={transitionData.performedBy}
-                className="w-full px-4 py-2.5 border border-gray-300 rounded-lg bg-gray-100 font-medium text-gray-900"
+                className="w-full px-4 py-2.5  border border-gray-300 rounded-lg bg-gray-100 font-medium text-gray-900"
                 disabled
               />
               <p className="text-xs text-gray-600 mt-1">
-                Automatically filled with your name
+                Otomatis terisi nama anda
               </p>
             </div>
 
             {/* ASSIGN TO - Only show for "assigned" state */}
             {transitionData.newState === "assigned" && (
               <div className="bg-purple-50 border border-purple-200 rounded-lg p-4 space-y-4">
-                <h4 className="font-semibold text-purple-900">
-                  Assignment Details
-                </h4>
+                <h4 className="font-semibold text-purple-900">Detail tugas</h4>
 
                 <div>
                   <label className="block text-sm font-medium text-gray-900 mb-2">
@@ -739,7 +737,7 @@ export const ProcessStepCard: React.FC<ProcessStepCardProps> = ({
                         assignedTo: e.target.value,
                       })
                     }
-                    className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                    className="w-full px-4 py-2.5 text-gray-900 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
                     required
                   >
                     <option value="">-- Select User --</option>
@@ -786,12 +784,12 @@ export const ProcessStepCard: React.FC<ProcessStepCardProps> = ({
             {transitionData.newState === "completed" && (
               <div className="bg-green-50 border border-green-200 rounded-lg p-4">
                 <h4 className="font-semibold text-green-900 mb-3">
-                  Completion Details
+                  Detail Penyelesaian
                 </h4>
 
                 <div>
                   <label className="block text-sm font-medium text-gray-900 mb-2">
-                    Quantity Completed *
+                    Jumlah Selesai *
                   </label>
                   <input
                     type="number"
@@ -804,7 +802,7 @@ export const ProcessStepCard: React.FC<ProcessStepCardProps> = ({
                     }
                     min="0"
                     max={processStep.quantityReceived}
-                    className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                    className="w-full px-4 py-2.5 text-gray-900 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
                     required
                   />
                   <p className="text-xs text-green-700 mt-1">
@@ -818,7 +816,7 @@ export const ProcessStepCard: React.FC<ProcessStepCardProps> = ({
             {/* Notes */}
             <div>
               <label className="block text-sm font-medium text-gray-900 mb-2">
-                Notes (Optional)
+                Catatan (Optional)
               </label>
               <textarea
                 value={transitionData.notes}
@@ -828,7 +826,7 @@ export const ProcessStepCard: React.FC<ProcessStepCardProps> = ({
                     notes: e.target.value,
                   })
                 }
-                className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                className="w-full px-4 py-2.5 text-gray-900 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                 rows={3}
                 placeholder="Add any additional notes about this transition..."
               />
@@ -842,13 +840,13 @@ export const ProcessStepCard: React.FC<ProcessStepCardProps> = ({
               onClick={() => setIsTransitionModalOpen(false)}
               disabled={isSubmitting}
             >
-              Cancel
+              Batal
             </Button>
             <Button type="submit" variant="primary" disabled={isSubmitting}>
               {isSubmitting ? (
                 <>
                   <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
-                  Processing...
+                  Memproses...
                 </>
               ) : (
                 `Confirm Transition`
@@ -876,15 +874,15 @@ export const ProcessStepCard: React.FC<ProcessStepCardProps> = ({
             {/* CONTEXT */}
             <div className="bg-red-50 border border-red-200 rounded-lg p-4">
               <h4 className="font-semibold text-red-900 mb-2">
-                Process Information
+                Informasi Proses
               </h4>
               <div className="text-sm space-y-1">
                 <p className="text-red-800">
-                  <span className="font-medium">Process:</span>{" "}
+                  <span className="font-medium">Proses:</span>{" "}
                   {PROCESS_LABELS[processStep.processName]}
                 </p>
                 <p className="text-red-800">
-                  <span className="font-medium">Department:</span>{" "}
+                  <span className="font-medium">Departemen:</span>{" "}
                   {processStep.department}
                 </p>
                 <p className="text-red-700 text-xs mt-2">
@@ -896,7 +894,7 @@ export const ProcessStepCard: React.FC<ProcessStepCardProps> = ({
             {/* Category Selection */}
             <div>
               <label className="block text-sm font-medium text-gray-900 mb-2">
-                Category *
+                Kategori *
               </label>
               <div className="grid grid-cols-2 gap-3">
                 <button
@@ -945,7 +943,7 @@ export const ProcessStepCard: React.FC<ProcessStepCardProps> = ({
             {/* Reject Type */}
             <div>
               <label className="block text-sm font-medium text-gray-900 mb-2">
-                Reject Type *
+                Tipe Reject *
               </label>
               <select
                 value={rejectData.rejectType}
@@ -955,7 +953,7 @@ export const ProcessStepCard: React.FC<ProcessStepCardProps> = ({
                     rejectType: e.target.value as RejectType,
                   })
                 }
-                className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-transparent"
+                className="w-full px-4 py-2.5 border text-gray-700 border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-transparent"
                 required
               >
                 {Object.entries(REJECT_TYPE_LABELS).map(([value, label]) => (
@@ -970,7 +968,7 @@ export const ProcessStepCard: React.FC<ProcessStepCardProps> = ({
             <div className="grid grid-cols-2 gap-4">
               <div>
                 <label className="block text-sm font-medium text-gray-900 mb-2">
-                  Quantity *
+                  Jumlah *
                 </label>
                 <input
                   type="number"
@@ -982,22 +980,22 @@ export const ProcessStepCard: React.FC<ProcessStepCardProps> = ({
                     })
                   }
                   min="1"
-                  className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-transparent"
+                  className="w-full px-4 py-2.5 border text-gray-700 border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-transparent"
                   required
                 />
               </div>
               <div>
                 <label className="block text-sm font-medium text-gray-900 mb-2">
-                  Size (Optional)
+                  Ukuran (Optional)
                 </label>
                 <select
                   value={rejectData.size}
                   onChange={(e) =>
                     setRejectData({ ...rejectData, size: e.target.value })
                   }
-                  className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-transparent"
+                  className="w-full px-4 py-2.5 border text-gray-700 border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-transparent"
                 >
-                  <option value="">-- Select Size --</option>
+                  <option value="">-- Pilih Ukuran --</option>
                   <option value="XS">XS</option>
                   <option value="S">S</option>
                   <option value="M">M</option>
@@ -1011,7 +1009,7 @@ export const ProcessStepCard: React.FC<ProcessStepCardProps> = ({
             {/* Bundle Number */}
             <div>
               <label className="block text-sm font-medium text-gray-900 mb-2">
-                Bundle Number (Optional)
+                Nomor Bundle (Opsional)
               </label>
               <input
                 type="text"
@@ -1019,7 +1017,7 @@ export const ProcessStepCard: React.FC<ProcessStepCardProps> = ({
                 onChange={(e) =>
                   setRejectData({ ...rejectData, bundleNumber: e.target.value })
                 }
-                className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-transparent"
+                className="w-full px-4 py-2.5 border text-gray-700 border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-transparent"
                 placeholder="e.g., BDL-001"
               />
             </div>
@@ -1027,14 +1025,14 @@ export const ProcessStepCard: React.FC<ProcessStepCardProps> = ({
             {/* Description */}
             <div>
               <label className="block text-sm font-medium text-gray-900 mb-2">
-                Description *
+                Deskripsi *
               </label>
               <textarea
                 value={rejectData.description}
                 onChange={(e) =>
                   setRejectData({ ...rejectData, description: e.target.value })
                 }
-                className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-transparent"
+                className="w-full px-4 py-2.5 border text-gray-700 border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-transparent"
                 rows={3}
                 placeholder="Describe the defect in detail..."
                 required
@@ -1044,14 +1042,14 @@ export const ProcessStepCard: React.FC<ProcessStepCardProps> = ({
             {/* Root Cause */}
             <div>
               <label className="block text-sm font-medium text-gray-900 mb-2">
-                Root Cause (Optional)
+                Root Cause (Opsional)
               </label>
               <textarea
                 value={rejectData.rootCause}
                 onChange={(e) =>
                   setRejectData({ ...rejectData, rootCause: e.target.value })
                 }
-                className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-transparent"
+                className="w-full px-4 py-2.5 border text-gray-700 border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-transparent"
                 rows={2}
                 placeholder="What caused this defect?"
               />
@@ -1060,7 +1058,7 @@ export const ProcessStepCard: React.FC<ProcessStepCardProps> = ({
             {/* Reported By */}
             <div>
               <label className="block text-sm font-medium text-gray-900 mb-2">
-                Reported By (You) *
+                Dilaporkan oleh (You) *
               </label>
               <input
                 type="text"
@@ -1098,7 +1096,7 @@ export const ProcessStepCard: React.FC<ProcessStepCardProps> = ({
                       : "text-yellow-800"
                   }
                 >
-                  <span className="font-medium">Category:</span>{" "}
+                  <span className="font-medium">Kategori:</span>{" "}
                   {REJECT_CATEGORY_LABELS[rejectData.rejectCategory]}
                 </p>
                 <p
@@ -1108,7 +1106,7 @@ export const ProcessStepCard: React.FC<ProcessStepCardProps> = ({
                       : "text-yellow-800"
                   }
                 >
-                  <span className="font-medium">Type:</span>{" "}
+                  <span className="font-medium">Tipe:</span>{" "}
                   {REJECT_TYPE_LABELS[rejectData.rejectType]}
                 </p>
                 <p
@@ -1118,7 +1116,7 @@ export const ProcessStepCard: React.FC<ProcessStepCardProps> = ({
                       : "text-yellow-800"
                   }
                 >
-                  <span className="font-medium">Quantity:</span>{" "}
+                  <span className="font-medium">Jumlah:</span>{" "}
                   {rejectData.quantity} pcs
                   {rejectData.size && ` (Size: ${rejectData.size})`}
                 </p>
@@ -1129,7 +1127,7 @@ export const ProcessStepCard: React.FC<ProcessStepCardProps> = ({
                       : "text-yellow-800"
                   }
                 >
-                  <span className="font-medium">Action:</span>{" "}
+                  <span className="font-medium">Aksi:</span>{" "}
                   {REJECT_ACTION_LABELS[rejectData.action]}
                 </p>
               </div>
@@ -1143,13 +1141,13 @@ export const ProcessStepCard: React.FC<ProcessStepCardProps> = ({
               onClick={() => setIsRejectModalOpen(false)}
               disabled={isSubmitting}
             >
-              Cancel
+              Batal
             </Button>
             <Button type="submit" variant="danger" disabled={isSubmitting}>
               {isSubmitting ? (
                 <>
                   <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
-                  Recording...
+                  Mencatat...
                 </>
               ) : (
                 `Record ${

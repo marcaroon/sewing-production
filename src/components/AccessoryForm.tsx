@@ -144,7 +144,7 @@ export const AccessoryForm: React.FC<AccessoryFormProps> = ({
           <div className="grid grid-cols-2 gap-4">
             <div>
               <label className="block text-sm font-medium text-gray-900 mb-2">
-                Accessory Code *
+                Kode Aksesoris *
               </label>
               <input
                 type="text"
@@ -160,7 +160,7 @@ export const AccessoryForm: React.FC<AccessoryFormProps> = ({
             </div>
             <div>
               <label className="block text-sm font-medium text-gray-900 mb-2">
-                Accessory Name *
+                Nama Aksesoris *
               </label>
               <input
                 type="text"
@@ -180,7 +180,7 @@ export const AccessoryForm: React.FC<AccessoryFormProps> = ({
           <div className="grid grid-cols-2 gap-4">
             <div>
               <label className="block text-sm font-medium text-gray-900 mb-2">
-                Category *
+                Kategori *
               </label>
               <select
                 value={formData.category}
@@ -224,7 +224,7 @@ export const AccessoryForm: React.FC<AccessoryFormProps> = ({
           <div className="grid grid-cols-2 gap-4">
             <div>
               <label className="block text-sm font-medium text-gray-900 mb-2">
-                Color (Optional)
+                Warna (Opsional)
               </label>
               <input
                 type="text"
@@ -239,7 +239,7 @@ export const AccessoryForm: React.FC<AccessoryFormProps> = ({
             </div>
             <div>
               <label className="block text-sm font-medium text-gray-900 mb-2">
-                Size (Optional)
+                Ukuran (Opsional)
               </label>
               <input
                 type="text"
@@ -257,7 +257,7 @@ export const AccessoryForm: React.FC<AccessoryFormProps> = ({
           {/* Supplier */}
           <div>
             <label className="block text-sm font-medium text-gray-900 mb-2">
-              Supplier (Optional)
+              Supplier (Opsional)
             </label>
             <input
               type="text"
@@ -275,7 +275,7 @@ export const AccessoryForm: React.FC<AccessoryFormProps> = ({
           <div className="grid grid-cols-2 gap-4">
             <div>
               <label className="block text-sm font-medium text-gray-900 mb-2">
-                Minimum Stock *
+                Stok Minimum *
               </label>
               <input
                 type="number"
@@ -317,7 +317,7 @@ export const AccessoryForm: React.FC<AccessoryFormProps> = ({
           <div className="grid grid-cols-2 gap-4">
             <div>
               <label className="block text-sm font-medium text-gray-900 mb-2">
-                Unit Price (Rp)
+                Harga Satuan (Rp)
               </label>
               <input
                 type="number"
@@ -337,7 +337,7 @@ export const AccessoryForm: React.FC<AccessoryFormProps> = ({
             {!isEdit && (
               <div>
                 <label className="block text-sm font-medium text-gray-900 mb-2">
-                  Initial Stock
+                  Initial Stok
                 </label>
                 <input
                   type="number"
@@ -364,7 +364,7 @@ export const AccessoryForm: React.FC<AccessoryFormProps> = ({
             onClick={onClose}
             disabled={isSubmitting}
           >
-            Cancel
+            Batal
           </Button>
           <Button type="submit" variant="primary" disabled={isSubmitting}>
             {isSubmitting ? "Saving..." : isEdit ? "Update" : "Create"}

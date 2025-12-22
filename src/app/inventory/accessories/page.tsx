@@ -3,6 +3,7 @@
 "use client";
 
 import React, { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
 import { Accessory } from "@/lib/types-inventory";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/Card";
 import { Button } from "@/components/ui/Button";
@@ -19,6 +20,7 @@ import {
   Trash2,
   ArrowDownToLine,
   RefreshCw,
+  ArrowLeft,
 } from "lucide-react";
 
 export default function AccessoriesPage() {
@@ -107,6 +109,8 @@ export default function AccessoriesPage() {
     }
   };
 
+  const router = useRouter();
+
   const lowStockCount = accessories.filter((a) => a.isLowStock).length;
 
   if (isLoading) {
@@ -114,7 +118,7 @@ export default function AccessoriesPage() {
       <div className="max-w-7xl mx-auto px-4 py-8">
         <div className="text-center">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
-          <p>Loading accessories...</p>
+          <p>Memuat aksesoris...</p>
         </div>
       </div>
     );
@@ -123,17 +127,23 @@ export default function AccessoriesPage() {
   return (
     <div className="max-w-7xl mx-auto px-4 py-8">
       {/* Header */}
-      <div className="flex items-center justify-between mb-8">
-        <div>
-          <h1 className="text-3xl font-bold text-gray-900 mb-2">
-            Accessories Inventory
-          </h1>
+      <div className="flex items-center gap-3 mb-8">
+        <button
+          onClick={() => router.back()}
+          className="text-gray-600 hover:text-gray-900"
+        >
+          <ArrowLeft className="w-6 h-6" />
+        </button>
+
+        <div className="flex-1">
+          <h1 className="text-3xl font-bold text-gray-900 mb-2">Aksesoris</h1>
           <p className="text-gray-600">Manage accessories and trims</p>
         </div>
+
         <div className="flex items-center gap-3">
           <Button onClick={() => loadAccessories()} variant="outline" size="sm">
             <RefreshCw className="w-4 h-4" />
-            Refresh
+            Muat Ulang
           </Button>
           <Button
             onClick={() => setShowLowStockOnly(!showLowStockOnly)}
@@ -145,8 +155,8 @@ export default function AccessoriesPage() {
           </Button>
           <Button onClick={handleCreate} variant="primary">
             <Plus className="w-4 h-4" />
-            Add Accessory
-          </Button>
+            Tambah Aksesoris
+          </Button>{" "}
         </div>
       </div>
 
@@ -176,13 +186,13 @@ export default function AccessoriesPage() {
             <CardContent>
               <div className="space-y-3">
                 <div className="flex justify-between items-center">
-                  <span className="text-sm text-gray-600">Category</span>
+                  <span className="text-sm text-gray-600">Kategori</span>
                   <Badge variant="info" size="sm">
                     {accessory.category}
                   </Badge>
                 </div>
                 <div className="flex justify-between items-center">
-                  <span className="text-sm text-gray-600">Current Stock</span>
+                  <span className="text-sm text-gray-600">Stok Sekarag</span>
                   <span
                     className={`text-2xl font-bold ${
                       accessory.isLowStock ? "text-red-600" : "text-green-600"
@@ -192,15 +202,15 @@ export default function AccessoriesPage() {
                   </span>
                 </div>
                 <div className="flex justify-between items-center text-sm">
-                  <span className="text-gray-600">Minimum Stock</span>
-                  <span className="font-semibold">
+                  <span className="text-gray-600">Stok Minimum</span>
+                  <span className="font-semibold text-gray-600">
                     {accessory.minimumStock} {accessory.unit}
                   </span>
                 </div>
                 {accessory.unitPrice && (
                   <div className="flex justify-between items-center text-sm">
-                    <span className="text-gray-600">Unit Price</span>
-                    <span className="font-semibold">
+                    <span className="text-gray-600">Harga Satuan</span>
+                    <span className="font-semibold text-gray-600">
                       Rp {formatNumber(accessory.unitPrice)}
                     </span>
                   </div>
@@ -214,7 +224,7 @@ export default function AccessoriesPage() {
                   onClick={() => handleStockIn(accessory)}
                 >
                   <ArrowDownToLine className="w-4 h-4" />
-                  Stock In
+                  Stok Masuk
                 </Button>
                 <Button
                   variant="outline"
@@ -222,7 +232,7 @@ export default function AccessoriesPage() {
                   onClick={() => handleEdit(accessory)}
                 >
                   <Edit className="w-4 h-4" />
-                  Edit
+                  Ubah
                 </Button>
                 <Button
                   variant="danger"
@@ -233,7 +243,7 @@ export default function AccessoriesPage() {
                   }}
                 >
                   <Trash2 className="w-4 h-4" />
-                  Delete
+                  Hapus
                 </Button>
               </div>
             </CardContent>

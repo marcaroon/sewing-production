@@ -12,7 +12,6 @@ import {
   Package,
   AlertTriangle,
   ShoppingCart,
-  DollarSign,
   Plus,
   TrendingUp,
   RefreshCw,
@@ -71,10 +70,10 @@ export default function InventoryDashboardPage() {
   if (isLoading) {
     return (
       <div className="max-w-7xl mx-auto px-4 py-8">
-        <div className="flex items-center justify-center min-h-[400px]">
+        <div className="flex items-center justify-center min-h-100">
           <div className="text-center">
             <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
-            <p className="text-gray-600 font-medium">Loading dashboard...</p>
+            <p className="text-gray-600 font-medium">Memuat dashboard...</p>
           </div>
         </div>
       </div>
@@ -96,7 +95,7 @@ export default function InventoryDashboardPage() {
                 onClick={loadDashboard}
                 className="mt-3 text-sm text-red-800 font-semibold underline hover:text-red-900"
               >
-                Try Again
+                Coba Lagi
               </button>
             </div>
           </div>
@@ -114,9 +113,7 @@ export default function InventoryDashboardPage() {
       <div className="mb-8">
         <div className="flex items-center justify-between mb-4">
           <div>
-            <h1 className="text-3xl font-bold text-gray-900 mb-2">
-              Inventory Dashboard
-            </h1>
+            <h1 className="text-3xl font-bold text-gray-900 mb-2">Inventory</h1>
             <p className="text-gray-600">
               Monitor stock levels, usage, and transactions
             </p>
@@ -131,18 +128,18 @@ export default function InventoryDashboardPage() {
               <RefreshCw
                 className={`w-4 h-4 ${isRefreshing ? "animate-spin" : ""}`}
               />
-              Refresh
+              Muat Ulang
             </Button>
             <Link href="/inventory/materials">
               <Button variant="primary">
                 <Plus className="w-4 h-4" />
-                Add Material
+                Tambah Bahan
               </Button>
             </Link>
             <Link href="/inventory/accessories">
               <Button variant="success">
                 <Plus className="w-4 h-4" />
-                Add Accessory
+                Tambah Aksesoris
               </Button>
             </Link>
           </div>
@@ -159,12 +156,12 @@ export default function InventoryDashboardPage() {
                 <Package className="w-8 h-8 text-blue-600" />
               </div>
               <Badge variant="info" size="sm">
-                Materials
+                Bahan
               </Badge>
             </div>
             <div>
               <p className="text-sm font-semibold text-gray-600 uppercase mb-1">
-                Total Materials
+                Total Bahan
               </p>
               <p className="text-3xl font-bold text-gray-900">
                 {stats.totalMaterials}
@@ -172,7 +169,7 @@ export default function InventoryDashboardPage() {
             </div>
             <Link href="/inventory/materials">
               <button className="mt-4 text-sm text-blue-600 font-semibold hover:text-blue-800 flex items-center gap-1 group">
-                View All
+                Lihat Semua
                 <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
               </button>
             </Link>
@@ -187,12 +184,12 @@ export default function InventoryDashboardPage() {
                 <ShoppingCart className="w-8 h-8 text-green-600" />
               </div>
               <Badge variant="success" size="sm">
-                Accessories
+                Aksesoris
               </Badge>
             </div>
             <div>
               <p className="text-sm font-semibold text-gray-600 uppercase mb-1">
-                Total Accessories
+                Total Aksesoris
               </p>
               <p className="text-3xl font-bold text-gray-900">
                 {stats.totalAccessories}
@@ -200,7 +197,7 @@ export default function InventoryDashboardPage() {
             </div>
             <Link href="/inventory/accessories">
               <button className="mt-4 text-sm text-green-600 font-semibold hover:text-green-800 flex items-center gap-1 group">
-                View All
+                Lihat Semua
                 <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
               </button>
             </Link>
@@ -227,9 +224,6 @@ export default function InventoryDashboardPage() {
                   }`}
                 />
               </div>
-              <Badge variant="danger" size="sm">
-                Alert
-              </Badge>
             </div>
             <div>
               <p className="text-sm font-semibold text-gray-600 uppercase mb-1">
@@ -243,8 +237,8 @@ export default function InventoryDashboardPage() {
                 {totalLowStock}
               </p>
               <p className="text-xs text-gray-600 mt-1">
-                {stats.lowStockMaterials} materials ·{" "}
-                {stats.lowStockAccessories} accessories
+                {stats.lowStockMaterials} bahan · {stats.lowStockAccessories}{" "}
+                aksesoris
               </p>
             </div>
             {totalLowStock > 0 && (
@@ -254,7 +248,7 @@ export default function InventoryDashboardPage() {
                   className="flex-1"
                 >
                   <button className="w-full text-xs text-red-600 font-semibold hover:text-red-800 border-2 border-red-200 rounded-lg py-1.5 hover:bg-red-50 transition-colors">
-                    Materials
+                    Bahan
                   </button>
                 </Link>
                 <Link
@@ -262,7 +256,7 @@ export default function InventoryDashboardPage() {
                   className="flex-1"
                 >
                   <button className="w-full text-xs text-red-600 font-semibold hover:text-red-800 border-2 border-red-200 rounded-lg py-1.5 hover:bg-red-50 transition-colors">
-                    Accessories
+                    Aksesoris
                   </button>
                 </Link>
               </div>
@@ -273,7 +267,7 @@ export default function InventoryDashboardPage() {
 
       {/* Quick Actions */}
       <div className="mb-8">
-        <h2 className="text-xl font-bold text-gray-900 mb-4">Quick Actions</h2>
+        <h2 className="text-xl font-bold text-gray-900 mb-4">Aksi Cepat</h2>
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
           <Link href="/inventory/materials?lowStock=true">
             <Card
@@ -287,10 +281,10 @@ export default function InventoryDashboardPage() {
                   </div>
                   <div className="flex-1">
                     <p className="font-bold text-gray-900 mb-1">
-                      Low Stock Materials
+                      Bahan Low Stock
                     </p>
                     <p className="text-sm text-gray-600">
-                      {stats.lowStockMaterials} items below minimum
+                      {stats.lowStockMaterials} item dibawah minimum
                     </p>
                   </div>
                   <ArrowRight className="w-5 h-5 text-gray-400" />
@@ -311,10 +305,10 @@ export default function InventoryDashboardPage() {
                   </div>
                   <div className="flex-1">
                     <p className="font-bold text-gray-900 mb-1">
-                      Low Stock Accessories
+                      Aksesoris Low Stock
                     </p>
                     <p className="text-sm text-gray-600">
-                      {stats.lowStockAccessories} items below minimum
+                      {stats.lowStockAccessories} item dibawah minimum
                     </p>
                   </div>
                   <ArrowRight className="w-5 h-5 text-gray-400" />
@@ -335,11 +329,9 @@ export default function InventoryDashboardPage() {
                   </div>
                   <div className="flex-1">
                     <p className="font-bold text-gray-900 mb-1">
-                      Stock Transactions
+                      Stok Transaksi
                     </p>
-                    <p className="text-sm text-gray-600">
-                      View all in/out movements
-                    </p>
+                    <p className="text-sm text-gray-600">Lihat semua</p>
                   </div>
                   <ArrowRight className="w-5 h-5 text-gray-400" />
                 </div>
@@ -355,7 +347,7 @@ export default function InventoryDashboardPage() {
         <Card>
           <CardHeader>
             <div className="flex items-center justify-between">
-              <CardTitle>Top Used Materials</CardTitle>
+              <CardTitle>Pengunaan Bahan Teratas</CardTitle>
               <TrendingUp className="w-5 h-5 text-blue-600" />
             </div>
           </CardHeader>
@@ -394,9 +386,11 @@ export default function InventoryDashboardPage() {
             ) : (
               <div className="text-center py-12">
                 <Package className="w-12 h-12 text-gray-300 mx-auto mb-3" />
-                <p className="text-gray-500 font-medium">No usage data yet</p>
+                <p className="text-gray-500 font-medium">
+                  Belum ada data penggunaan
+                </p>
                 <p className="text-sm text-gray-400 mt-1">
-                  Material usage will appear here once orders are processed
+                  Penggunaan bahan akan ditampilkan setelah pesanan diproses
                 </p>
               </div>
             )}
@@ -407,7 +401,7 @@ export default function InventoryDashboardPage() {
         <Card>
           <CardHeader>
             <div className="flex items-center justify-between">
-              <CardTitle>Top Used Accessories</CardTitle>
+              <CardTitle>Penggunaan Aksesoris Terbanyak</CardTitle>
               <TrendingUp className="w-5 h-5 text-green-600" />
             </div>
           </CardHeader>
@@ -446,9 +440,11 @@ export default function InventoryDashboardPage() {
             ) : (
               <div className="text-center py-12">
                 <ShoppingCart className="w-12 h-12 text-gray-300 mx-auto mb-3" />
-                <p className="text-gray-500 font-medium">No usage data yet</p>
+                <p className="text-gray-500 font-medium">
+                  Belum ada data penggunaan
+                </p>
                 <p className="text-sm text-gray-400 mt-1">
-                  Accessory usage will appear here once orders are processed
+                  Penggunaan aksesoris akan ditampilkan setelah pesanan diproses
                 </p>
               </div>
             )}
@@ -461,10 +457,10 @@ export default function InventoryDashboardPage() {
         <Card>
           <CardHeader>
             <div className="flex items-center justify-between">
-              <CardTitle>Recent Transactions</CardTitle>
+              <CardTitle>Transaksi Terbaru</CardTitle>
               <Link href="/inventory/transactions">
                 <button className="text-sm text-blue-600 font-semibold hover:text-blue-800 flex items-center gap-1">
-                  View All
+                  Lihat Semua
                   <ArrowRight className="w-4 h-4" />
                 </button>
               </Link>

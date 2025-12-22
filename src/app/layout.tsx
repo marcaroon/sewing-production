@@ -57,17 +57,6 @@ export default async function RootLayout({
                           <RealtimeClock />
                         </p>
                       </div>
-
-                      {/* Quick Actions */}
-                      <div className="flex items-center gap-3">
-                        <div className="text-right">
-                          {!user.isAdmin && user.department && (
-                            <p className="text-xs text-gray-500 truncate">
-                              {user.department}
-                            </p>
-                          )}
-                        </div>
-                      </div>
                     </div>
                   </div>
                 </header>
@@ -83,7 +72,7 @@ export default async function RootLayout({
                     <p className="text-xs text-gray-500">
                       © 2025 Total Quality Indonesia
                     </p>
-                    <p className="text-xs text-gray-400">Version 1.0.0</p>
+                    <p className="text-xs text-gray-400">Versi 1.0.0</p>
                   </div>
                 </footer>
               </div>

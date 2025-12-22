@@ -14,7 +14,6 @@ import {
   ArrowRight,
   CheckCircle,
   Calendar,
-  User,
   Layers,
   TrendingUp,
   AlertTriangle,
@@ -76,7 +75,6 @@ export default function QRScannerPage() {
     setIsLoading(true);
     setError("");
 
-    // ✅ Wait for user to load if not yet loaded
     if (!currentUser) {
       await loadCurrentUser();
     }

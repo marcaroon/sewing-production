@@ -110,9 +110,7 @@ export const MaterialAccessorySelector: React.FC<
     <div className="space-y-6">
       {/* Materials Section */}
       <div>
-        <h4 className="font-semibold text-gray-900 mb-3">
-          Materials (Bahan Baku)
-        </h4>
+        <h4 className="font-semibold text-gray-900 mb-3">Bahan</h4>
 
         {/* Selected Materials */}
         <div className="space-y-3 mb-4">
@@ -167,16 +165,16 @@ export const MaterialAccessorySelector: React.FC<
               e.target.value = "";
             }
           }}
-          className="w-full px-4 py-2 border border-gray-300 rounded-lg"
+          className="w-full px-4 py-2 border text-gray-600 border-gray-300 rounded-lg"
         >
-          <option value="">+ Add Material</option>
+          <option value="">+ Tambah Bahan</option>
           {materials
             .filter(
               (m) => !selectedMaterials.find((sm) => sm.materialId === m.id)
             )
             .map((material) => (
               <option key={material.id} value={material.id}>
-                {material.name} ({material.materialCode}) - Stock:{" "}
+                {material.name} ({material.materialCode}) - Stok:{" "}
                 {material.currentStock} {material.unit}
               </option>
             ))}
@@ -185,9 +183,7 @@ export const MaterialAccessorySelector: React.FC<
 
       {/* Accessories Section */}
       <div>
-        <h4 className="font-semibold text-gray-900 mb-3">
-          Accessories (Aksesoris)
-        </h4>
+        <h4 className="font-semibold text-gray-900 mb-3">Aksesoris</h4>
         {/* Selected Accessories */}
         <div className="space-y-3 mb-4">
           {selectedAccessories.map((sa) => {
@@ -204,7 +200,7 @@ export const MaterialAccessorySelector: React.FC<
                     {accessory.name}
                   </p>
                   <p className="text-sm text-gray-600">
-                    {accessory.accessoryCode} • {accessory.category} • Stock:{" "}
+                    {accessory.accessoryCode} • {accessory.category} • Stok:{" "}
                     {accessory.currentStock} {accessory.unit}
                   </p>
                 </div>
@@ -242,16 +238,16 @@ export const MaterialAccessorySelector: React.FC<
               e.target.value = "";
             }
           }}
-          className="w-full px-4 py-2 border border-gray-300 rounded-lg"
+          className="w-full px-4 py-2 border text-gray-600 border-gray-300 rounded-lg"
         >
-          <option value="">+ Add Accessory</option>
+          <option value="">+ Tambah Aksesoris</option>
           {accessories
             .filter(
               (a) => !selectedAccessories.find((sa) => sa.accessoryId === a.id)
             )
             .map((accessory) => (
               <option key={accessory.id} value={accessory.id}>
-                {accessory.name} ({accessory.accessoryCode}) - Stock:{" "}
+                {accessory.name} ({accessory.accessoryCode}) - Stok:{" "}
                 {accessory.currentStock} {accessory.unit}
               </option>
             ))}
@@ -263,11 +259,11 @@ export const MaterialAccessorySelector: React.FC<
         <div className="bg-purple-50 border border-purple-200 rounded-lg p-4">
           <h4 className="font-semibold text-purple-900 mb-2">Summary</h4>
           <p className="text-sm text-purple-800">
-            Materials: {selectedMaterials.length} items • Accessories:{" "}
+            Bahan: {selectedMaterials.length} items • Aksesoris:{" "}
             {selectedAccessories.length} items
           </p>
           <p className="text-xs text-purple-700 mt-1">
-            Make sure all quantities are correct before submitting order
+            Pastikan semua jumlah sesuai sebelum order dibuat
           </p>
         </div>
       )}

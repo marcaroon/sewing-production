@@ -29,8 +29,8 @@ type SidebarProps = {
 
 const menuItems = [
   { href: "/dashboard", label: "Dashboard", icon: LayoutDashboard },
-  { href: "/orders", label: "Orders", icon: Package },
-  { href: "/inventory/dashboard", label: "Inventory", icon: Warehouse },
+  { href: "/orders", label: "Order", icon: Package },
+  { href: "/inventory/dashboard", label: "Gudang", icon: Warehouse },
   { href: "/waiting-list", label: "Waiting List", icon: List },
   { href: "/monitoring", label: "Monitoring", icon: Monitor },
   { href: "/qr/scanner", label: "Scanner", icon: QrCode },
@@ -125,7 +125,7 @@ export default function Sidebar({ user }: SidebarProps) {
                 className="flex items-center gap-3 px-4 py-3 rounded-xl bg-blue-600 text-white font-semibold shadow-lg hover:bg-blue-700 transition-all mt-4"
               >
                 <Plus className="w-5 h-5" />
-                <span>New Order</span>
+                <span>Buat Order</span>
               </Link>
             )}
           </nav>

@@ -109,7 +109,7 @@ export const OrderCardNew: React.FC<OrderCardProps> = ({ order }) => {
             <div className="flex items-start gap-2">
               <CheckCircle2 className="w-4 h-4 text-green-600 mt-0.5" />
               <div>
-                <span className="text-gray-600 text-xs block">Completed</span>
+                <span className="text-gray-600 text-xs block">Selesai</span>
                 <p className="font-bold text-green-600">
                   {formatNumber(order.totalCompleted)} pcs
                 </p>
@@ -119,7 +119,7 @@ export const OrderCardNew: React.FC<OrderCardProps> = ({ order }) => {
               <Calendar className="w-4 h-4 text-gray-500 mt-0.5" />
               <div>
                 <span className="text-gray-600 text-xs block">
-                  Production Due
+                  Batas Waktu Produksi
                 </span>
                 <p
                   className={`font-bold ${
@@ -134,7 +134,7 @@ export const OrderCardNew: React.FC<OrderCardProps> = ({ order }) => {
               <Clock className="w-4 h-4 text-gray-500 mt-0.5" />
               <div>
                 <span className="text-gray-600 text-xs block">
-                  Delivery Due
+                  Batas Waktu Pengiriman
                 </span>
                 <p className="font-bold text-gray-900">
                   {formatDate(order.deliveryDeadline)}

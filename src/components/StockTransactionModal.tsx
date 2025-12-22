@@ -125,7 +125,7 @@ export const StockTransactionModal: React.FC<StockTransactionModalProps> = ({
             {item.currentStock !== undefined && (
               <div className="mt-2 pt-2 border-t border-blue-300">
                 <p className="text-sm text-gray-700">
-                  Current Stock:{" "}
+                  Stok Sekarang:{" "}
                   <span className="font-bold">
                     {item.currentStock} {item.unit}
                   </span>
@@ -137,7 +137,7 @@ export const StockTransactionModal: React.FC<StockTransactionModalProps> = ({
           {/* Transaction Type */}
           <div>
             <label className="block text-sm font-medium text-gray-900 mb-2">
-              Transaction Type *
+              Tipe Transaksi *
             </label>
             <select
               value={formData.transactionType}
@@ -159,7 +159,7 @@ export const StockTransactionModal: React.FC<StockTransactionModalProps> = ({
           {/* Quantity */}
           <div>
             <label className="block text-sm font-medium text-gray-900 mb-2">
-              Quantity *
+              Jumlah *
             </label>
             <div className="flex gap-2">
               <input
@@ -248,7 +248,7 @@ export const StockTransactionModal: React.FC<StockTransactionModalProps> = ({
                   : "bg-yellow-50 border-yellow-300"
               }`}
             >
-              <p className="font-semibold text-gray-900 mb-2">Summary:</p>
+              <p className="font-semibold text-gray-900 mb-2">Kesimpulan:</p>
               <p className="text-sm text-gray-800">
                 <span className="font-bold">{selectedType?.label}</span> of{" "}
                 <span className="font-bold">
@@ -279,7 +279,7 @@ export const StockTransactionModal: React.FC<StockTransactionModalProps> = ({
             onClick={onClose}
             disabled={isSubmitting}
           >
-            Cancel
+            Batal
           </Button>
           <Button type="submit" variant="primary" disabled={isSubmitting}>
             {isSubmitting ? "Recording..." : "Record Transaction"}

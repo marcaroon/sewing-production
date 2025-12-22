@@ -178,7 +178,7 @@ export const BarcodeDisplay: React.FC<BarcodeDisplayProps> = ({
                 className="flex-1"
               >
                 <Download className="w-4 h-4" />
-                Download
+                Unduh
               </Button>
               <Button
                 variant="outline"
@@ -187,7 +187,7 @@ export const BarcodeDisplay: React.FC<BarcodeDisplayProps> = ({
                 className="flex-1"
               >
                 <Printer className="w-4 h-4" />
-                Print
+                Cetak
               </Button>
             </div>
           )}

@@ -3,7 +3,7 @@
 "use client";
 
 import React, { useEffect, useState } from "react";
-import { useSearchParams } from "next/navigation";
+import { useSearchParams, useRouter } from "next/navigation";
 import { Material } from "@/lib/types-inventory";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/Card";
 import { Button } from "@/components/ui/Button";
@@ -19,8 +19,8 @@ import {
   Edit,
   Trash2,
   ArrowDownToLine,
-  ArrowUpFromLine,
   RefreshCw,
+  ArrowLeft,
 } from "lucide-react";
 
 export default function MaterialsPage() {
@@ -46,6 +46,7 @@ export default function MaterialsPage() {
   const [isDeleting, setIsDeleting] = useState(false);
 
   const searchParams = useSearchParams();
+  const router = useRouter();
 
   useEffect(() => {
     loadMaterials();
@@ -124,7 +125,7 @@ export default function MaterialsPage() {
       <div className="max-w-7xl mx-auto px-4 py-8">
         <div className="text-center">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
-          <p>Loading materials...</p>
+          <p>Memuat bahan...</p>
         </div>
       </div>
     );
@@ -133,17 +134,23 @@ export default function MaterialsPage() {
   return (
     <div className="max-w-7xl mx-auto px-4 py-8">
       {/* Header */}
-      <div className="flex items-center justify-between mb-8">
-        <div>
-          <h1 className="text-3xl font-bold text-gray-900 mb-2">
-            Materials Inventory
-          </h1>
+      <div className="flex items-center gap-3 mb-8">
+        <button
+          onClick={() => router.back()}
+          className="text-gray-600 hover:text-gray-900"
+        >
+          <ArrowLeft className="w-6 h-6" />
+        </button>
+
+        <div className="flex-1">
+          <h1 className="text-3xl font-bold text-gray-900 mb-2">Bahan</h1>
           <p className="text-gray-600">Manage raw materials and fabrics</p>
         </div>
+
         <div className="flex items-center gap-3">
           <Button onClick={() => loadMaterials()} variant="outline" size="sm">
             <RefreshCw className="w-4 h-4" />
-            Refresh
+            Muat Ulang
           </Button>
           <Button
             onClick={() => setShowLowStockOnly(!showLowStockOnly)}
@@ -155,8 +162,8 @@ export default function MaterialsPage() {
           </Button>
           <Button onClick={handleCreate} variant="primary">
             <Plus className="w-4 h-4" />
-            Add Material
-          </Button>
+            Tambah Bahan
+          </Button>{" "}
         </div>
       </div>
 
@@ -186,13 +193,13 @@ export default function MaterialsPage() {
             <CardContent>
               <div className="space-y-3">
                 <div className="flex justify-between items-center">
-                  <span className="text-sm text-gray-600">Category</span>
+                  <span className="text-sm text-gray-600">Kategori</span>
                   <Badge variant="info" size="sm">
                     {material.category}
                   </Badge>
                 </div>
                 <div className="flex justify-between items-center">
-                  <span className="text-sm text-gray-600">Current Stock</span>
+                  <span className="text-sm text-gray-600">Stock Sekarang</span>
                   <span
                     className={`text-2xl font-bold ${
                       material.isLowStock ? "text-red-600" : "text-green-600"
@@ -202,15 +209,15 @@ export default function MaterialsPage() {
                   </span>
                 </div>
                 <div className="flex justify-between items-center text-sm">
-                  <span className="text-gray-600">Minimum Stock</span>
-                  <span className="font-semibold">
+                  <span className="text-gray-600">Stok Minimum</span>
+                  <span className="font-semibold text-gray-600">
                     {material.minimumStock} {material.unit}
                   </span>
                 </div>
                 {material.unitPrice && (
                   <div className="flex justify-between items-center text-sm">
-                    <span className="text-gray-600">Unit Price</span>
-                    <span className="font-semibold">
+                    <span className="text-gray-600">Harga Satuan</span>
+                    <span className="font-semibold text-gray-600">
                       Rp {formatNumber(material.unitPrice)}
                     </span>
                   </div>
@@ -224,7 +231,7 @@ export default function MaterialsPage() {
                   onClick={() => handleStockIn(material)}
                 >
                   <ArrowDownToLine className="w-4 h-4" />
-                  Stock In
+                  Stok Masuk
                 </Button>
                 <Button
                   variant="outline"
@@ -232,7 +239,7 @@ export default function MaterialsPage() {
                   onClick={() => handleEdit(material)}
                 >
                   <Edit className="w-4 h-4" />
-                  Edit
+                  Ubah
                 </Button>
                 <Button
                   variant="danger"
@@ -243,7 +250,7 @@ export default function MaterialsPage() {
                   }}
                 >
                   <Trash2 className="w-4 h-4" />
-                  Delete
+                  Hapus
                 </Button>
               </div>
             </CardContent>
@@ -263,7 +270,7 @@ export default function MaterialsPage() {
             {!showLowStockOnly && (
               <Button onClick={handleCreate} variant="primary">
                 <Plus className="w-4 h-4" />
-                Add Your First Material
+                Tambah bahan pertama
               </Button>
             )}
           </CardContent>
@@ -310,13 +317,13 @@ export default function MaterialsPage() {
       >
         <div className="space-y-4">
           <p className="text-gray-700">
-            Are you sure you want to delete{" "}
+            Anda yakin ingin menghapus?{" "}
             <span className="font-bold">{deleteMaterial?.name}</span>?
           </p>
           <div className="bg-red-50 border border-red-200 rounded p-3">
             <p className="text-sm text-red-800">
-              ⚠️ This action cannot be undone. All transaction history will be
-              deleted.
+              ⚠️ Tindakan ini bersifat permanen. Semua riwayat transaksi akan
+              dihapus.
             </p>
           </div>
         </div>
@@ -326,7 +333,7 @@ export default function MaterialsPage() {
             onClick={() => setIsDeleteOpen(false)}
             disabled={isDeleting}
           >
-            Cancel
+            Batal
           </Button>
           <Button variant="danger" onClick={handleDelete} disabled={isDeleting}>
             {isDeleting ? "Deleting..." : "Delete"}

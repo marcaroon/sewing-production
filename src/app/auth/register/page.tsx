@@ -117,10 +117,10 @@ export default function RegisterPage() {
               <UserPlus className="w-12 h-12 text-green-600" />
             </div>
             <h2 className="text-2xl font-bold text-gray-900 mb-2">
-              Registration Successful!
+              Registrasi Berhasil!
             </h2>
             <p className="text-gray-600 mb-6">
-              Your account has been created. Redirecting to login...
+              Akun anda telah dibuat. Mengarahkan ke login...
             </p>
             <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto"></div>
           </CardContent>
@@ -137,16 +137,14 @@ export default function RegisterPage() {
           <div className="inline-flex items-center justify-center bg-blue-600 rounded-full p-4 mb-4 shadow-xl">
             <Factory className="w-12 h-12 text-white" />
           </div>
-          <h1 className="text-3xl font-bold text-gray-900 mb-2">
-            Create Account
-          </h1>
-          <p className="text-gray-600">Join Production Management System</p>
+          <h1 className="text-3xl font-bold text-gray-900 mb-2">Buat Akun</h1>
+          <p className="text-gray-600">Gabung Production Management System</p>
         </div>
 
         {/* Register Card */}
         <Card className="shadow-2xl border-2 border-gray-200">
           <CardHeader>
-            <CardTitle className="text-center">Register New Account</CardTitle>
+            <CardTitle className="text-center">Buat Akun Baru</CardTitle>
           </CardHeader>
           <CardContent>
             <form onSubmit={handleSubmit} className="space-y-6">
@@ -155,7 +153,7 @@ export default function RegisterPage() {
                   <AlertCircle className="w-5 h-5 text-red-600 mt-0.5" />
                   <div>
                     <p className="text-sm font-bold text-red-900">
-                      Registration Failed
+                      Registrasi Gagal
                     </p>
                     <p className="text-sm text-red-800 mt-1">{error}</p>
                   </div>
@@ -166,7 +164,7 @@ export default function RegisterPage() {
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
                   <label className="block text-sm font-bold text-gray-900 mb-2">
-                    Full Name *
+                    Nama Lengkap *
                   </label>
                   <div className="relative">
                     <User className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
@@ -186,7 +184,7 @@ export default function RegisterPage() {
 
                 <div>
                   <label className="block text-sm font-bold text-gray-900 mb-2">
-                    Email Address *
+                    Email *
                   </label>
                   <div className="relative">
                     <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
@@ -230,7 +228,7 @@ export default function RegisterPage() {
 
                 <div>
                   <label className="block text-sm font-bold text-gray-900 mb-2">
-                    Confirm Password *
+                    Konfirmasi Password *
                   </label>
                   <div className="relative">
                     <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
@@ -256,7 +254,7 @@ export default function RegisterPage() {
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
                   <label className="block text-sm font-bold text-gray-900 mb-2">
-                    Department *
+                    Departemen *
                   </label>
                   <div className="relative">
                     <Building className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
@@ -269,7 +267,7 @@ export default function RegisterPage() {
                       required
                       disabled={isSubmitting}
                     >
-                      <option value="">Select Department</option>
+                      <option value="">Pilih Departemen</option>
                       {DEPARTMENTS.map((dept) => (
                         <option key={dept} value={dept}>
                           {dept}
@@ -292,7 +290,7 @@ export default function RegisterPage() {
                     required
                     disabled={isSubmitting}
                   >
-                    <option value="">Select Role</option>
+                    <option value="">Pilih Role</option>
                     {ROLES.map((role) => (
                       <option key={role.value} value={role.value}>
                         {role.label}
@@ -305,7 +303,7 @@ export default function RegisterPage() {
               {/* Phone (Optional) */}
               <div>
                 <label className="block text-sm font-bold text-gray-900 mb-2">
-                  Phone Number (Optional)
+                  Nomor Telepon (Opsional)
                 </label>
                 <input
                   type="tel"
@@ -327,13 +325,13 @@ export default function RegisterPage() {
                   className="w-4 h-4 mt-1 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
                 />
                 <p className="text-sm text-gray-600">
-                  I agree to the{" "}
+                  Saya setuju dengan{" "}
                   <Link href="/terms" className="text-blue-600 font-semibold">
-                    Terms of Service
+                    Ketentuan Layanan
                   </Link>{" "}
-                  and{" "}
+                  dan{" "}
                   <Link href="/privacy" className="text-blue-600 font-semibold">
-                    Privacy Policy
+                    Kebijakan Privasi
                   </Link>
                 </p>
               </div>
@@ -349,12 +347,12 @@ export default function RegisterPage() {
                 {isSubmitting ? (
                   <>
                     <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white mr-2"></div>
-                    Creating Account...
+                    Akun dibuat...
                   </>
                 ) : (
                   <>
                     <UserPlus className="w-5 h-5 mr-2" />
-                    Create Account
+                    Buat akun
                   </>
                 )}
               </Button>
@@ -362,12 +360,12 @@ export default function RegisterPage() {
               {/* Login Link */}
               <div className="text-center pt-4 border-t-2 border-gray-200">
                 <p className="text-gray-600">
-                  Already have an account?{" "}
+                  Sudah punya akun?{" "}
                   <Link
                     href="/auth/login"
                     className="text-blue-600 hover:text-blue-700 font-bold"
                   >
-                    Login here
+                    Login disini
                   </Link>
                 </p>
               </div>
@@ -381,7 +379,7 @@ export default function RegisterPage() {
             href="/"
             className="text-gray-600 hover:text-gray-900 font-semibold text-sm"
           >
-            ← Back to Home
+            ← Kembali Home
           </Link>
         </div>
       </div>

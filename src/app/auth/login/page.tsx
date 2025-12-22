@@ -57,17 +57,17 @@ function LoginForm() {
             <Factory className="w-12 h-12 text-white" />
           </div>
           <h1 className="text-3xl font-bold text-gray-900 mb-2">
-            Welcome Back
+            Selamat Datang Kembali
           </h1>
           <p className="text-gray-600">
-            Login to your Production Management System
+            Masuk ke Production Management System
           </p>
         </div>
 
         {/* Login Card */}
         <Card className="shadow-2xl border-2 border-gray-200">
           <CardHeader>
-            <CardTitle className="text-center">Login to Dashboard</CardTitle>
+            <CardTitle className="text-center">Masuk ke Dashboard</CardTitle>
           </CardHeader>
           <CardContent>
             <form onSubmit={handleSubmit} className="space-y-6">
@@ -76,7 +76,7 @@ function LoginForm() {
                   <AlertCircle className="w-5 h-5 text-red-600 mt-0.5" />
                   <div>
                     <p className="text-sm font-bold text-red-900">
-                      Login Failed
+                      Login Gagal
                     </p>
                     <p className="text-sm text-red-800 mt-1">{error}</p>
                   </div>
@@ -86,7 +86,7 @@ function LoginForm() {
               {/* Email */}
               <div>
                 <label className="block text-sm font-bold text-gray-900 mb-2">
-                  Email Address
+                  Email
                 </label>
                 <div className="relative">
                   <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
@@ -97,7 +97,7 @@ function LoginForm() {
                       setFormData({ ...formData, email: e.target.value })
                     }
                     className="w-full pl-12 pr-4 py-3 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-gray-400 font-medium"
-                    placeholder="your.email@company.com"
+                    placeholder="your.email@mail.com"
                     required
                     disabled={isSubmitting}
                   />
@@ -132,13 +132,13 @@ function LoginForm() {
                     type="checkbox"
                     className="w-4 h-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
                   />
-                  <span className="text-gray-700 font-medium">Remember me</span>
+                  <span className="text-gray-700 font-medium">Ingat saya</span>
                 </label>
                 <Link
                   href="/auth/forgot-password"
                   className="text-blue-600 hover:text-blue-700 font-semibold"
                 >
-                  Forgot password?
+                  Lupa password?
                 </Link>
               </div>
 
@@ -158,7 +158,7 @@ function LoginForm() {
                 ) : (
                   <>
                     <LogIn className="w-5 h-5 mr-2" />
-                    Login to Dashboard
+                    Masuk ke Dashboard
                   </>
                 )}
               </Button>
@@ -166,12 +166,12 @@ function LoginForm() {
               {/* Register Link */}
               <div className="text-center pt-4 border-t-2 border-gray-200">
                 <p className="text-gray-600">
-                  Don't have an account?{" "}
+                  Belum mempunyai akun?{" "}
                   <Link
                     href="/auth/register"
                     className="text-blue-600 hover:text-blue-700 font-bold"
                   >
-                    Register here
+                    Daftar disini
                   </Link>
                 </p>
               </div>
@@ -185,7 +185,7 @@ function LoginForm() {
             href="/"
             className="text-gray-600 hover:text-gray-900 font-semibold text-sm"
           >
-            ← Back to Home
+            ← Kembali ke Home
           </Link>
         </div>
       </div>

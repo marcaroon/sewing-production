@@ -1,4 +1,4 @@
-// src/app/api/orders/route.ts - COMPLETE VERSION with Materials & Accessories
+// src/app/api/orders/route.ts - UPDATED VERSION with Manual Order Number
 
 import { NextRequest, NextResponse } from "next/server";
 import prisma from "@/lib/prisma";
@@ -10,6 +10,7 @@ export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
     const {
+      orderNumber, // NEW: Manual input dari user
       buyerId,
       styleId,
       orderDate,
@@ -21,9 +22,35 @@ export async function POST(request: NextRequest) {
       notes,
       processTemplateId,
       customProcessFlow,
-      selectedMaterials,    // NEW: Array of { materialId, quantityRequired }
-      selectedAccessories,  // NEW: Array of { accessoryId, quantityRequired }
+      selectedMaterials,
+      selectedAccessories,
     } = body;
+
+    // ========== VALIDATE ORDER NUMBER ==========
+    if (!orderNumber || orderNumber.trim() === "") {
+      return NextResponse.json(
+        {
+          success: false,
+          error: "Order number is required",
+        },
+        { status: 400 }
+      );
+    }
+
+    // Check if order number already exists
+    const existingOrder = await prisma.order.findUnique({
+      where: { orderNumber: orderNumber.trim().toUpperCase() },
+    });
+
+    if (existingOrder) {
+      return NextResponse.json(
+        {
+          success: false,
+          error: `Order number "${orderNumber}" already exists. Please use a different order number.`,
+        },
+        { status: 409 } // 409 Conflict
+      );
+    }
 
     // Validate deadlines
     if (new Date(deliveryDeadline) <= new Date(productionDeadline)) {
@@ -65,7 +92,6 @@ export async function POST(request: NextRequest) {
 
     // ==================== VALIDATE MATERIALS (if provided) ====================
     if (selectedMaterials && selectedMaterials.length > 0) {
-      // Check if all materials exist
       const materialIds = selectedMaterials.map((m: any) => m.materialId);
       const materialsExist = await prisma.material.findMany({
         where: { id: { in: materialIds } },
@@ -78,11 +104,13 @@ export async function POST(request: NextRequest) {
         );
       }
 
-      // Validate quantities
       for (const sm of selectedMaterials) {
         if (!sm.quantityRequired || sm.quantityRequired <= 0) {
           return NextResponse.json(
-            { success: false, error: "Material quantities must be greater than 0" },
+            {
+              success: false,
+              error: "Material quantities must be greater than 0",
+            },
             { status: 400 }
           );
         }
@@ -106,7 +134,10 @@ export async function POST(request: NextRequest) {
       for (const sa of selectedAccessories) {
         if (!sa.quantityRequired || sa.quantityRequired <= 0) {
           return NextResponse.json(
-            { success: false, error: "Accessory quantities must be greater than 0" },
+            {
+              success: false,
+              error: "Accessory quantities must be greater than 0",
+            },
             { status: 400 }
           );
         }
@@ -115,17 +146,10 @@ export async function POST(request: NextRequest) {
 
     // ==================== CREATE ORDER WITH PROCESS STEPS ====================
     const result = await prisma.$transaction(async (tx) => {
-      // Generate order number
-      const year = new Date().getFullYear();
-      const count = await tx.order.count({
-        where: { orderNumber: { startsWith: `ORD-${year}` } },
-      });
-      const orderNumber = `ORD-${year}-${String(count + 1).padStart(5, "0")}`;
-
-      // Create order
+      // Create order dengan manual order number
       const order = await tx.order.create({
         data: {
-          orderNumber,
+          orderNumber: orderNumber.trim().toUpperCase(), // Store in uppercase
           buyerId,
           styleId,
           orderDate: new Date(orderDate),
@@ -221,9 +245,10 @@ export async function POST(request: NextRequest) {
       // ==================== CREATE ORDER MATERIALS ====================
       const createdMaterials = [];
       if (selectedMaterials && selectedMaterials.length > 0) {
-        // Get material details for unit info
         const materialDetails = await tx.material.findMany({
-          where: { id: { in: selectedMaterials.map((m: any) => m.materialId) } },
+          where: {
+            id: { in: selectedMaterials.map((m: any) => m.materialId) },
+          },
         });
 
         for (const sm of selectedMaterials) {
@@ -259,13 +284,16 @@ export async function POST(request: NextRequest) {
       // ==================== CREATE ORDER ACCESSORIES ====================
       const createdAccessories = [];
       if (selectedAccessories && selectedAccessories.length > 0) {
-        // Get accessory details for unit info
         const accessoryDetails = await tx.accessory.findMany({
-          where: { id: { in: selectedAccessories.map((a: any) => a.accessoryId) } },
+          where: {
+            id: { in: selectedAccessories.map((a: any) => a.accessoryId) },
+          },
         });
 
         for (const sa of selectedAccessories) {
-          const accessory = accessoryDetails.find((a) => a.id === sa.accessoryId);
+          const accessory = accessoryDetails.find(
+            (a) => a.id === sa.accessoryId
+          );
           if (!accessory) continue;
 
           const orderAccessory = await tx.orderAccessory.create({
@@ -294,11 +322,11 @@ export async function POST(request: NextRequest) {
         }
       }
 
-      return { 
-        order, 
-        processSteps, 
-        materials: createdMaterials, 
-        accessories: createdAccessories 
+      return {
+        order,
+        processSteps,
+        materials: createdMaterials,
+        accessories: createdAccessories,
       };
     });
 
@@ -348,7 +376,7 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({
       success: true,
       data: transformedOrder,
-      message: `Order created with ${processFlow.length} process steps, ${result.materials.length} materials, ${result.accessories.length} accessories`,
+      message: `Order ${result.order.orderNumber} created successfully with ${processFlow.length} process steps`,
     });
   } catch (error) {
     console.error("Error creating order:", error);
@@ -363,7 +391,7 @@ export async function POST(request: NextRequest) {
   }
 }
 
-// GET /api/orders - Get all orders
+// GET endpoint tetap sama...
 export async function GET(request: NextRequest) {
   try {
     const { searchParams } = new URL(request.url);
@@ -372,7 +400,6 @@ export async function GET(request: NextRequest) {
     const state = searchParams.get("state");
     const search = searchParams.get("search");
 
-    // Build where clause
     const where: any = {};
 
     if (phase) {
@@ -410,7 +437,6 @@ export async function GET(request: NextRequest) {
       },
     });
 
-    // Transform to match frontend format with proper null checks
     const transformedOrders = orders.map((order) => ({
       id: order.id,
       orderNumber: order.orderNumber,

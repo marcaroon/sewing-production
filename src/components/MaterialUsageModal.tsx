@@ -140,7 +140,7 @@ export const MaterialUsageModal: React.FC<MaterialUsageModalProps> = ({
     setError("");
 
     if (!usageData.usedBy.trim()) {
-      setError("Please enter your name");
+      setError("Masukkan nama");
       return;
     }
 

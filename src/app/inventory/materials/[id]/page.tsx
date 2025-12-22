@@ -14,7 +14,6 @@ import {
   ArrowLeft,
   Edit,
   ArrowDownToLine,
-  ArrowUpFromLine,
   History,
   TrendingUp,
   AlertTriangle,
@@ -65,7 +64,7 @@ export default function MaterialDetailPage() {
       <div className="max-w-7xl mx-auto px-4 py-8">
         <div className="text-center">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
-          <p>Loading material details...</p>
+          <p>Memuat detail bahan...</p>
         </div>
       </div>
     );
@@ -75,12 +74,12 @@ export default function MaterialDetailPage() {
     return (
       <div className="max-w-7xl mx-auto px-4 py-8">
         <div className="bg-red-50 border border-red-200 rounded-lg p-6">
-          <p className="text-red-800">Material not found</p>
+          <p className="text-red-800">Bahan tidak ditemukan</p>
           <button
             onClick={() => router.push("/inventory/materials")}
             className="mt-3 text-sm text-red-800 underline"
           >
-            Back to Materials
+            Kembali ke bahan
           </button>
         </div>
       </div>
@@ -111,7 +110,7 @@ export default function MaterialDetailPage() {
               size="sm"
             >
               <Edit className="w-4 h-4" />
-              Edit
+              Ubah
             </Button>
             <Button
               onClick={() => setIsTransactionOpen(true)}
@@ -119,7 +118,7 @@ export default function MaterialDetailPage() {
               size="sm"
             >
               <ArrowDownToLine className="w-4 h-4" />
-              Stock In/Out
+              Stok Keluar/Masuk
             </Button>
           </div>
         </div>
@@ -133,7 +132,7 @@ export default function MaterialDetailPage() {
               <Package className="w-8 h-8 text-blue-600" />
               <div>
                 <p className="text-xs font-semibold text-gray-600 uppercase">
-                  Current Stock
+                  Stok Sekarang
                 </p>
                 <p className="text-2xl font-bold text-blue-900">
                   {formatNumber(material.currentStock || 0)}
@@ -153,7 +152,7 @@ export default function MaterialDetailPage() {
               <AlertTriangle className="w-8 h-8 text-orange-600" />
               <div>
                 <p className="text-xs font-semibold text-gray-600 uppercase">
-                  Minimum Stock
+                  Stok Minimum
                 </p>
                 <p className="text-2xl font-bold text-orange-900">
                   {material.minimumStock}
@@ -187,7 +186,7 @@ export default function MaterialDetailPage() {
               <History className="w-8 h-8 text-purple-600" />
               <div>
                 <p className="text-xs font-semibold text-gray-600 uppercase">
-                  Transactions
+                  Transaksi
                 </p>
                 <p className="text-2xl font-bold text-purple-900">
                   {transactions.length}
@@ -203,11 +202,11 @@ export default function MaterialDetailPage() {
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
         <Card>
           <CardHeader>
-            <CardTitle>Material Information</CardTitle>
+            <CardTitle>Informasi Bahan</CardTitle>
           </CardHeader>
           <CardContent className="space-y-3">
             <div>
-              <p className="text-sm text-gray-600">Category</p>
+              <p className="text-sm text-gray-600">Kategori</p>
               <Badge variant="info" size="sm">
                 {material.category}
               </Badge>
@@ -218,7 +217,7 @@ export default function MaterialDetailPage() {
             </div>
             {material.color && (
               <div>
-                <p className="text-sm text-gray-600">Color</p>
+                <p className="text-sm text-gray-600">Warna</p>
                 <p className="font-semibold text-gray-900">{material.color}</p>
               </div>
             )}
@@ -232,7 +231,7 @@ export default function MaterialDetailPage() {
             )}
             {material.unitPrice && (
               <div>
-                <p className="text-sm text-gray-600">Unit Price</p>
+                <p className="text-sm text-gray-600">Harga Satuan</p>
                 <p className="font-semibold text-gray-900">
                   Rp {formatNumber(material.unitPrice)}
                 </p>
@@ -244,13 +243,13 @@ export default function MaterialDetailPage() {
         {/* Stock Status */}
         <Card>
           <CardHeader>
-            <CardTitle>Stock Status</CardTitle>
+            <CardTitle>Stok Status</CardTitle>
           </CardHeader>
           <CardContent>
             <div className="space-y-4">
               <div className="flex justify-between items-center p-3 bg-blue-50 rounded-lg">
                 <span className="text-sm font-semibold text-blue-700">
-                  Available
+                  Tersedia
                 </span>
                 <span className="text-lg font-bold text-blue-900">
                   {formatNumber(material.currentStock || 0)} {material.unit}
@@ -262,7 +261,7 @@ export default function MaterialDetailPage() {
                     ⚠️ Low Stock Alert
                   </p>
                   <p className="text-xs text-red-700 mt-1">
-                    Below minimum stock level
+                    Dibawah stok minimum
                   </p>
                 </div>
               )}
@@ -273,7 +272,7 @@ export default function MaterialDetailPage() {
         {/* Usage Stats (if available) */}
         <Card>
           <CardHeader>
-            <CardTitle>Usage Statistics</CardTitle>
+            <CardTitle>Statistik Penggunaan</CardTitle>
           </CardHeader>
           <CardContent>
             <p className="text-sm text-gray-600">
@@ -287,12 +286,12 @@ export default function MaterialDetailPage() {
       {/* Transaction History */}
       <Card>
         <CardHeader>
-          <CardTitle>Transaction History</CardTitle>
+          <CardTitle>Riwayat Transaksi</CardTitle>
         </CardHeader>
         <CardContent>
           {transactions.length === 0 ? (
             <p className="text-center py-8 text-gray-500">
-              No transactions yet
+              Belum ada transaksi
             </p>
           ) : (
             <div className="overflow-x-auto">
@@ -300,13 +299,13 @@ export default function MaterialDetailPage() {
                 <thead>
                   <tr className="border-b border-gray-200">
                     <th className="text-left py-3 px-4 text-sm font-semibold text-gray-700">
-                      Date
+                      Tanggal
                     </th>
                     <th className="text-left py-3 px-4 text-sm font-semibold text-gray-700">
-                      Type
+                      Tipe
                     </th>
                     <th className="text-right py-3 px-4 text-sm font-semibold text-gray-700">
-                      Quantity
+                      Jumlah
                     </th>
                     <th className="text-left py-3 px-4 text-sm font-semibold text-gray-700">
                       Reference

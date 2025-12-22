@@ -141,7 +141,7 @@ export const TransferLogCard: React.FC<TransferLogCardProps> = ({
           <div className="flex items-center justify-between bg-linear-to-r from-blue-50 to-purple-50 border-2 border-blue-200 rounded-lg p-4">
             <div className="flex-1">
               <p className="text-xs font-bold text-blue-700 uppercase mb-1">
-                From
+                Dari
               </p>
               <p className="font-bold text-sm text-gray-900">
                 {getProcessLabel(transferLog.fromProcess)}
@@ -155,7 +155,7 @@ export const TransferLogCard: React.FC<TransferLogCardProps> = ({
             </div>
             <div className="flex-1">
               <p className="text-xs font-bold text-purple-700 uppercase mb-1">
-                To
+                Ke
               </p>
               <p className="font-bold text-sm text-gray-900">
                 {getProcessLabel(transferLog.toProcess)}
@@ -171,7 +171,7 @@ export const TransferLogCard: React.FC<TransferLogCardProps> = ({
             <div className="flex items-center gap-2 bg-blue-50 border border-blue-200 rounded-lg p-2.5">
               <Package className="w-4 h-4 text-blue-600" />
               <div>
-                <p className="text-xs font-bold text-blue-700">Transferred</p>
+                <p className="text-xs font-bold text-blue-700">Dipindahkan</p>
                 <p className="font-bold text-blue-900">
                   {formatNumber(transferLog.quantityTransferred)} pcs
                 </p>
@@ -180,7 +180,7 @@ export const TransferLogCard: React.FC<TransferLogCardProps> = ({
             <div className="flex items-center gap-2 bg-green-50 border border-green-200 rounded-lg p-2.5">
               <CheckCircle2 className="w-4 h-4 text-green-600" />
               <div>
-                <p className="text-xs font-bold text-green-700">Completed</p>
+                <p className="text-xs font-bold text-green-700">Selesai</p>
                 <p className="font-bold text-green-900">
                   {formatNumber(transferLog.quantityCompleted)} pcs
                 </p>
@@ -224,7 +224,7 @@ export const TransferLogCard: React.FC<TransferLogCardProps> = ({
             <div>
               <div className="flex items-center gap-1.5 mb-1">
                 <User className="w-3 h-3 text-gray-600" />
-                <p className="text-xs font-bold text-gray-700">Received By</p>
+                <p className="text-xs font-bold text-gray-700">Diterima oleh</p>
               </div>
               <p className="font-bold text-gray-900">
                 {transferLog.receivedBy || "-"}
@@ -239,7 +239,7 @@ export const TransferLogCard: React.FC<TransferLogCardProps> = ({
                 <div className="flex items-center gap-2 bg-blue-50 border border-blue-200 rounded px-2.5 py-2">
                   <Clock className="w-3 h-3 text-blue-600" />
                   <div>
-                    <p className="font-semibold text-blue-700">Processing</p>
+                    <p className="font-semibold text-blue-700">Memproses</p>
                     <p className="font-bold text-blue-900">
                       {transferLog.processingDuration} min
                     </p>
@@ -250,7 +250,7 @@ export const TransferLogCard: React.FC<TransferLogCardProps> = ({
                 <div className="flex items-center gap-2 bg-yellow-50 border border-yellow-200 rounded px-2.5 py-2">
                   <Clock className="w-3 h-3 text-yellow-600" />
                   <div>
-                    <p className="font-semibold text-yellow-700">Waiting</p>
+                    <p className="font-semibold text-yellow-700">Menunggu</p>
                     <p className="font-bold text-yellow-900">
                       {transferLog.waitingDuration} min
                     </p>
@@ -281,7 +281,7 @@ export const TransferLogCard: React.FC<TransferLogCardProps> = ({
                 size="sm"
               >
                 <CheckCircle2 className="w-4 h-4" />
-                Receive
+                Terima
               </Button>
             )}
             {!transferLog.isReceived && !canReceive && !isAdmin && (
@@ -297,7 +297,9 @@ export const TransferLogCard: React.FC<TransferLogCardProps> = ({
                     clipRule="evenodd"
                   />
                 </svg>
-                <span>Only {transferLog.toDepartment} can receive</span>
+                <span>
+                  Hanya {transferLog.toDepartment} yang dapat menerima
+                </span>
               </div>
             )}
           </div>
@@ -315,11 +317,11 @@ export const TransferLogCard: React.FC<TransferLogCardProps> = ({
           <div className="bg-linear-to-r from-blue-50 to-purple-50 border-2 border-blue-300 rounded-lg p-4">
             <h4 className="font-bold text-gray-900 mb-3 flex items-center gap-2">
               <FileText className="w-5 h-5 text-blue-600" />
-              Transfer Information
+              Informasi Perpindahan
             </h4>
             <div className="grid grid-cols-2 gap-4 text-sm">
               <div>
-                <p className="text-gray-700 font-semibold">From Process</p>
+                <p className="text-gray-700 font-semibold">Dari Proses</p>
                 <p className="font-bold text-gray-900">
                   {getProcessLabel(transferLog.fromProcess)}
                 </p>
@@ -328,7 +330,7 @@ export const TransferLogCard: React.FC<TransferLogCardProps> = ({
                 </p>
               </div>
               <div>
-                <p className="text-gray-700 font-semibold">To Process</p>
+                <p className="text-gray-700 font-semibold">Ke Proses</p>
                 <p className="font-bold text-gray-900">
                   {getProcessLabel(transferLog.toProcess)}
                 </p>
@@ -343,7 +345,7 @@ export const TransferLogCard: React.FC<TransferLogCardProps> = ({
             <div className="bg-red-50 border-2 border-red-300 rounded-lg p-4">
               <h4 className="font-bold text-red-900 mb-3 flex items-center gap-2">
                 <AlertTriangle className="w-5 h-5 text-red-600" />
-                Reject/Rework Details
+                Detail Reject/Rework
               </h4>
               <div className="space-y-2">
                 {rejects.map((reject: any, idx: number) => (
@@ -382,7 +384,7 @@ export const TransferLogCard: React.FC<TransferLogCardProps> = ({
             <div className="bg-yellow-50 border-2 border-yellow-300 rounded-lg p-4">
               <p className="font-bold text-yellow-900 mb-2 flex items-center gap-2">
                 <FileText className="w-4 h-4" />
-                Notes
+                Catatan
               </p>
               <p className="text-sm font-medium text-yellow-800">
                 {transferLog.notes}
@@ -421,7 +423,7 @@ export const TransferLogCard: React.FC<TransferLogCardProps> = ({
             )}
 
             <div className="bg-blue-50 border-2 border-blue-300 rounded-lg p-4 text-sm">
-              <p className="font-bold text-blue-900 mb-2">Will Receive:</p>
+              <p className="font-bold text-blue-900 mb-2">Akan diterima:</p>
               <p className="text-gray-900 font-semibold">
                 {transferLog.quantityTransferred} pcs from{" "}
                 {getProcessLabel(transferLog.fromProcess)}
@@ -430,7 +432,7 @@ export const TransferLogCard: React.FC<TransferLogCardProps> = ({
 
             <div>
               <label className="block text-sm font-bold text-gray-900 mb-2">
-                Receiver Name *
+                Nama Penerima *
               </label>
               <input
                 type="text"
@@ -446,7 +448,7 @@ export const TransferLogCard: React.FC<TransferLogCardProps> = ({
 
             <div>
               <label className="block text-sm font-bold text-gray-900 mb-2">
-                Issues? (optional)
+                Issues? (Opsional)
               </label>
               <textarea
                 value={receiveData.issues}
@@ -462,7 +464,7 @@ export const TransferLogCard: React.FC<TransferLogCardProps> = ({
 
             <div>
               <label className="block text-sm font-bold text-gray-900 mb-2">
-                Additional Notes (optional)
+                Catatan Tambahan (Oprional)
               </label>
               <textarea
                 value={receiveData.notes}
@@ -483,7 +485,7 @@ export const TransferLogCard: React.FC<TransferLogCardProps> = ({
               onClick={() => setIsReceiveModalOpen(false)}
               disabled={isSubmitting}
             >
-              Cancel
+              Batal
             </Button>
             <Button type="submit" variant="success" disabled={isSubmitting}>
               {isSubmitting ? "Processing..." : "Confirm Receive"}

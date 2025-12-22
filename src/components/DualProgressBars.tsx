@@ -66,7 +66,7 @@ export function DualProgressBarsCompact({ order }: DualProgressBarsProps) {
       <div>
         <div className="flex justify-between items-center text-xs font-semibold text-gray-700 mb-1.5">
           <div className="flex items-center gap-1">
-            <span>Process Steps</span>
+            <span>Tahapan</span>
           </div>
           <span>
             {processProgress.completed}/{processProgress.total}
@@ -118,11 +118,9 @@ export function DualProgressBarsFull({ order }: DualProgressBarsProps) {
             <TrendingUp className="w-6 h-6 text-white" />
           </div> */}
           <div className="flex-1">
-            <h3 className="text-lg font-bold text-gray-900">
-              Process Flow Progress
-            </h3>
+            <h3 className="text-lg font-bold text-gray-900">Progres Tahapan</h3>
             <p className="text-sm text-gray-600">
-              Steps completed in production flow
+              Tahapan selesai di alur produksi
             </p>
           </div>
         </div>
@@ -134,12 +132,12 @@ export function DualProgressBarsFull({ order }: DualProgressBarsProps) {
                 {processProgress.percentage}%
               </p>
               <p className="text-xs text-gray-600 mt-1">
-                {processProgress.completed} of {processProgress.total} steps
+                {processProgress.completed} of {processProgress.total} tahap
               </p>
             </div>
             <div className="text-right">
               <p className="text-sm font-semibold text-gray-700">
-                Current Step
+                Tahapan Sekarang
               </p>
               <p className="text-lg font-bold text-gray-700">
                 {processProgress.completed + 1}
@@ -160,7 +158,7 @@ export function DualProgressBarsFull({ order }: DualProgressBarsProps) {
             {order.processTemplate || "Standard Flow"}
           </p>
           <p className="text-xs text-gray-600 mt-1">
-            Total {processProgress.total} production steps
+            Total {processProgress.total} tahapan produksi
           </p>
         </div>
       </div>
@@ -189,7 +187,7 @@ export function DualProgressBarsFull({ order }: DualProgressBarsProps) {
               </p>
             </div>
             <div className="text-right">
-              <p className="text-sm font-semibold text-gray-700">Remaining</p>
+              <p className="text-sm font-semibold text-gray-700">Tersisa</p>
               <p className="text-lg font-bold text-gray-700">
                 {(
                   quantityProgress.total - quantityProgress.completed
@@ -208,7 +206,7 @@ export function DualProgressBarsFull({ order }: DualProgressBarsProps) {
 
         <div className="grid grid-cols-2 gap-2">
           <div className="bg-white rounded-lg p-3 border border-green-200">
-            <p className="text-xs font-semibold text-gray-700">Completed</p>
+            <p className="text-xs font-semibold text-gray-700">Selesai</p>
             <p className="text-lg font-bold text-green-600">
               {quantityProgress.completed.toLocaleString()}
             </p>

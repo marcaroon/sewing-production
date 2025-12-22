@@ -82,10 +82,10 @@ export default function DashboardPage() {
   if (isLoading) {
     return (
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <div className="flex items-center justify-center min-h-[400px]">
+        <div className="flex items-center justify-center min-h-100">
           <div className="text-center">
             <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
-            <p className="text-gray-700 font-medium">Loading dashboard...</p>
+            <p className="text-gray-700 font-medium">Memuat dashboard...</p>
           </div>
         </div>
       </div>
@@ -105,7 +105,7 @@ export default function DashboardPage() {
                 onClick={loadData}
                 className="mt-3 text-sm text-red-800 font-semibold underline hover:text-red-900"
               >
-                Try Again
+                Coba lagi
               </button>
             </div>
           </div>
@@ -132,7 +132,7 @@ export default function DashboardPage() {
             <div className="flex items-center justify-between">
               <div className="flex-1">
                 <p className="text-sm font-semibold text-gray-600 uppercase tracking-wide">
-                  Total Orders
+                  Total Order
                 </p>
                 <p className="text-3xl font-bold text-gray-900 mt-2">
                   {stats.totalOrders}
@@ -151,7 +151,7 @@ export default function DashboardPage() {
             <div className="flex items-center justify-between">
               <div className="flex-1">
                 <p className="text-sm font-semibold text-gray-600 uppercase tracking-wide">
-                  In Production
+                  Di Produksi
                 </p>
                 <p className="text-3xl font-bold text-orange-600 mt-2">
                   {stats.ordersInProduction}
@@ -170,7 +170,7 @@ export default function DashboardPage() {
             <div className="flex items-center justify-between">
               <div className="flex-1">
                 <p className="text-sm font-semibold text-gray-600 uppercase tracking-wide">
-                  In Delivery
+                  Dalam Pengiriman
                 </p>
                 <p className="text-3xl font-bold text-blue-600 mt-2">
                   {stats.ordersInDelivery}
@@ -189,7 +189,7 @@ export default function DashboardPage() {
             <div className="flex items-center justify-between">
               <div className="flex-1">
                 <p className="text-sm font-semibold text-gray-600 uppercase tracking-wide">
-                  Completed
+                  Selesai
                 </p>
                 <p className="text-3xl font-bold text-green-600 mt-2">
                   {stats.ordersCompleted}
@@ -209,7 +209,7 @@ export default function DashboardPage() {
           <CardHeader>
             <div className="flex items-center gap-2">
               <TrendingUp className="w-5 h-5 text-blue-600" />
-              <CardTitle>Performance Metrics</CardTitle>
+              <CardTitle>Metriks Performa</CardTitle>
             </div>
           </CardHeader>
           <CardContent>
@@ -218,18 +218,18 @@ export default function DashboardPage() {
                 <div className="flex items-center gap-2">
                   <Clock className="w-4 h-4 text-gray-600" />
                   <span className="text-sm font-semibold text-gray-700">
-                    Avg Production Time
+                    Rata-rata waktu produksi
                   </span>
                 </div>
                 <span className="text-xl font-bold text-gray-900">
-                  {stats.avgProductionTime} days
+                  {stats.avgProductionTime} hari
                 </span>
               </div>
               <div className="flex justify-between items-center p-3 bg-gray-50 rounded-lg border border-gray-200">
                 <div className="flex items-center gap-2">
                   <AlertTriangle className="w-4 h-4 text-gray-600" />
                   <span className="text-sm font-semibold text-gray-700">
-                    Total Reject Rate
+                    Presentase total reject
                   </span>
                 </div>
                 <span
@@ -281,13 +281,13 @@ export default function DashboardPage() {
         <div className="flex items-center justify-between mb-6">
           <div className="flex items-center gap-3">
             <Package className="w-6 h-6 text-blue-600" />
-            <h2 className="text-2xl font-bold text-gray-900">Active Orders</h2>
+            <h2 className="text-2xl font-bold text-gray-900">Order Akif</h2>
           </div>
           <Link
             href="/orders"
             className="text-blue-600 hover:text-blue-800 font-semibold text-sm flex items-center gap-1"
           >
-            View All
+            Lihat semua
             <Plus className="w-4 h-4" />
           </Link>
         </div>
@@ -312,9 +312,7 @@ export default function DashboardPage() {
         <div>
           <div className="flex items-center gap-3 mb-6">
             <CheckCircle2 className="w-6 h-6 text-green-600" />
-            <h2 className="text-2xl font-bold text-gray-900">
-              Recently Completed
-            </h2>
+            <h2 className="text-2xl font-bold text-gray-900">Selesai</h2>
           </div>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
             {completedOrders.map((order) => (

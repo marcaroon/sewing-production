@@ -105,7 +105,7 @@ export default function TransactionsPage() {
       <div className="max-w-7xl mx-auto px-4 py-8">
         <div className="text-center">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
-          <p>Loading transactions...</p>
+          <p className="text-gray-600">Loading transactions...</p>
         </div>
       </div>
     );
@@ -118,7 +118,7 @@ export default function TransactionsPage() {
         <div className="flex items-center justify-between mb-4">
           <div>
             <h1 className="text-3xl font-bold text-gray-900 mb-2">
-              Stock Transactions
+              Transaksi Stok
             </h1>
             <p className="text-gray-600">
               All material and accessory movements
@@ -126,7 +126,7 @@ export default function TransactionsPage() {
           </div>
           <Button onClick={loadTransactions} variant="outline" size="sm">
             <RefreshCw className="w-4 h-4" />
-            Refresh
+            Muat Ulang
           </Button>
         </div>
 
@@ -136,7 +136,7 @@ export default function TransactionsPage() {
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Item Type
+                  Jenis Item
                 </label>
                 <select
                   value={filter.type}
@@ -145,14 +145,14 @@ export default function TransactionsPage() {
                   }
                   className="w-full px-4 py-2 border border-gray-300 rounded-lg"
                 >
-                  <option value="all">All Types</option>
-                  <option value="material">Materials Only</option>
-                  <option value="accessory">Accessories Only</option>
+                  <option value="all">Semua Jenis</option>
+                  <option value="material">Hanya Bahan</option>
+                  <option value="accessory">Hanya Aksesoris</option>
                 </select>
               </div>
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Transaction Type
+                  Jenis Transaksi
                 </label>
                 <select
                   value={filter.transactionType}
@@ -161,11 +161,11 @@ export default function TransactionsPage() {
                   }
                   className="w-full px-4 py-2 border border-gray-300 rounded-lg"
                 >
-                  <option value="all">All Transactions</option>
-                  <option value="in">Stock In</option>
-                  <option value="out">Stock Out</option>
-                  <option value="adjustment">Adjustments</option>
-                  <option value="return">Returns</option>
+                  <option value="all">Semua Transaksi</option>
+                  <option value="in">Stok Masuk</option>
+                  <option value="out">Stok Keluar</option>
+                  <option value="adjustment">Penyesuaian</option>
+                  <option value="return">Pengembalian</option>
                 </select>
               </div>
             </div>
@@ -196,7 +196,7 @@ export default function TransactionsPage() {
               <ArrowDownToLine className="w-8 h-8 text-green-600" />
               <div>
                 <p className="text-xs font-semibold text-gray-600 uppercase">
-                  Stock In
+                  Stok Masuk
                 </p>
                 <p className="text-2xl font-bold text-green-900">
                   {
@@ -215,7 +215,7 @@ export default function TransactionsPage() {
               <ArrowUpFromLine className="w-8 h-8 text-red-600" />
               <div>
                 <p className="text-xs font-semibold text-gray-600 uppercase">
-                  Stock Out
+                  Stok Keluar
                 </p>
                 <p className="text-2xl font-bold text-red-900">
                   {
@@ -234,7 +234,7 @@ export default function TransactionsPage() {
               <Filter className="w-8 h-8 text-purple-600" />
               <div>
                 <p className="text-xs font-semibold text-gray-600 uppercase">
-                  Others
+                  Lain-lain
                 </p>
                 <p className="text-2xl font-bold text-purple-900">
                   {
@@ -254,12 +254,12 @@ export default function TransactionsPage() {
       {/* Transactions Table */}
       <Card>
         <CardHeader>
-          <CardTitle>Transaction History</CardTitle>
+          <CardTitle>Riwayat Transaksi</CardTitle>
         </CardHeader>
         <CardContent>
           {filteredTransactions.length === 0 ? (
             <p className="text-center py-8 text-gray-500">
-              No transactions found
+              Tidak ditemukan transaksi
             </p>
           ) : (
             <div className="overflow-x-auto">
@@ -267,25 +267,25 @@ export default function TransactionsPage() {
                 <thead>
                   <tr className="border-b border-gray-200">
                     <th className="text-left py-3 px-4 text-sm font-semibold text-gray-700">
-                      Date & Time
+                      Tanggal & Waktu
                     </th>
                     <th className="text-left py-3 px-4 text-sm font-semibold text-gray-700">
                       Item
                     </th>
                     <th className="text-left py-3 px-4 text-sm font-semibold text-gray-700">
-                      Type
+                      Jenis
                     </th>
                     <th className="text-left py-3 px-4 text-sm font-semibold text-gray-700">
-                      Transaction
+                      Transaksi
                     </th>
                     <th className="text-right py-3 px-4 text-sm font-semibold text-gray-700">
-                      Quantity
+                      Jumlah
                     </th>
                     <th className="text-left py-3 px-4 text-sm font-semibold text-gray-700">
                       Reference
                     </th>
                     <th className="text-left py-3 px-4 text-sm font-semibold text-gray-700">
-                      By
+                      Oleh
                     </th>
                   </tr>
                 </thead>

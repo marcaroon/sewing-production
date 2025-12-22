@@ -50,7 +50,7 @@ interface TransferLogListProps {
       return (
         <div className="text-center py-8">
           <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto mb-4"></div>
-          <p className="text-gray-600">Loading transfer logs...</p>
+          <p className="text-gray-600">Memuat log perpindahan...</p>
         </div>
       );
     }
@@ -63,7 +63,7 @@ interface TransferLogListProps {
             onClick={loadTransferLogs}
             className="mt-3 text-sm text-red-800 underline hover:text-red-900"
           >
-            Try Again
+            Coba lagi
           </button>
         </div>
       );

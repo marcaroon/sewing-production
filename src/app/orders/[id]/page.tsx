@@ -119,7 +119,6 @@ export default function OrderDetailPage() {
     window.open(`/api/orders/${order.id}/print-qr?type=${type}`, "_blank");
   };
 
-  // Helper functions untuk calculate metrics
   const calculateCompletionRate = () => {
     return order && order.totalQuantity > 0
       ? Math.round((order.totalCompleted / order.totalQuantity) * 100)
@@ -151,10 +150,10 @@ export default function OrderDetailPage() {
   if (isLoading) {
     return (
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <div className="flex items-center justify-center min-h-[400px]">
+        <div className="flex items-center justify-center min-h-100">
           <div className="text-center">
             <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
-            <p className="text-gray-600">Loading order details...</p>
+            <p className="text-gray-600">Memuat detail order...</p>
           </div>
         </div>
       </div>
@@ -188,7 +187,7 @@ export default function OrderDetailPage() {
                 onClick={() => router.push("/orders")}
                 className="mt-3 text-sm text-red-800 underline hover:text-red-900"
               >
-                Back to Orders
+                Kembali ke order
               </button>
             </div>
           </div>
@@ -245,7 +244,7 @@ export default function OrderDetailPage() {
                 variant="primary"
                 size="sm"
               >
-                Assign Next Process
+                Assign ke Process Selanjutnya
               </Button>
             )}
           </div>
@@ -305,10 +304,10 @@ export default function OrderDetailPage() {
                   }`}
                 >
                   {tab === "overview" && "Overview"}
-                  {tab === "process-steps" && "Process Steps"}
-                  {tab === "transfers" && "Transfers"}
-                  {tab === "details" && "Details"}
-                  {tab === "qr" && "Barcodes"}
+                  {tab === "process-steps" && "Tahapan Proses"}
+                  {tab === "transfers" && "Pemindahan"}
+                  {tab === "details" && "Detail"}
+                  {tab === "qr" && "Barcode"}
                 </button>
               )
             )}
@@ -329,7 +328,7 @@ export default function OrderDetailPage() {
               <CardContent>
                 <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
                   <div>
-                    <p className="text-sm text-gray-600 mb-1">Total Quantity</p>
+                    <p className="text-sm text-gray-600 mb-1">Jumlah Total</p>
                     <p className="text-2xl font-bold text-gray-900">
                       {formatNumber(order.totalQuantity)}
                     </p>
@@ -485,17 +484,17 @@ export default function OrderDetailPage() {
             {/* Order Info */}
             <Card>
               <CardHeader>
-                <CardTitle>Order Information</CardTitle>
+                <CardTitle>Informasi Order</CardTitle>
               </CardHeader>
               <CardContent className="space-y-4">
                 <div>
-                  <p className="text-sm text-gray-600">Order Date</p>
+                  <p className="text-sm text-gray-600">Tanggal Order</p>
                   <p className="font-semibold text-gray-900">
                     {formatDate(order.orderDate)}
                   </p>
                 </div>
                 <div>
-                  <p className="text-sm text-gray-600">Production Deadline</p>
+                  <p className="text-sm text-gray-600">Batas Waktu Produksi</p>
                   <p
                     className={`font-semibold ${
                       delayed ? "text-red-600" : "text-gray-900"
@@ -508,25 +507,27 @@ export default function OrderDetailPage() {
                   </p>
                 </div>
                 <div>
-                  <p className="text-sm text-gray-600">Delivery Deadline</p>
+                  <p className="text-sm text-gray-600">
+                    Batas Waktu Pengiriman
+                  </p>
                   <p className="font-semibold text-gray-900">
                     {formatDate(order.deliveryDeadline)}
                   </p>
                 </div>
                 <div>
-                  <p className="text-sm text-gray-600 mb-2">Current Phase</p>
+                  <p className="text-sm text-gray-600 mb-2">Fase Sekarang</p>
                   <Badge variant="info">
                     {PHASE_LABELS[order.currentPhase]}
                   </Badge>
                 </div>
                 <div>
-                  <p className="text-sm text-gray-600">Current Process</p>
+                  <p className="text-sm text-gray-600">Proses Sekarang</p>
                   <p className="font-semibold text-gray-900">
                     {PROCESS_LABELS[order.currentProcess]}
                   </p>
                 </div>
                 <div>
-                  <p className="text-sm text-gray-600 mb-2">Current State</p>
+                  <p className="text-sm text-gray-600 mb-2">State Sekarang</p>
                   <Badge variant="default">
                     {PROCESS_STATE_LABELS[order.currentState]}
                   </Badge>
@@ -541,20 +542,20 @@ export default function OrderDetailPage() {
                 )}
                 {order.assignedTo && (
                   <div>
-                    <p className="text-sm text-gray-600">Assigned To</p>
+                    <p className="text-sm text-gray-600">Ditugaskan ke</p>
                     <p className="font-semibold text-gray-900">
                       {order.assignedTo}
                     </p>
                   </div>
                 )}
                 <div>
-                  <p className="text-sm text-gray-600">Created By</p>
+                  <p className="text-sm text-gray-600">Dibuat oleh</p>
                   <p className="font-semibold text-gray-900">
                     {order.createdBy}
                   </p>
                 </div>
                 <div>
-                  <p className="text-sm text-gray-600">Last Updated</p>
+                  <p className="text-sm text-gray-600">Terakhir Diperbarui</p>
                   <p className="font-semibold text-gray-900">
                     {formatDateTime(order.updatedAt)}
                   </p>
@@ -565,23 +566,23 @@ export default function OrderDetailPage() {
             {/* Buyer Info */}
             <Card>
               <CardHeader>
-                <CardTitle>Buyer Information</CardTitle>
+                <CardTitle>Informasi Buyer</CardTitle>
               </CardHeader>
               <CardContent className="space-y-4">
                 <div>
-                  <p className="text-sm text-gray-600">Name</p>
+                  <p className="text-sm text-gray-600">Nama</p>
                   <p className="font-semibold text-gray-900">
                     {order.buyer.name}
                   </p>
                 </div>
                 <div>
-                  <p className="text-sm text-gray-600">Code</p>
+                  <p className="text-sm text-gray-600">Kokde</p>
                   <p className="font-semibold text-gray-900">
                     {order.buyer.code}
                   </p>
                 </div>
                 <div>
-                  <p className="text-sm text-gray-600 mb-2">Type</p>
+                  <p className="text-sm text-gray-600 mb-2">Tipe</p>
                   <Badge
                     variant={
                       order.buyer.type === "repeat" ? "success" : "warning"
@@ -591,7 +592,7 @@ export default function OrderDetailPage() {
                   </Badge>
                 </div>
                 <div>
-                  <p className="text-sm text-gray-600">Leftover Policy</p>
+                  <p className="text-sm text-gray-600">Aturan Pengembalian</p>
                   <p className="text-sm text-gray-900">
                     {order.buyer.leftoverPolicy?.canReuse
                       ? "✓ Can be reused"
@@ -600,7 +601,7 @@ export default function OrderDetailPage() {
                 </div>
                 {order.buyer.contactPerson && (
                   <div>
-                    <p className="text-sm text-gray-600">Contact Person</p>
+                    <p className="text-sm text-gray-600">Kontak</p>
                     <p className="font-semibold text-gray-900">
                       {order.buyer.contactPerson}
                     </p>
@@ -617,24 +618,24 @@ export default function OrderDetailPage() {
             {/* Style Info */}
             <Card>
               <CardHeader>
-                <CardTitle>Style Information</CardTitle>
+                <CardTitle>Informasi Style</CardTitle>
               </CardHeader>
               <CardContent className="space-y-4">
                 <div>
-                  <p className="text-sm text-gray-600">Style Code</p>
+                  <p className="text-sm text-gray-600">Kode Style</p>
                   <p className="font-semibold text-gray-900">
                     {order.style.styleCode}
                   </p>
                 </div>
                 <div>
-                  <p className="text-sm text-gray-600">Category</p>
+                  <p className="text-sm text-gray-600">Kategori</p>
                   <p className="font-semibold text-gray-900">
                     {GARMENT_CATEGORIES[order.style.category]}
                   </p>
                 </div>
                 {order.style.description && (
                   <div>
-                    <p className="text-sm text-gray-600">Description</p>
+                    <p className="text-sm text-gray-600">Deskripsi</p>
                     <p className="text-sm text-gray-900">
                       {order.style.description}
                     </p>
@@ -647,7 +648,7 @@ export default function OrderDetailPage() {
             {order.notes && (
               <Card>
                 <CardHeader>
-                  <CardTitle>Notes</CardTitle>
+                  <CardTitle>Catatan</CardTitle>
                 </CardHeader>
                 <CardContent>
                   <p className="text-sm text-gray-700">{order.notes}</p>
@@ -725,7 +726,7 @@ export default function OrderDetailPage() {
                         <td className="py-3 px-4 text-right text-gray-900">
                           {size.bundleCount || 0}
                         </td>
-                        <td className="py-3 px-4 text-right">
+                        <td className="py-3 px-4 text-right text-gray-600">
                           {size.quantity > 0
                             ? Math.round((size.completed / size.quantity) * 100)
                             : 0}
@@ -734,8 +735,8 @@ export default function OrderDetailPage() {
                       </tr>
                     ))}
                     <tr className="font-bold bg-gray-50">
-                      <td className="py-3 px-4">Total</td>
-                      <td className="py-3 px-4 text-right">
+                      <td className="py-3 px-4 text-gray-600">Total</td>
+                      <td className="py-3 px-4 text-gray-600 text-right">
                         {order.totalQuantity}
                       </td>
                       <td className="py-3 px-4 text-right text-green-600">
@@ -744,13 +745,13 @@ export default function OrderDetailPage() {
                       <td className="py-3 px-4 text-right text-red-600">
                         {order.totalRejected}
                       </td>
-                      <td className="py-3 px-4 text-right">
+                      <td className="py-3 px-4 text-gray-600 text-right">
                         {order.sizeBreakdown.reduce(
                           (sum, s) => sum + (s.bundleCount || 0),
                           0
                         )}
                       </td>
-                      <td className="py-3 px-4 text-right">
+                      <td className="py-3 px-4 text-gray-600 text-right">
                         {completionRate}%
                       </td>
                     </tr>
@@ -763,7 +764,7 @@ export default function OrderDetailPage() {
           {/* Material Status */}
           <Card>
             <CardHeader>
-              <CardTitle>Material & Production Status</CardTitle>
+              <CardTitle>Status Bahan & Produksi</CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
               <div className="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
@@ -777,11 +778,11 @@ export default function OrderDetailPage() {
                 )}
               </div>
               <div className="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
-                <span className="font-medium text-gray-900">Has Leftover</span>
+                <span className="font-medium text-gray-900">Pengembalian</span>
                 {order.hasLeftover ? (
-                  <Badge variant="info">Yes</Badge>
+                  <Badge variant="info">Ya</Badge>
                 ) : (
-                  <Badge variant="default">No</Badge>
+                  <Badge variant="default">Tida</Badge>
                 )}
               </div>
             </CardContent>
@@ -790,23 +791,23 @@ export default function OrderDetailPage() {
           {/* Complete Buyer Info */}
           <Card>
             <CardHeader>
-              <CardTitle>Complete Buyer Information</CardTitle>
+              <CardTitle>Informasi Buyer</CardTitle>
             </CardHeader>
             <CardContent className="space-y-3">
               <div>
-                <p className="text-sm text-gray-600">Name</p>
+                <p className="text-sm text-gray-600">Nama</p>
                 <p className="font-semibold text-gray-900">
                   {order.buyer.name}
                 </p>
               </div>
               <div>
-                <p className="text-sm text-gray-600">Code</p>
+                <p className="text-sm text-gray-600">Kode</p>
                 <p className="font-semibold text-gray-900">
                   {order.buyer.code}
                 </p>
               </div>
               <div>
-                <p className="text-sm text-gray-600 mb-2">Type</p>
+                <p className="text-sm text-gray-600 mb-2">Tipe</p>
                 <Badge
                   variant={
                     order.buyer.type === "repeat" ? "success" : "warning"
@@ -817,7 +818,7 @@ export default function OrderDetailPage() {
               </div>
               {order.buyer.contactPerson && (
                 <div>
-                  <p className="text-sm text-gray-600">Contact Person</p>
+                  <p className="text-sm text-gray-600">Kontak</p>
                   <p className="font-semibold text-gray-900">
                     {order.buyer.contactPerson}
                   </p>
@@ -827,26 +828,37 @@ export default function OrderDetailPage() {
                 </div>
               )}
               <div>
-                <p className="text-sm text-gray-600 mb-2">Leftover Policy</p>
+                <p className="text-sm text-gray-600 mb-2">
+                  Aturan Pengembalian
+                </p>
                 <div className="space-y-2 text-sm">
                   <div className="flex items-center">
                     {order.buyer.leftoverPolicy?.canReuse ? (
-                      <span className="text-green-600">✓ Can be reused</span>
+                      <span className="text-green-600">
+                        ✓ Bisa digunakan ulang
+                      </span>
                     ) : (
-                      <span className="text-red-600">✗ Cannot be reused</span>
+                      <span className="text-red-600">
+                        ✗ Tidak bisa digunakan ulang
+                      </span>
                     )}
                   </div>
                   <div className="flex items-center">
                     {order.buyer.leftoverPolicy?.returRequired ? (
-                      <span className="text-orange-600">⚠ Return required</span>
+                      <span className="text-orange-600">
+                        ⚠ Perlu pengembalian
+                      </span>
                     ) : (
-                      <span className="text-gray-600">No return required</span>
+                      <span className="text-gray-600">
+                        Tidak perlu pengembalian
+                      </span>
                     )}
                   </div>
                   {order.buyer.leftoverPolicy?.storageLocation && (
                     <div>
                       <p className="text-gray-600">
-                        Storage: {order.buyer.leftoverPolicy.storageLocation}
+                        Penyimpanan:{" "}
+                        {order.buyer.leftoverPolicy.storageLocation}
                       </p>
                     </div>
                   )}
@@ -858,30 +870,30 @@ export default function OrderDetailPage() {
           {/* Complete Style Info */}
           <Card>
             <CardHeader>
-              <CardTitle>Complete Style Information</CardTitle>
+              <CardTitle>Informasi Style</CardTitle>
             </CardHeader>
             <CardContent className="space-y-3">
               <div>
-                <p className="text-sm text-gray-600">Style Code</p>
+                <p className="text-sm text-gray-600">Kode Style</p>
                 <p className="font-semibold text-gray-900">
                   {order.style.styleCode}
                 </p>
               </div>
               <div>
-                <p className="text-sm text-gray-600">Name</p>
+                <p className="text-sm text-gray-600">Nama</p>
                 <p className="font-semibold text-gray-900">
                   {order.style.name}
                 </p>
               </div>
               <div>
-                <p className="text-sm text-gray-600">Category</p>
+                <p className="text-sm text-gray-600">Kategori</p>
                 <p className="font-semibold text-gray-900 capitalize">
                   {GARMENT_CATEGORIES[order.style.category]}
                 </p>
               </div>
               {order.style.description && (
                 <div>
-                  <p className="text-sm text-gray-600">Description</p>
+                  <p className="text-sm text-gray-600">Deskripsi</p>
                   <p className="text-sm text-gray-900">
                     {order.style.description}
                   </p>
@@ -890,12 +902,12 @@ export default function OrderDetailPage() {
               {(order.style.estimatedCuttingTime ||
                 order.style.estimatedSewingTime) && (
                 <div>
-                  <p className="text-sm text-gray-600 mb-2">Estimated Times</p>
+                  <p className="text-sm text-gray-600 mb-2">Estimasi Waktu</p>
                   <div className="grid grid-cols-2 gap-4 text-sm">
                     {order.style.estimatedCuttingTime && (
                       <div>
                         <p className="text-gray-600">Cutting</p>
-                        <p className="font-semibold">
+                        <p className="font-semibold text-gray-600">
                           {order.style.estimatedCuttingTime} min
                         </p>
                       </div>
@@ -903,7 +915,7 @@ export default function OrderDetailPage() {
                     {order.style.estimatedSewingTime && (
                       <div>
                         <p className="text-gray-600">Sewing</p>
-                        <p className="font-semibold">
+                        <p className="font-semibold text-gray-600">
                           {order.style.estimatedSewingTime} min/pc
                         </p>
                       </div>
@@ -921,7 +933,7 @@ export default function OrderDetailPage() {
           {/* QR Code Actions */}
           <Card>
             <CardHeader>
-              <CardTitle>Barcode Management</CardTitle>
+              <CardTitle>Manajemen Barcode</CardTitle>
             </CardHeader>
             <CardContent>
               <div className="space-y-4">
@@ -941,7 +953,7 @@ export default function OrderDetailPage() {
                       />
                     </svg>
                     <p className="text-gray-600 mb-4">
-                      No Barcodes generated yet
+                      Belum ada barcode dibuat
                     </p>
                     <Button
                       onClick={handleGenerateQR}
@@ -951,7 +963,7 @@ export default function OrderDetailPage() {
                       {isGeneratingQR ? (
                         <>
                           <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
-                          Generating...
+                          Dibuat...
                         </>
                       ) : (
                         "Generate Barcodes"
@@ -976,7 +988,7 @@ export default function OrderDetailPage() {
                         variant="primary"
                         size="sm"
                       >
-                        Print All Barcodes
+                        Cetak Semua Barcode
                       </Button>
                     </div>
 
@@ -998,14 +1010,14 @@ export default function OrderDetailPage() {
                       <div>
                         <div className="flex items-center justify-between mb-4">
                           <h3 className="text-lg font-semibold text-gray-900">
-                            Bundle Barcodes ({qrCodes.bundleQRs.length})
+                            Bundle Barcode ({qrCodes.bundleQRs.length})
                           </h3>
                           <Button
                             onClick={() => handlePrintQR("bundle")}
                             variant="outline"
                             size="sm"
                           >
-                            Print Bundle Barcodes
+                            Cetak Bundle Barcode
                           </Button>
                         </div>
                         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
@@ -1043,17 +1055,17 @@ export default function OrderDetailPage() {
         <div className="space-y-6">
           <Card>
             <CardHeader>
-              <CardTitle>Process Flow Tracking</CardTitle>
+              <CardTitle>Pelacakan Alur Proses</CardTitle>
             </CardHeader>
             <CardContent>
               <p className="text-sm text-gray-600 mb-4">
-                Track each process step from PPIC through completion. Each step
-                shows detailed timestamps and state transitions.
+                Pantau setiap langkah proses dari PPIC hingga selesai, lengkap
+                dengan detail waktu dan perubahan status.
               </p>
               <div className="space-y-4">
                 {processSteps.length === 0 ? (
                   <div className="text-center py-8 text-gray-500">
-                    <p>No process steps found</p>
+                    <p>Tidak ada proses ditemukan</p>
                   </div>
                 ) : (
                   processSteps.map((step) => (
