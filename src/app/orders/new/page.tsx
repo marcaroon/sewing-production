@@ -4,8 +4,15 @@
 
 import React, { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import { Buyer, Style, SizeType } from "@/lib/types-new";
-import { SIZE_OPTIONS, BUYER_TYPE_LABELS } from "@/lib/constants-new";
+import { Buyer, Style, SizeType, ProcessName } from "@/lib/types-new";
+import {
+  SIZE_OPTIONS,
+  BUYER_TYPE_LABELS,
+  PROCESS_LABELS,
+  PROCESS_DEPARTMENT_MAP,
+  DELIVERY_PROCESSES,
+  PRODUCTION_PROCESSES,
+} from "@/lib/constants-new";
 import { getTemplateOptions, getTemplateById } from "@/lib/process-templates";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/Card";
 import { Button } from "@/components/ui/Button";
@@ -21,6 +28,29 @@ export default function NewOrderPage() {
   const [isLoading, setIsLoading] = useState(true);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isCheckingOrderNumber, setIsCheckingOrderNumber] = useState(false);
+
+  const [showBuyerForm, setShowBuyerForm] = useState(false);
+  const [showStyleForm, setShowStyleForm] = useState(false);
+
+  const [newBuyer, setNewBuyer] = useState({
+    name: "",
+    type: "repeat" as "repeat" | "one-time",
+    code: "",
+    contactPerson: "",
+    phone: "",
+    canReuse: false,
+    returRequired: false,
+    storageLocation: "",
+  });
+
+  const [newStyle, setNewStyle] = useState({
+    styleCode: "",
+    name: "",
+    category: "shirt" as "shirt" | "pants" | "jacket" | "dress" | "other",
+    description: "",
+    estimatedCuttingTime: 0,
+    estimatedSewingTime: 0,
+  });
 
   const [formData, setFormData] = useState({
     orderNumber: "", // NEW: Manual input
@@ -78,6 +108,132 @@ export default function NewOrderPage() {
     }
   };
 
+  // Tambahkan di bagian state declarations
+  const [customProcessFlow, setCustomProcessFlow] = useState<ProcessName[]>([]);
+  const [isCustomizing, setIsCustomizing] = useState(false);
+
+  // Tambahkan useEffect untuk sync dengan template
+  useEffect(() => {
+    if (formData.processTemplateId && !isCustomizing) {
+      const template = getTemplateById(formData.processTemplateId);
+      if (template) {
+        setCustomProcessFlow([...template.processes]);
+      }
+    }
+  }, [formData.processTemplateId]);
+
+  // Tambahkan setelah state declarations
+  const addProcessToFlow = (processName: ProcessName) => {
+    if (!customProcessFlow.includes(processName)) {
+      setCustomProcessFlow([...customProcessFlow, processName]);
+      setIsCustomizing(true);
+    }
+  };
+
+  const removeProcessFromFlow = (processName: ProcessName) => {
+    setCustomProcessFlow(customProcessFlow.filter((p) => p !== processName));
+    setIsCustomizing(true);
+  };
+
+  const moveProcessUp = (index: number) => {
+    if (index > 0) {
+      const newFlow = [...customProcessFlow];
+      [newFlow[index - 1], newFlow[index]] = [
+        newFlow[index],
+        newFlow[index - 1],
+      ];
+      setCustomProcessFlow(newFlow);
+      setIsCustomizing(true);
+    }
+  };
+
+  const moveProcessDown = (index: number) => {
+    if (index < customProcessFlow.length - 1) {
+      const newFlow = [...customProcessFlow];
+      [newFlow[index], newFlow[index + 1]] = [
+        newFlow[index + 1],
+        newFlow[index],
+      ];
+      setCustomProcessFlow(newFlow);
+      setIsCustomizing(true);
+    }
+  };
+
+  const resetToTemplate = () => {
+    const template = getTemplateById(formData.processTemplateId);
+    if (template) {
+      setCustomProcessFlow([...template.processes]);
+      setIsCustomizing(false);
+    }
+  };
+
+  // Tambahkan setelah loadData function
+  const handleCreateBuyer = async () => {
+    try {
+      const response = await fetch("/api/buyers", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(newBuyer),
+      });
+
+      const result = await response.json();
+      if (result.success) {
+        // Reload buyers
+        await loadData();
+        // Set as selected
+        setFormData({ ...formData, buyerId: result.data.id });
+        // Reset form
+        setNewBuyer({
+          name: "",
+          type: "repeat",
+          code: "",
+          contactPerson: "",
+          phone: "",
+          canReuse: false,
+          returRequired: false,
+          storageLocation: "",
+        });
+        setShowBuyerForm(false);
+        alert("Buyer created successfully!");
+      } else {
+        alert(result.error || "Failed to create buyer");
+      }
+    } catch (error) {
+      console.error("Error creating buyer:", error);
+      alert("Failed to create buyer");
+    }
+  };
+
+  const handleCreateStyle = async () => {
+    try {
+      const response = await fetch("/api/styles", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(newStyle),
+      });
+
+      const result = await response.json();
+      if (result.success) {
+        await loadData();
+        setFormData({ ...formData, styleId: result.data.id });
+        setNewStyle({
+          styleCode: "",
+          name: "",
+          category: "shirt",
+          description: "",
+          estimatedCuttingTime: 0,
+          estimatedSewingTime: 0,
+        });
+        setShowStyleForm(false);
+        alert("Style created successfully!");
+      } else {
+        alert(result.error || "Failed to create style");
+      }
+    } catch (error) {
+      console.error("Error creating style:", error);
+      alert("Failed to create style");
+    }
+  };
   // Check if order number exists
   const checkOrderNumberExists = async (orderNumber: string) => {
     if (!orderNumber.trim()) return;
@@ -221,7 +377,7 @@ export default function NewOrderPage() {
       }));
 
       const orderData = {
-        orderNumber: formData.orderNumber.trim().toUpperCase(), // NEW: Send manual order number
+        orderNumber: formData.orderNumber.trim().toUpperCase(),
         buyerId: formData.buyerId,
         styleId: formData.styleId,
         orderDate: formData.orderDate,
@@ -231,7 +387,12 @@ export default function NewOrderPage() {
         sizeBreakdown: sizeBreakdownArray,
         createdBy: formData.createdBy,
         notes: formData.notes,
-        processTemplateId: formData.processTemplateId,
+        processTemplateId: isCustomizing
+          ? "custom"
+          : formData.processTemplateId,
+        customProcessFlow: isCustomizing ? customProcessFlow : undefined,
+        selectedMaterials,
+        selectedAccessories,
       };
 
       const response = await fetch("/api/orders", {
@@ -262,18 +423,18 @@ export default function NewOrderPage() {
     }
   };
 
-  if (isLoading) {
-    return (
-      <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <div className="flex items-center justify-center min-h-100">
-          <div className="text-center">
-            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
-            <p className="text-gray-600">Memuat form data...</p>
-          </div>
-        </div>
-      </div>
-    );
-  }
+  // if (isLoading) {
+  //   return (
+  //     <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+  //       <div className="flex items-center justify-center min-h-100">
+  //         <div className="text-center">
+  //           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
+  //           <p className="text-gray-600">Memuat form data...</p>
+  //         </div>
+  //       </div>
+  //     </div>
+  //   );
+  // }
 
   return (
     <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
@@ -331,12 +492,12 @@ export default function NewOrderPage() {
                 maxLength={50}
               />
 
-              {isCheckingOrderNumber && (
+              {/* {isCheckingOrderNumber && (
                 <p className="text-sm text-blue-600 mt-1 flex items-center gap-1">
                   <div className="animate-spin rounded-full h-3 w-3 border-b-2 border-blue-600"></div>
                   Mengecek kesediaan...
                 </p>
-              )}
+              )} */}
 
               {errors.orderNumber && (
                 <p className="text-sm text-red-600 mt-1 flex items-center gap-1">
@@ -369,123 +530,450 @@ export default function NewOrderPage() {
         {/* Buyer Selection */}
         <Card>
           <CardHeader>
-            <CardTitle>Pilih Buyer</CardTitle>
+            <div className="flex items-center justify-between">
+              <CardTitle>Pilih Buyer</CardTitle>
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                onClick={() => setShowBuyerForm(!showBuyerForm)}
+              >
+                {showBuyerForm ? "Cancel" : "+ New Buyer"}
+              </Button>
+            </div>
           </CardHeader>
           <CardContent>
             <div className="space-y-4">
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Buyer *
-                </label>
-                <select
-                  value={formData.buyerId}
-                  onChange={(e) =>
-                    setFormData({ ...formData, buyerId: e.target.value })
-                  }
-                  className={`w-full px-4 py-2 text-gray-600 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent ${
-                    errors.buyerId ? "border-red-500" : "border-gray-300"
-                  }`}
-                  disabled={isSubmitting}
-                >
-                  <option value="">-- Pilih Buyer --</option>
-                  {buyers.map((buyer) => (
-                    <option key={buyer.id} value={buyer.id}>
-                      {buyer.name} ({buyer.code}) -{" "}
-                      {BUYER_TYPE_LABELS[buyer.type]}
-                    </option>
-                  ))}
-                </select>
-                {errors.buyerId && (
-                  <p className="text-sm text-red-600 mt-1">{errors.buyerId}</p>
-                )}
-              </div>
+              {/* Existing Buyer Selection */}
+              {!showBuyerForm && (
+                <>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      Buyer *
+                    </label>
+                    <select
+                      value={formData.buyerId}
+                      onChange={(e) =>
+                        setFormData({ ...formData, buyerId: e.target.value })
+                      }
+                      className={`w-full px-4 py-2 text-gray-600 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent ${
+                        errors.buyerId ? "border-red-500" : "border-gray-300"
+                      }`}
+                      disabled={isSubmitting}
+                    >
+                      <option value="">-- Pilih Buyer --</option>
+                      {buyers.map((buyer) => (
+                        <option key={buyer.id} value={buyer.id}>
+                          {buyer.name} ({buyer.code}) -{" "}
+                          {BUYER_TYPE_LABELS[buyer.type]}
+                        </option>
+                      ))}
+                    </select>
+                    {errors.buyerId && (
+                      <p className="text-sm text-red-600 mt-1">
+                        {errors.buyerId}
+                      </p>
+                    )}
+                  </div>
 
-              {selectedBuyer && (
-                <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
-                  <div className="grid grid-cols-2 gap-4 text-sm">
+                  {selectedBuyer && (
+                    <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+                      <div className="grid grid-cols-2 gap-4 text-sm">
+                        <div>
+                          <p className="text-blue-900 font-medium">
+                            Jenis Buyer
+                          </p>
+                          <Badge
+                            variant={
+                              selectedBuyer.type === "repeat"
+                                ? "success"
+                                : "warning"
+                            }
+                          >
+                            {BUYER_TYPE_LABELS[selectedBuyer.type]}
+                          </Badge>
+                        </div>
+                        <div>
+                          <p className="text-blue-900 font-medium">
+                            Aturan Pengembalian
+                          </p>
+                          <p className="text-blue-800 text-sm">
+                            {selectedBuyer.leftoverPolicy?.canReuse
+                              ? "✓ Material dapat digunakan kembali"
+                              : "✗ Material harus diretur"}
+                          </p>
+                        </div>
+                      </div>
+                    </div>
+                  )}
+                </>
+              )}
+
+              {/* New Buyer Form */}
+              {showBuyerForm && (
+                <div className="bg-purple-50 border-2 border-purple-300 rounded-lg p-4 space-y-4">
+                  <h4 className="font-bold text-purple-900">
+                    Create New Buyer
+                  </h4>
+
+                  <div className="grid grid-cols-2 gap-4">
                     <div>
-                      <p className="text-blue-900 font-medium">Jenis Buyer</p>
-                      <Badge
-                        variant={
-                          selectedBuyer.type === "repeat"
-                            ? "success"
-                            : "warning"
+                      <label className="block text-sm font-medium text-gray-900 mb-2">
+                        Buyer Name *
+                      </label>
+                      <input
+                        type="text"
+                        value={newBuyer.name}
+                        onChange={(e) =>
+                          setNewBuyer({ ...newBuyer, name: e.target.value })
                         }
-                      >
-                        {BUYER_TYPE_LABELS[selectedBuyer.type]}
-                      </Badge>
+                        className="w-full px-4 py-2 text-gray-900 border border-gray-300 rounded-lg"
+                        placeholder="e.g., Nike Indonesia"
+                      />
                     </div>
                     <div>
-                      <p className="text-blue-900 font-medium">
-                        Aturan Pengembalian
-                      </p>
-                      <p className="text-blue-800 text-sm">
-                        {selectedBuyer.leftoverPolicy?.canReuse
-                          ? "✓ Material dapat digunakan kembali"
-                          : "✗ Material harus diretur"}
-                      </p>
+                      <label className="block text-sm font-medium text-gray-900 mb-2">
+                        Buyer Code *
+                      </label>
+                      <input
+                        type="text"
+                        value={newBuyer.code}
+                        onChange={(e) =>
+                          setNewBuyer({ ...newBuyer, code: e.target.value })
+                        }
+                        className="w-full px-4 py-2 border text-gray-900 border-gray-300 rounded-lg"
+                        placeholder="e.g., NIKE-001"
+                      />
                     </div>
                   </div>
+
+                  <div>
+                    <label className="block text-sm font-medium text-gray-900 mb-2">
+                      Buyer Type *
+                    </label>
+                    <select
+                      value={newBuyer.type}
+                      onChange={(e) =>
+                        setNewBuyer({
+                          ...newBuyer,
+                          type: e.target.value as "repeat" | "one-time",
+                        })
+                      }
+                      className="w-full px-4 py-2 text-gray-900 border border-gray-300 rounded-lg"
+                    >
+                      <option value="repeat">Repeat Buyer</option>
+                      <option value="one-time">One-Time Buyer</option>
+                    </select>
+                  </div>
+
+                  <div className="grid grid-cols-2 gap-4">
+                    <div>
+                      <label className="block text-sm font-medium text-gray-900 mb-2">
+                        Contact Person
+                      </label>
+                      <input
+                        type="text"
+                        value={newBuyer.contactPerson}
+                        onChange={(e) =>
+                          setNewBuyer({
+                            ...newBuyer,
+                            contactPerson: e.target.value,
+                          })
+                        }
+                        className="w-full px-4 py-2 text-gray-900 border border-gray-300 rounded-lg"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-900 mb-2">
+                        Phone
+                      </label>
+                      <input
+                        type="text"
+                        value={newBuyer.phone}
+                        onChange={(e) =>
+                          setNewBuyer({ ...newBuyer, phone: e.target.value })
+                        }
+                        className="w-full px-4 py-2 text-gray-900 border border-gray-300 rounded-lg"
+                      />
+                    </div>
+                  </div>
+
+                  <div className="space-y-2">
+                    <label className="flex items-center gap-2">
+                      <input
+                        type="checkbox"
+                        checked={newBuyer.canReuse}
+                        onChange={(e) =>
+                          setNewBuyer({
+                            ...newBuyer,
+                            canReuse: e.target.checked,
+                          })
+                        }
+                        className="w-4 h-4"
+                      />
+                      <span className="text-sm text-gray-900">
+                        Material can be reused
+                      </span>
+                    </label>
+                    <label className="flex items-center gap-2">
+                      <input
+                        type="checkbox"
+                        checked={newBuyer.returRequired}
+                        onChange={(e) =>
+                          setNewBuyer({
+                            ...newBuyer,
+                            returRequired: e.target.checked,
+                          })
+                        }
+                        className="w-4 h-4"
+                      />
+                      <span className="text-sm text-gray-900">
+                        Return required
+                      </span>
+                    </label>
+                  </div>
+
+                  {newBuyer.canReuse && (
+                    <div>
+                      <label className="block text-sm font-medium text-gray-900 mb-2">
+                        Storage Location
+                      </label>
+                      <input
+                        type="text"
+                        value={newBuyer.storageLocation}
+                        onChange={(e) =>
+                          setNewBuyer({
+                            ...newBuyer,
+                            storageLocation: e.target.value,
+                          })
+                        }
+                        className="w-full px-4 py-2 border border-gray-300 rounded-lg"
+                        placeholder="e.g., Warehouse A, Rack 5"
+                      />
+                    </div>
+                  )}
+
+                  <Button
+                    type="button"
+                    onClick={handleCreateBuyer}
+                    variant="primary"
+                    className="w-full"
+                  >
+                    Create Buyer
+                  </Button>
                 </div>
               )}
             </div>
           </CardContent>
         </Card>
 
-        {/* Style Selection */}
+        {/* Style Selection - UPDATED */}
         <Card>
           <CardHeader>
-            <CardTitle>Pilih Style</CardTitle>
+            <div className="flex items-center justify-between">
+              <CardTitle>Pilih Style</CardTitle>
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                onClick={() => setShowStyleForm(!showStyleForm)}
+              >
+                {showStyleForm ? "Cancel" : "+ New Style"}
+              </Button>
+            </div>
           </CardHeader>
           <CardContent>
             <div className="space-y-4">
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Style *
-                </label>
-                <select
-                  value={formData.styleId}
-                  onChange={(e) =>
-                    setFormData({ ...formData, styleId: e.target.value })
-                  }
-                  className={`w-full px-4 py-2 text-gray-600 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent ${
-                    errors.styleId ? "border-red-500" : "border-gray-300"
-                  }`}
-                  disabled={isSubmitting}
-                >
-                  <option value="">-- Pilih Style --</option>
-                  {styles.map((style) => (
-                    <option key={style.id} value={style.id}>
-                      {style.styleCode} - {style.name}
-                    </option>
-                  ))}
-                </select>
-                {errors.styleId && (
-                  <p className="text-sm text-red-600 mt-1">{errors.styleId}</p>
-                )}
-              </div>
+              {/* Existing Style Selection */}
+              {!showStyleForm && (
+                <>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      Style *
+                    </label>
+                    <select
+                      value={formData.styleId}
+                      onChange={(e) =>
+                        setFormData({ ...formData, styleId: e.target.value })
+                      }
+                      className={`w-full px-4 py-2 text-gray-600 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent ${
+                        errors.styleId ? "border-red-500" : "border-gray-300"
+                      }`}
+                      disabled={isSubmitting}
+                    >
+                      <option value="">-- Pilih Style --</option>
+                      {styles.map((style) => (
+                        <option key={style.id} value={style.id}>
+                          {style.styleCode} - {style.name}
+                        </option>
+                      ))}
+                    </select>
+                    {errors.styleId && (
+                      <p className="text-sm text-red-600 mt-1">
+                        {errors.styleId}
+                      </p>
+                    )}
+                  </div>
 
-              {selectedStyle && (
-                <div className="bg-gray-50 border border-gray-200 rounded-lg p-4">
-                  <div className="grid grid-cols-2 gap-4 text-sm">
+                  {selectedStyle && (
+                    <div className="bg-gray-50 border border-gray-200 rounded-lg p-4">
+                      <div className="grid grid-cols-2 gap-4 text-sm">
+                        <div>
+                          <p className="text-gray-700 font-medium">
+                            Kode Style
+                          </p>
+                          <p className="text-gray-900">
+                            {selectedStyle.styleCode}
+                          </p>
+                        </div>
+                        <div>
+                          <p className="text-gray-700 font-medium">Kategori</p>
+                          <p className="text-gray-900 capitalize">
+                            {selectedStyle.category}
+                          </p>
+                        </div>
+                      </div>
+                    </div>
+                  )}
+                </>
+              )}
+
+              {/* New Style Form */}
+              {showStyleForm && (
+                <div className="bg-green-50 border-2 border-green-300 rounded-lg p-4 space-y-4">
+                  <h4 className="font-bold text-green-900">Create New Style</h4>
+
+                  <div className="grid grid-cols-2 gap-4">
                     <div>
-                      <p className="text-gray-700 font-medium">Kode Style</p>
-                      <p className="text-gray-900">{selectedStyle.styleCode}</p>
+                      <label className="block text-sm font-medium text-gray-900 mb-2">
+                        Style Code *
+                      </label>
+                      <input
+                        type="text"
+                        value={newStyle.styleCode}
+                        onChange={(e) =>
+                          setNewStyle({
+                            ...newStyle,
+                            styleCode: e.target.value,
+                          })
+                        }
+                        className="w-full px-4 py-2 text-gray-900 border border-gray-300 rounded-lg"
+                        placeholder="e.g., ST-001"
+                      />
                     </div>
                     <div>
-                      <p className="text-gray-700 font-medium">Kategori</p>
-                      <p className="text-gray-900 capitalize">
-                        {selectedStyle.category}
-                      </p>
+                      <label className="block text-sm font-medium text-gray-900 mb-2">
+                        Style Name *
+                      </label>
+                      <input
+                        type="text"
+                        value={newStyle.name}
+                        onChange={(e) =>
+                          setNewStyle({ ...newStyle, name: e.target.value })
+                        }
+                        className="w-full px-4 py-2 text-gray-900 border border-gray-300 rounded-lg"
+                        placeholder="e.g., Polo Shirt Regular"
+                      />
                     </div>
                   </div>
+
+                  <div>
+                    <label className="block text-sm font-medium text-gray-900 mb-2">
+                      Category *
+                    </label>
+                    <select
+                      value={newStyle.category}
+                      onChange={(e) =>
+                        setNewStyle({
+                          ...newStyle,
+                          category: e.target.value as
+                            | "shirt"
+                            | "pants"
+                            | "jacket"
+                            | "dress"
+                            | "other",
+                        })
+                      }
+                      className="w-full px-4 py-2 text-gray-900 border border-gray-300 rounded-lg"
+                    >
+                      <option value="shirt">Shirt</option>
+                      <option value="pants">Pants</option>
+                      <option value="jacket">Jacket</option>
+                      <option value="dress">Dress</option>
+                      <option value="other">Other</option>
+                    </select>
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-medium text-gray-900 mb-2">
+                      Description
+                    </label>
+                    <textarea
+                      value={newStyle.description}
+                      onChange={(e) =>
+                        setNewStyle({
+                          ...newStyle,
+                          description: e.target.value,
+                        })
+                      }
+                      className="w-full px-4 py-2 text-gray-900 border border-gray-300 rounded-lg"
+                      rows={3}
+                      placeholder="Style description..."
+                    />
+                  </div>
+
+                  <div className="grid grid-cols-2 gap-4">
+                    <div>
+                      <label className="block text-sm font-medium text-gray-900 mb-2">
+                        Est. Cutting Time (min)
+                      </label>
+                      <input
+                        type="number"
+                        value={newStyle.estimatedCuttingTime}
+                        onChange={(e) =>
+                          setNewStyle({
+                            ...newStyle,
+                            estimatedCuttingTime: parseInt(e.target.value) || 0,
+                          })
+                        }
+                        className="w-full px-4 py-2 text-gray-900 border border-gray-300 rounded-lg"
+                        min="0"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-900 mb-2">
+                        Est. Sewing Time (min/pc)
+                      </label>
+                      <input
+                        type="number"
+                        value={newStyle.estimatedSewingTime}
+                        onChange={(e) =>
+                          setNewStyle({
+                            ...newStyle,
+                            estimatedSewingTime: parseInt(e.target.value) || 0,
+                          })
+                        }
+                        className="w-full px-4 py-2 text-gray-900 border border-gray-300 rounded-lg"
+                        min="0"
+                      />
+                    </div>
+                  </div>
+
+                  <Button
+                    type="button"
+                    onClick={handleCreateStyle}
+                    variant="primary"
+                    className="w-full"
+                  >
+                    Create Style
+                  </Button>
                 </div>
               )}
             </div>
           </CardContent>
         </Card>
 
-        {/* NEW: Process Template Selection */}
+        {/* NEW: Process Template Selection - WITH CUSTOMIZATION */}
         <Card>
           <CardHeader>
             <CardTitle>Pilih Template Proses</CardTitle>
@@ -498,12 +986,13 @@ export default function NewOrderPage() {
                 </label>
                 <select
                   value={formData.processTemplateId}
-                  onChange={(e) =>
+                  onChange={(e) => {
                     setFormData({
                       ...formData,
                       processTemplateId: e.target.value,
-                    })
-                  }
+                    });
+                    setIsCustomizing(false); // Reset customization when changing template
+                  }}
                   className={`w-full px-4 py-2 text-gray-600 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent ${
                     errors.processTemplateId
                       ? "border-red-500"
@@ -526,58 +1015,201 @@ export default function NewOrderPage() {
                 )}
               </div>
 
-              {selectedTemplate && (
+              {selectedTemplate && customProcessFlow.length > 0 && (
                 <div className="bg-purple-50 border-2 border-purple-300 rounded-lg p-4">
-                  <h4 className="font-bold text-purple-900 mb-3 flex items-center gap-2">
-                    <svg
-                      className="w-5 h-5"
-                      fill="none"
-                      stroke="currentColor"
-                      viewBox="0 0 24 24"
-                    >
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        strokeWidth={2}
-                        d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"
-                      />
-                    </svg>
-                    Template Preview
-                  </h4>
+                  <div className="flex items-center justify-between mb-4">
+                    <h4 className="font-bold text-purple-900 flex items-center gap-2">
+                      <svg
+                        className="w-5 h-5"
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth={2}
+                          d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"
+                        />
+                      </svg>
+                      Process Flow Editor
+                      {isCustomizing && (
+                        <Badge variant="warning" size="sm">
+                          Modified
+                        </Badge>
+                      )}
+                    </h4>
+                    <div className="flex gap-2">
+                      {isCustomizing && (
+                        <Button
+                          type="button"
+                          variant="outline"
+                          size="sm"
+                          onClick={resetToTemplate}
+                        >
+                          Reset to Template
+                        </Button>
+                      )}
+                    </div>
+                  </div>
 
-                  <div className="grid grid-cols-2 gap-4 text-sm mb-4">
+                  {/* Template Info */}
+                  <div className="grid grid-cols-2 gap-4 text-sm mb-4 p-3 bg-white rounded-lg border border-purple-200">
                     <div>
                       <p className="text-purple-700 font-semibold">
                         Total Tahapan
                       </p>
                       <p className="text-2xl font-bold text-purple-900">
-                        {selectedTemplate.processes.length}
+                        {customProcessFlow.length}
                       </p>
                     </div>
                     <div>
-                      <p className="text-purple-700 font-semibold">
-                        Perkiraaan Hari
-                      </p>
+                      <p className="text-purple-700 font-semibold">Est. Days</p>
                       <p className="text-2xl font-bold text-purple-900">
                         ~{selectedTemplate.estimatedDays}
                       </p>
                     </div>
                   </div>
 
-                  <div className="bg-white rounded p-3 max-h-48 overflow-y-auto">
-                    <p className="text-xs font-bold text-purple-900 mb-2 uppercase">
-                      Alur Tahapan:
-                    </p>
-                    <ol className="text-xs space-y-1">
-                      {selectedTemplate.processes.map((process, idx) => (
-                        <li key={process} className="text-gray-800">
-                          <span className="font-bold text-purple-700">
-                            {idx + 1}.
-                          </span>{" "}
-                          {process.replace(/_/g, " ").toUpperCase()}
-                        </li>
-                      ))}
-                    </ol>
+                  {/* Process Flow List - EDITABLE */}
+                  <div className="bg-white rounded-lg p-3 space-y-2 max-h-96 overflow-y-auto border-2 border-purple-200">
+                    {customProcessFlow.map((process, idx) => (
+                      <div
+                        key={`${process}-${idx}`}
+                        className="flex items-center gap-2 p-2 bg-purple-50 rounded border border-purple-200 hover:bg-purple-100 transition-colors"
+                      >
+                        {/* Move Buttons */}
+                        <div className="flex flex-col gap-1">
+                          <button
+                            type="button"
+                            onClick={() => moveProcessUp(idx)}
+                            disabled={idx === 0}
+                            className="text-purple-600 hover:text-purple-800 disabled:text-gray-400 disabled:cursor-not-allowed"
+                            title="Move up"
+                          >
+                            <svg
+                              className="w-4 h-4"
+                              fill="none"
+                              stroke="currentColor"
+                              viewBox="0 0 24 24"
+                            >
+                              <path
+                                strokeLinecap="round"
+                                strokeLinejoin="round"
+                                strokeWidth={2}
+                                d="M5 15l7-7 7 7"
+                              />
+                            </svg>
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => moveProcessDown(idx)}
+                            disabled={idx === customProcessFlow.length - 1}
+                            className="text-purple-600 hover:text-purple-800 disabled:text-gray-400 disabled:cursor-not-allowed"
+                            title="Move down"
+                          >
+                            <svg
+                              className="w-4 h-4"
+                              fill="none"
+                              stroke="currentColor"
+                              viewBox="0 0 24 24"
+                            >
+                              <path
+                                strokeLinecap="round"
+                                strokeLinejoin="round"
+                                strokeWidth={2}
+                                d="M19 9l-7 7-7-7"
+                              />
+                            </svg>
+                          </button>
+                        </div>
+
+                        {/* Step Number */}
+                        <span className="font-bold text-sm text-purple-700 w-8">
+                          {idx + 1}.
+                        </span>
+
+                        {/* Process Name */}
+                        <span className="flex-1 text-sm font-semibold text-gray-800">
+                          {PROCESS_LABELS[process]}
+                        </span>
+
+                        {/* Department Badge */}
+                        <Badge variant="info" size="sm">
+                          {PROCESS_DEPARTMENT_MAP[process]}
+                        </Badge>
+
+                        {/* Remove Button */}
+                        <button
+                          type="button"
+                          onClick={() => removeProcessFromFlow(process)}
+                          className="text-red-500 hover:text-red-700 hover:bg-red-100 rounded p-1"
+                          title="Remove from flow"
+                        >
+                          <svg
+                            className="w-4 h-4"
+                            fill="none"
+                            stroke="currentColor"
+                            viewBox="0 0 24 24"
+                          >
+                            <path
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
+                              strokeWidth={2}
+                              d="M6 18L18 6M6 6l12 12"
+                            />
+                          </svg>
+                        </button>
+                      </div>
+                    ))}
+                  </div>
+
+                  {/* Add Process Dropdown */}
+                  <div className="mt-4">
+                    <label className="block text-sm font-semibold text-purple-900 mb-2">
+                      Add More Processes:
+                    </label>
+                    <select
+                      onChange={(e) => {
+                        console.log("Selected value:", e.target.value); // DEBUG: Cek apakah event trigger
+                        if (e.target.value) {
+                          addProcessToFlow(e.target.value as ProcessName);
+                          e.target.value = "";
+                        }
+                      }}
+                      className="w-full px-4 py-2 border-2 border-purple-300 rounded-lg focus:ring-2 focus:ring-purple-500 text-gray-900 font-medium"
+                      disabled={isSubmitting} // Tambahkan ini jika perlu, tapi default false
+                    >
+                      <option value="">-- Add Process --</option>
+                      <optgroup label="📦 Production">
+                        {PRODUCTION_PROCESSES.filter(
+                          (p) => !customProcessFlow.includes(p)
+                        ).map((process) => (
+                          <option key={process} value={process}>
+                            {PROCESS_LABELS[process]}
+                          </option>
+                        ))}
+                      </optgroup>
+                      <optgroup label="🚚 Delivery">
+                        {DELIVERY_PROCESSES.filter(
+                          (p) => !customProcessFlow.includes(p)
+                        ).map((process) => (
+                          <option key={process} value={process}>
+                            {PROCESS_LABELS[process]}
+                          </option>
+                        ))}
+                      </optgroup>
+                    </select>
+                    {PRODUCTION_PROCESSES.filter(
+                      (p) => !customProcessFlow.includes(p)
+                    ).length === 0 &&
+                      DELIVERY_PROCESSES.filter(
+                        (p) => !customProcessFlow.includes(p)
+                      ).length === 0 && (
+                        <p className="text-sm text-red-600 mt-2">
+                          All processes already added. No more available.
+                        </p>
+                      )}
                   </div>
                 </div>
               )}

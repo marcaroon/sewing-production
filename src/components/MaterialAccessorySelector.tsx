@@ -140,7 +140,7 @@ export const MaterialAccessorySelector: React.FC<
                     )
                   }
                   placeholder="Qty"
-                  className="w-24 px-3 py-2 border border-gray-300 rounded-lg"
+                  className="w-24 px-3 py-2 text-gray-900 border border-gray-300 rounded-lg"
                   step="0.01"
                 />
                 <span className="text-sm text-gray-600">{material.unit}</span>
@@ -214,7 +214,7 @@ export const MaterialAccessorySelector: React.FC<
                     )
                   }
                   placeholder="Qty"
-                  className="w-24 px-3 py-2 border border-gray-300 rounded-lg"
+                  className="w-24 px-3 py-2 text-gray-900 border border-gray-300 rounded-lg"
                 />
                 <span className="text-sm text-gray-600">{accessory.unit}</span>
                 <Button

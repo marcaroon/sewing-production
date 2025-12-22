@@ -1,4 +1,5 @@
-// src/app/api/orders/route.ts - UPDATED VERSION with Manual Order Number
+// src/app/api/orders/route.ts - FIXED VERSION
+// Only create FIRST process step, let others be created dynamically
 
 import { NextRequest, NextResponse } from "next/server";
 import prisma from "@/lib/prisma";
@@ -10,7 +11,7 @@ export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
     const {
-      orderNumber, // NEW: Manual input dari user
+      orderNumber,
       buyerId,
       styleId,
       orderDate,
@@ -48,7 +49,7 @@ export async function POST(request: NextRequest) {
           success: false,
           error: `Order number "${orderNumber}" already exists. Please use a different order number.`,
         },
-        { status: 409 } // 409 Conflict
+        { status: 409 }
       );
     }
 
@@ -144,12 +145,12 @@ export async function POST(request: NextRequest) {
       }
     }
 
-    // ==================== CREATE ORDER WITH PROCESS STEPS ====================
+    // ==================== CREATE ORDER WITH FIRST PROCESS STEP ONLY ====================
     const result = await prisma.$transaction(async (tx) => {
-      // Create order dengan manual order number
+      // Create order
       const order = await tx.order.create({
         data: {
-          orderNumber: orderNumber.trim().toUpperCase(), // Store in uppercase
+          orderNumber: orderNumber.trim().toUpperCase(),
           buyerId,
           styleId,
           orderDate: new Date(orderDate),
@@ -162,7 +163,7 @@ export async function POST(request: NextRequest) {
           processFlow: JSON.stringify(processFlow),
           totalProcessSteps,
 
-          // Current state
+          // Current state - FIRST PROCESS
           currentPhase: "production",
           currentProcess: processFlow[0],
           currentState: "at_ppic",
@@ -187,60 +188,42 @@ export async function POST(request: NextRequest) {
         },
       });
 
-      // ==================== CREATE PROCESS STEPS ====================
       const now = new Date();
-      const processSteps = [];
+      const firstProcessName = processFlow[0];
+      const firstDepartment =
+        PROCESS_DEPARTMENT_MAP[firstProcessName] || "PPIC";
 
-      for (let i = 0; i < processFlow.length; i++) {
-        const processName = processFlow[i];
-        const isFirstProcess = i === 0;
+      const firstProcessStep = await tx.processStep.create({
+        data: {
+          orderId: order.id,
+          processName: firstProcessName,
+          processPhase: "production",
+          sequenceOrder: 1,
+          department: firstDepartment,
+          status: "pending",
+          quantityReceived: totalQuantity,
+          quantityCompleted: 0,
+          quantityRejected: 0,
+          quantityRework: 0,
+          arrivedAtPpicTime: now,
+          notes: `Order created with ${processFlow.length} planned process steps (Template: ${templateId})`,
+        },
+      });
 
-        const isDeliveryProcess = [
-          "packing",
-          "final_inspection",
-          "loading",
-          "shipping",
-          "delivered",
-        ].includes(processName);
-        const processPhase = isDeliveryProcess ? "delivery" : "production";
-
-        const department = PROCESS_DEPARTMENT_MAP[processName] || "PPIC";
-
-        const processStep = await tx.processStep.create({
-          data: {
-            orderId: order.id,
-            processName,
-            processPhase,
-            sequenceOrder: i + 1,
-            department,
-            status: "pending",
-            quantityReceived: isFirstProcess ? totalQuantity : 0,
-            arrivedAtPpicTime: isFirstProcess ? now : null,
-            notes: isFirstProcess
-              ? `Order created with template: ${templateId}`
-              : null,
-          },
-        });
-
-        processSteps.push(processStep);
-
-        // Create initial transition for first process
-        if (isFirstProcess) {
-          await tx.processTransition.create({
-            data: {
-              orderId: order.id,
-              processStepId: processStep.id,
-              fromState: "at_ppic",
-              toState: "at_ppic",
-              transitionTime: now,
-              performedBy: createdBy,
-              processName,
-              department,
-              notes: `Order created with ${processFlow.length} process steps`,
-            },
-          });
-        }
-      }
+      // Create initial transition
+      await tx.processTransition.create({
+        data: {
+          orderId: order.id,
+          processStepId: firstProcessStep.id,
+          fromState: "at_ppic",
+          toState: "at_ppic",
+          transitionTime: now,
+          performedBy: createdBy,
+          processName: firstProcessName,
+          department: firstDepartment,
+          notes: `Order created - Starting with ${firstProcessName}`,
+        },
+      });
 
       // ==================== CREATE ORDER MATERIALS ====================
       const createdMaterials = [];
@@ -324,7 +307,7 @@ export async function POST(request: NextRequest) {
 
       return {
         order,
-        processSteps,
+        firstProcessStep,
         materials: createdMaterials,
         accessories: createdAccessories,
       };
@@ -368,7 +351,7 @@ export async function POST(request: NextRequest) {
       updatedAt: result.order.updatedAt,
       createdBy: result.order.createdBy,
       notes: result.order.notes || undefined,
-      processSteps: result.processSteps,
+      processSteps: [result.firstProcessStep], // Only first step
       materials: result.materials,
       accessories: result.accessories,
     };
@@ -376,7 +359,7 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({
       success: true,
       data: transformedOrder,
-      message: `Order ${result.order.orderNumber} created successfully with ${processFlow.length} process steps`,
+      message: `Order ${result.order.orderNumber} created successfully. Ready for ${processFlow[0]} process.`,
     });
   } catch (error) {
     console.error("Error creating order:", error);
@@ -391,7 +374,7 @@ export async function POST(request: NextRequest) {
   }
 }
 
-// GET endpoint tetap sama...
+// GET endpoint - No changes needed
 export async function GET(request: NextRequest) {
   try {
     const { searchParams } = new URL(request.url);

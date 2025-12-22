@@ -185,7 +185,7 @@ class ApiClient {
         .filter((s) => s.status === "completed")
         .map((s) => s.processName),
       inProgress: steps
-        .filter((s) => s.status === "in_progress" || s.status === "pending")
+        .filter((s) => s.status === "in_progress")
         .map((s) => s.processName),
     };
   }
