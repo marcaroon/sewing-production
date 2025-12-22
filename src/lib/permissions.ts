@@ -14,12 +14,11 @@ export type UserRole =
   | "shiwake"
   | "ironing";
 
-// Mapping Role ke Process yang mereka handle
 export const ROLE_PROCESS_MAP: Record<UserRole, ProcessName[]> = {
-  admin: [], // Admin bisa semua - akan di-handle khusus
-  ppic: ["draft", "material_request"],
+  admin: [], // Admin lewat isAdmin flag
+  ppic: [], // PPIC tidak execute process, hanya assign
   warehouse: ["material_issued"],
-  cutting: ["cutting"],
+  cutting: ["cutting", "material_request"],
   numbering: ["numbering"],
   shiwake: ["shiwake"],
   sewing: ["sewing"],
@@ -31,14 +30,12 @@ export const ROLE_PROCESS_MAP: Record<UserRole, ProcessName[]> = {
 
 export function canModifyProcess(
   userRole: UserRole,
-  processName: ProcessName
+  processName: ProcessName,
+  isAdmin: boolean = false
 ): boolean {
-  if (userRole === "admin") return true;
+  if (isAdmin) return true;
 
-  if (userRole === "ppic") {
-    // PPIC hanya bisa modify draft dan material_request
-    return ["draft", "material_request"].includes(processName);
-  }
+  if (userRole === "ppic") return false;
 
   const allowedProcesses = ROLE_PROCESS_MAP[userRole] || [];
   return allowedProcesses.includes(processName);
@@ -46,16 +43,14 @@ export function canModifyProcess(
 
 export function canViewProcess(
   userRole: UserRole,
-  processName: ProcessName
+  processName: ProcessName,
+  isAdmin: boolean = false
 ): boolean {
-  if (userRole === "admin" || userRole === "ppic") return true;
-
-  const allowedProcesses = ROLE_PROCESS_MAP[userRole] || [];
-  return allowedProcesses.includes(processName);
+  return true;
 }
 
 export function getRoleForProcess(processName: ProcessName): UserRole[] {
-  const roles: UserRole[] = ["admin", "ppic"]; // Admin dan PPIC selalu included
+  const roles: UserRole[] = ["admin", "ppic"];
 
   for (const [role, processes] of Object.entries(ROLE_PROCESS_MAP)) {
     if (processes.includes(processName)) {
@@ -68,9 +63,10 @@ export function getRoleForProcess(processName: ProcessName): UserRole[] {
 
 export function canExecuteProcess(
   userRole: UserRole,
-  processName: ProcessName
+  processName: ProcessName,
+  isAdmin: boolean = false
 ): boolean {
-  if (userRole === "admin") return true;
+  if (isAdmin) return true;
 
   if (userRole === "ppic") return false;
 
@@ -78,45 +74,73 @@ export function canExecuteProcess(
   return allowedProcesses.includes(processName);
 }
 
-// Permission helpers
+export function canReceiveTransfer(
+  userRole: UserRole,
+  toProcessName: ProcessName,
+  isAdmin: boolean = false
+): boolean {
+  if (isAdmin) return true;
+
+  if (userRole === "ppic") return false;
+
+  const allowedProcesses = ROLE_PROCESS_MAP[userRole] || [];
+  return allowedProcesses.includes(toProcessName);
+}
+
 export const Permissions = {
-  canCreateOrder: (role: UserRole) => ["admin", "ppic"].includes(role),
-  canEditOrder: (role: UserRole) => ["admin", "ppic"].includes(role),
-  canDeleteOrder: (role: UserRole) => ["admin"].includes(role),
-  canViewOrder: (role: UserRole) => true, // Semua bisa view
+  canCreateOrder: (role: UserRole, isAdmin: boolean = false) =>
+    isAdmin || ["ppic"].includes(role),
 
-  canAssignProcess: (role: UserRole) => ["admin", "ppic"].includes(role),
+  canEditOrder: (role: UserRole, isAdmin: boolean = false) =>
+    isAdmin || ["ppic"].includes(role),
 
-  canTransitionProcess: (role: UserRole, processName: ProcessName) => {
-    // Admin bisa transition semua
-    if (role === "admin") return true;
-    // PPIC tidak bisa transition (hanya assign)
+  canDeleteOrder: (role: UserRole, isAdmin: boolean = false) => isAdmin,
+
+  canViewOrder: (role: UserRole, isAdmin: boolean = false) => true,
+
+  canAssignProcess: (role: UserRole, isAdmin: boolean = false) =>
+    isAdmin || ["ppic"].includes(role),
+
+  canTransitionProcess: (
+    role: UserRole,
+    processName: ProcessName,
+    isAdmin: boolean = false
+  ) => {
+    if (isAdmin) return true;
     if (role === "ppic") return false;
-    // User lain check mapping
-    return canExecuteProcess(role, processName);
+    return canExecuteProcess(role, processName, isAdmin);
   },
 
-  canRecordReject: (role: UserRole, processName: ProcessName) => {
-    // Admin bisa record reject semua
-    if (role === "admin") return true;
-    // PPIC tidak bisa record reject
+  canRecordReject: (
+    role: UserRole,
+    processName: ProcessName,
+    isAdmin: boolean = false
+  ) => {
+    if (isAdmin) return true;
     if (role === "ppic") return false;
-    // User lain check mapping
-    return canExecuteProcess(role, processName);
+    return canExecuteProcess(role, processName, isAdmin);
   },
 
-  canViewProcess: (role: UserRole, processName: ProcessName) =>
-    canViewProcess(role, processName),
+  canViewProcess: (
+    role: UserRole,
+    processName: ProcessName,
+    isAdmin: boolean = false
+  ) => canViewProcess(role, processName, isAdmin),
 
-  // Transfer permissions
-  canCreateTransfer: (role: UserRole, processName: ProcessName) =>
-    canExecuteProcess(role, processName),
-  canReceiveTransfer: (role: UserRole, processName: ProcessName) =>
-    canExecuteProcess(role, processName),
+  canCreateTransfer: (
+    role: UserRole,
+    processName: ProcessName,
+    isAdmin: boolean = false
+  ) => canExecuteProcess(role, processName, isAdmin),
 
-  // Inventory permissions
-  canManageInventory: (role: UserRole) => ["admin", "warehouse"].includes(role),
+  canReceiveTransfer: (
+    role: UserRole,
+    toProcessName: ProcessName,
+    isAdmin: boolean = false
+  ) => canReceiveTransfer(role, toProcessName, isAdmin),
 
-  // User management
-  canManageUsers: (role: UserRole) => ["admin"].includes(role),
+  canManageInventory: (role: UserRole, isAdmin: boolean = false) =>
+    isAdmin || ["warehouse"].includes(role),
+
+  canManageUsers: (role: UserRole, isAdmin: boolean = false) => isAdmin,
 };

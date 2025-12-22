@@ -18,7 +18,15 @@ export async function GET(request: NextRequest) {
 
     return NextResponse.json({
       success: true,
-      user,
+      user: {
+        id: user.id,
+        email: user.email,
+        name: user.name,
+        department: user.department,
+        role: user.role,
+        avatar: user.avatar,
+        isAdmin: user.isAdmin || false,
+      },
     });
   } catch (error) {
     console.error("Get user error:", error);

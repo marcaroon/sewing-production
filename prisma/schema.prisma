@@ -573,6 +573,7 @@ model User {
   // Auth fields
   emailVerified Boolean  @default(false)
   isActive      Boolean  @default(true)
+  isAdmin       Boolean  @default(false)
   lastLogin     DateTime?
   
   // Profile
@@ -587,6 +588,7 @@ model User {
   @@index([department])
   @@index([role])
   @@index([isActive])
+  @@index([isAdmin])
   @@map("users")
 }
 

@@ -56,6 +56,9 @@ export const ProcessStepCard: React.FC<ProcessStepCardProps> = ({
   onUpdate,
 }) => {
   const { user, checkPermission } = useAuth();
+
+  const isAdmin = user?.isAdmin || false;
+
   const [availableUsers, setAvailableUsers] = useState<any[]>([]);
   const [isTransitionModalOpen, setIsTransitionModalOpen] = useState(false);
   const [isRejectModalOpen, setIsRejectModalOpen] = useState(false);
@@ -207,9 +210,7 @@ export const ProcessStepCard: React.FC<ProcessStepCardProps> = ({
     }
   }, [user]);
 
-  const canView = user
-    ? checkPermission("canViewProcess", processStep.processName)
-    : false;
+  const canView = true;
 
   const canExecute = user
     ? checkPermission("canTransitionProcess", processStep.processName)
@@ -454,7 +455,6 @@ export const ProcessStepCard: React.FC<ProcessStepCardProps> = ({
               </div>
             )}
 
-          {/* ✅ PERBAIKAN: Message yang lebih jelas */}
           {!canExecute && (
             <div className="mt-4 p-3 bg-gray-50 border border-gray-200 rounded-lg">
               <div className="flex items-center gap-2 text-sm text-gray-600">
@@ -479,9 +479,8 @@ export const ProcessStepCard: React.FC<ProcessStepCardProps> = ({
                 </svg>
                 <span>
                   {user?.role === "ppic"
-                    ? "You can assign but cannot execute this process"
-                    : "View Only - This process is handled by " +
-                      processStep.department}
+                    ? "View Only - PPIC can assign but cannot execute this process"
+                    : `View Only - This process is handled by ${processStep.department}`}
                 </span>
               </div>
             </div>
@@ -489,7 +488,6 @@ export const ProcessStepCard: React.FC<ProcessStepCardProps> = ({
         </CardContent>
       </Card>
 
-      {/* ========== IMPROVED TRANSITION MODAL ========== */}
       <Modal
         isOpen={isTransitionModalOpen}
         onClose={() => !isSubmitting && setIsTransitionModalOpen(false)}
@@ -504,7 +502,6 @@ export const ProcessStepCard: React.FC<ProcessStepCardProps> = ({
               </div>
             )}
 
-            {/* CONTEXT INFO - Show DETAILED transition path */}
             <div className="bg-linear-to-r from-blue-50 to-indigo-50 border-2 border-blue-300 rounded-lg p-5">
               <h4 className="font-bold text-blue-900 mb-4 flex items-center gap-2">
                 <svg
@@ -524,7 +521,6 @@ export const ProcessStepCard: React.FC<ProcessStepCardProps> = ({
               </h4>
 
               <div className="space-y-4">
-                {/* FROM (Current State) */}
                 <div className="bg-white rounded-lg p-4 border-l-4 border-blue-500">
                   <p className="text-xs font-semibold text-blue-600 uppercase mb-2">
                     📍 FROM (Current)
@@ -562,7 +558,6 @@ export const ProcessStepCard: React.FC<ProcessStepCardProps> = ({
                   </div>
                 </div>
 
-                {/* ARROW */}
                 <div className="flex justify-center">
                   <svg
                     className="w-8 h-8 text-blue-600 animate-pulse"
@@ -579,7 +574,6 @@ export const ProcessStepCard: React.FC<ProcessStepCardProps> = ({
                   </svg>
                 </div>
 
-                {/* TO (Next State) */}
                 <div className="bg-white rounded-lg p-4 border-l-4 border-green-500">
                   <p className="text-xs font-semibold text-green-600 uppercase mb-2">
                     🎯 TO (Next)
@@ -589,7 +583,6 @@ export const ProcessStepCard: React.FC<ProcessStepCardProps> = ({
                       {getStateLabel(transitionData.newState)}
                     </p>
 
-                    {/* Show specific location based on state */}
                     {transitionData.newState === "at_ppic" && (
                       <div className="mt-2 bg-blue-50 rounded p-2">
                         <p className="text-sm text-blue-900">

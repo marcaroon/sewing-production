@@ -4,7 +4,7 @@ import prisma from "./prisma";
 import bcrypt from "bcryptjs";
 
 const SESSION_COOKIE_NAME = "session_token";
-const SESSION_EXPIRY_DAYS = 7;
+const SESSION_EXPIRY_DAYS = 1;
 
 export interface SessionUser {
   id: string;
@@ -13,18 +13,13 @@ export interface SessionUser {
   department: string;
   role: string;
   avatar?: string;
+  isAdmin?: boolean;
 }
 
-/**
- * Hash password using bcrypt
- */
 export async function hashPassword(password: string): Promise<string> {
   return bcrypt.hash(password, 10);
 }
 
-/**
- * Verify password against hash
- */
 export async function verifyPassword(
   password: string,
   hash: string
@@ -32,16 +27,10 @@ export async function verifyPassword(
   return bcrypt.compare(password, hash);
 }
 
-/**
- * Generate session token
- */
 export function generateSessionToken(): string {
   return `${Date.now()}-${Math.random().toString(36).substring(2, 15)}`;
 }
 
-/**
- * Create session for user
- */
 export async function createSession(
   userId: string,
   ipAddress?: string,
@@ -61,7 +50,6 @@ export async function createSession(
     },
   });
 
-  // Set cookie
   (await cookies()).set(SESSION_COOKIE_NAME, token, {
     httpOnly: true,
     secure: process.env.NODE_ENV === "production",
@@ -70,7 +58,6 @@ export async function createSession(
     path: "/",
   });
 
-  // Update last login
   await prisma.user.update({
     where: { id: userId },
     data: { lastLogin: new Date() },
@@ -79,9 +66,6 @@ export async function createSession(
   return token;
 }
 
-/**
- * Get current session user
- */
 export async function getCurrentUser(): Promise<SessionUser | null> {
   try {
     const cookieStore = await cookies();
@@ -96,14 +80,12 @@ export async function getCurrentUser(): Promise<SessionUser | null> {
     });
 
     if (!session || session.expiresAt < new Date()) {
-      // Session expired, delete it
       if (session) {
         await prisma.session.delete({ where: { id: session.id } });
       }
       return null;
     }
 
-    // Get user
     const user = await prisma.user.findUnique({
       where: { id: session.userId },
       select: {
@@ -114,6 +96,7 @@ export async function getCurrentUser(): Promise<SessionUser | null> {
         role: true,
         avatar: true,
         isActive: true,
+        isAdmin: true,
       },
     });
 
@@ -128,6 +111,7 @@ export async function getCurrentUser(): Promise<SessionUser | null> {
       department: user.department,
       role: user.role,
       avatar: user.avatar || undefined,
+      isAdmin: user.isAdmin,
     };
   } catch (error) {
     console.error("Error getting current user:", error);
@@ -135,29 +119,23 @@ export async function getCurrentUser(): Promise<SessionUser | null> {
   }
 }
 
-/**
- * Logout user
- */
 export async function logout(): Promise<void> {
   const cookieStore = await cookies();
   const token = cookieStore.get(SESSION_COOKIE_NAME)?.value;
 
   if (token) {
-    // Delete session from database
     await prisma.session.deleteMany({ where: { token } });
   }
 
-  // Clear cookie
   cookieStore.delete(SESSION_COOKIE_NAME);
 }
 
-/**
- * Check if user has permission
- */
 export function hasPermission(
   user: SessionUser,
   requiredRole: string
 ): boolean {
+  if (user.isAdmin) return true;
+
   const roleHierarchy = {
     admin: 5,
     ppic: 4,
@@ -176,9 +154,6 @@ export function hasPermission(
   return userLevel >= requiredLevel;
 }
 
-/**
- * Validate session token (for middleware)
- */
 export async function validateSession(token: string): Promise<boolean> {
   try {
     const session = await prisma.session.findUnique({
@@ -189,7 +164,6 @@ export async function validateSession(token: string): Promise<boolean> {
       return false;
     }
 
-    // Check if user is active
     const user = await prisma.user.findUnique({
       where: { id: session.userId },
       select: { isActive: true },

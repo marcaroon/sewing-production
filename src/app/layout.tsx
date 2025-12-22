@@ -61,9 +61,11 @@ export default async function RootLayout({
                       {/* Quick Actions */}
                       <div className="flex items-center gap-3">
                         <div className="text-right">
-                          <p className="text-xs text-gray-500">
-                            {user.department}
-                          </p>
+                          {!user.isAdmin && user.department && (
+                            <p className="text-xs text-gray-500 truncate">
+                              {user.department}
+                            </p>
+                          )}
                         </div>
                       </div>
                     </div>

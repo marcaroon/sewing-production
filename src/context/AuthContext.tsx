@@ -7,7 +7,7 @@ import { UserRole, Permissions } from "@/lib/permissions";
 import { ProcessName } from "@/lib/types-new";
 
 interface AuthContextType {
-  user: SessionUser | null;
+  user: (SessionUser & { isAdmin?: boolean }) | null;
   isLoading: boolean;
   permissions: typeof Permissions;
   checkPermission: (
@@ -19,7 +19,7 @@ interface AuthContextType {
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
-  const [user, setUser] = useState<SessionUser | null>(null);
+  const [user, setUser] = useState<(SessionUser & { isAdmin?: boolean }) | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
@@ -50,7 +50,11 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     const permissionFn = Permissions[permission];
     if (typeof permissionFn === "function") {
       try {
-        return (permissionFn as any)(user.role as UserRole, ...args);
+        return (permissionFn as any)(
+          user.role as UserRole,
+          ...args,
+          user.isAdmin || false
+        );
       } catch (error) {
         console.error("Permission check error:", error);
         return false;

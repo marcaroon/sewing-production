@@ -15,7 +15,6 @@ import {
   LogOut,
   Menu,
   X,
-  ChevronRight,
   User,
 } from "lucide-react";
 
@@ -24,6 +23,7 @@ type SidebarProps = {
     role: string;
     name: string;
     department: string;
+    isAdmin?: boolean;
   };
 };
 
@@ -45,7 +45,7 @@ export default function Sidebar({ user }: SidebarProps) {
     window.location.href = "/";
   };
 
-  const canCreateOrder = ["admin", "ppic"].includes(user?.role || "");
+  const canCreateOrder = user.isAdmin || ["ppic"].includes(user?.role || "");
 
   return (
     <>
@@ -140,9 +140,11 @@ export default function Sidebar({ user }: SidebarProps) {
                 <p className="text-sm font-semibold text-gray-900 truncate">
                   {user.name}
                 </p>
-                <p className="text-xs text-gray-500 truncate">
-                  {user.department}
-                </p>
+                {!user.isAdmin && user.department && (
+                  <p className="text-xs text-gray-500 truncate">
+                    {user.department}
+                  </p>
+                )}
               </div>
               <button
                 onClick={handleLogout}
