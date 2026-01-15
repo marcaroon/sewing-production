@@ -42,6 +42,7 @@ import {
   User,
   Eye,
   Lock,
+  ShieldCheck,
 } from "lucide-react";
 
 interface ProcessStepCardProps {
@@ -116,13 +117,13 @@ export const ProcessStepCard: React.FC<ProcessStepCardProps> = ({
   });
 
   const isAdmin = user?.isAdmin || false;
-  const isPPIC = user?.role === "ppic";
-  
+  const isPPIC = user?.department === "PPIC";
+  const userDepartment = user?.department || "";
+
   /**
-   * CRITICAL: Cek permission dengan benar
-   * - Admin: Bisa semua
-   * - PPIC: View only (tidak bisa eksekusi)
-   * - Role lain: Bisa eksekusi hanya process mereka
+   * ✅ CRITICAL FIX: Properly check permissions
+   * - Pass processName as second argument
+   * - isAdmin handled inside checkPermission
    */
   const canExecute = user
     ? checkPermission("canTransitionProcess", processStep.processName)
@@ -133,6 +134,21 @@ export const ProcessStepCard: React.FC<ProcessStepCardProps> = ({
     : false;
 
   const canView = true; // Semua bisa view
+
+  // Debug logs
+  // useEffect(() => {
+  //   if (user) {
+  //     console.log("=== ProcessStepCard Permission Debug ===");
+  //     console.log("User:", user.name);
+  //     console.log("User Department:", user.department);
+  //     console.log("User isAdmin:", user.isAdmin);
+  //     console.log("Process:", processStep.processName);
+  //     console.log("Process Department:", processStep.department);
+  //     console.log("Can Execute:", canExecute);
+  //     console.log("Can Reject:", canReject);
+  //     console.log("======================================");
+  //   }
+  // }, [user, processStep, canExecute, canReject]);
 
   // Load users saat assign
   useEffect(() => {
@@ -231,6 +247,16 @@ export const ProcessStepCard: React.FC<ProcessStepCardProps> = ({
         )
       : 0;
 
+  if (!user) {
+    return (
+      <Card>
+        <CardContent className="py-8 text-center text-gray-500">
+          Loading user permissions...
+        </CardContent>
+      </Card>
+    );
+  }
+
   return (
     <>
       <Card className="border-l-4 border-l-blue-600">
@@ -241,7 +267,18 @@ export const ProcessStepCard: React.FC<ProcessStepCardProps> = ({
                 <CardTitle className="text-lg">
                   {PROCESS_LABELS[processStep.processName]}
                 </CardTitle>
-                {/* Show lock icon if user can't execute */}
+                {/* ✅ Show access indicator */}
+                {isAdmin && (
+                  <div
+                    title="Admin Full Access"
+                    className="flex items-center gap-1"
+                  >
+                    <ShieldCheck className="w-4 h-4 text-green-600" />
+                    <span className="text-xs font-bold text-green-600">
+                      ADMIN
+                    </span>
+                  </div>
+                )}
                 {!canExecute && !isAdmin && (
                   <div title="View Only">
                     <Lock className="w-4 h-4 text-gray-400" />
@@ -252,6 +289,13 @@ export const ProcessStepCard: React.FC<ProcessStepCardProps> = ({
                 <p className="text-sm font-semibold text-gray-700">
                   {processStep.department}
                 </p>
+                {/* Show user's department if different */}
+                {userDepartment &&
+                  userDepartment !== processStep.department && (
+                    <Badge variant="default" size="sm">
+                      You: {userDepartment}
+                    </Badge>
+                  )}
               </div>
             </div>
             <div className="flex flex-col items-end gap-2">
@@ -326,7 +370,7 @@ export const ProcessStepCard: React.FC<ProcessStepCardProps> = ({
             </div>
           </div>
 
-          {/* Timestamps */}
+          {/* Timestamps - Collapsed by default */}
           {(processStep.arrivedAtPpicTime ||
             processStep.addedToWaitingTime ||
             processStep.assignedTime ||
@@ -401,11 +445,10 @@ export const ProcessStepCard: React.FC<ProcessStepCardProps> = ({
             </div>
           )}
 
-          {/* ACTION BUTTONS - CRITICAL RBAC */}
           {canExecute &&
             currentState !== "completed" &&
             validNextStates.length > 0 && (
-              <div className="flex gap-2 pt-3">
+              <div className="flex gap-2 pt-3 border-t-2 border-gray-200">
                 <Button
                   onClick={() => setIsTransitionModalOpen(true)}
                   variant="primary"
@@ -428,25 +471,56 @@ export const ProcessStepCard: React.FC<ProcessStepCardProps> = ({
               </div>
             )}
 
-          {/* VIEW ONLY MESSAGE */}
           {!canExecute && (
-            <div className="mt-4 p-3 bg-gray-50 border border-gray-200 rounded-lg">
-              <div className="flex items-center gap-2 text-sm text-gray-600">
-                <Eye className="w-4 h-4" />
-                <span>
-                  {isPPIC
-                    ? "View Only - PPIC tidak bisa eksekusi process, hanya assign"
-                    : isAdmin
-                    ? "Admin View Mode"
-                    : `View Only - Process ini dihandle oleh ${processStep.department}`}
-                </span>
+            <div className="mt-4 p-3 bg-gray-50 border-2 border-gray-300 rounded-lg">
+              <div className="flex items-start gap-3 text-sm">
+                {isAdmin ? (
+                  <>
+                    <Eye className="w-5 h-5 text-blue-600 mt-0.5" />
+                    <div>
+                      <p className="font-bold text-gray-900 mb-1">
+                        Admin View Mode
+                      </p>
+                      <p className="text-gray-600">
+                        You have full access but viewing in read-only mode.
+                        Buttons will appear when process is active.
+                      </p>
+                    </div>
+                  </>
+                ) : isPPIC ? (
+                  <>
+                    <Eye className="w-5 h-5 text-purple-600 mt-0.5" />
+                    <div>
+                      <p className="font-bold text-gray-900 mb-1">PPIC View</p>
+                      <p className="text-gray-600">
+                        PPIC can assign processes but cannot execute them. Use
+                        "Assign Next Process" for this order.
+                      </p>
+                    </div>
+                  </>
+                ) : (
+                  <>
+                    <Lock className="w-5 h-5 text-orange-600 mt-0.5" />
+                    <div>
+                      <p className="font-bold text-gray-900 mb-1">View Only</p>
+                      <p className="text-gray-600">
+                        This process is handled by{" "}
+                        <span className="font-bold">
+                          {processStep.department}
+                        </span>
+                        . Your department:{" "}
+                        <span className="font-bold">{userDepartment}</span>.
+                      </p>
+                    </div>
+                  </>
+                )}
               </div>
             </div>
           )}
         </CardContent>
       </Card>
 
-      {/* Transition Modal - sama seperti sebelumnya */}
+      {/* Transition Modal - Keep existing implementation */}
       <Modal
         isOpen={isTransitionModalOpen}
         onClose={() => !isSubmitting && setIsTransitionModalOpen(false)}
@@ -454,7 +528,6 @@ export const ProcessStepCard: React.FC<ProcessStepCardProps> = ({
         size="lg"
       >
         <form onSubmit={handleTransition}>
-          {/* ... Form content sama seperti sebelumnya ... */}
           <div className="space-y-6">
             {error && (
               <div className="bg-red-50 border border-red-200 rounded p-3 text-sm text-red-800">
@@ -462,7 +535,6 @@ export const ProcessStepCard: React.FC<ProcessStepCardProps> = ({
               </div>
             )}
 
-            {/* Minimal content untuk testing */}
             <div>
               <label className="block text-sm font-medium text-gray-900 mb-2">
                 New State *
@@ -503,7 +575,7 @@ export const ProcessStepCard: React.FC<ProcessStepCardProps> = ({
         </form>
       </Modal>
 
-      {/* Reject Modal - sama seperti sebelumnya */}
+      {/* Reject Modal - Keep existing implementation */}
       <Modal
         isOpen={isRejectModalOpen}
         onClose={() => !isSubmitting && setIsRejectModalOpen(false)}
@@ -518,7 +590,6 @@ export const ProcessStepCard: React.FC<ProcessStepCardProps> = ({
               </div>
             )}
 
-            {/* Minimal content */}
             <div>
               <label className="block text-sm font-medium text-gray-900 mb-2">
                 Description *

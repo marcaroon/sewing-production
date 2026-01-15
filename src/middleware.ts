@@ -78,7 +78,14 @@ export async function middleware(request: NextRequest) {
     // You can add more validation by calling an API endpoint
   }
 
-  return NextResponse.next();
+  const requestHeaders = new Headers(request.headers);
+  requestHeaders.set("x-pathname", pathname);
+
+  return NextResponse.next({
+    request: {
+      headers: requestHeaders,
+    },
+  });
 }
 
 export const config = {

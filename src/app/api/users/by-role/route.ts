@@ -1,10 +1,13 @@
-// src/app/api/users/by-role/route.ts - FILE BARU
+// src/app/api/users/by-role/route.ts - FIXED: Use Department
 import { NextRequest, NextResponse } from "next/server";
 import prisma from "@/lib/prisma";
 import { getCurrentUser } from "@/lib/auth";
-import { getRoleForProcess } from "@/lib/permissions";
+import { getDepartmentForProcess } from "@/lib/permissions";
 
-// GET /api/users/by-role?processName=sewing
+/**
+ * ✅ FIXED: Get users by DEPARTMENT (not role)
+ * GET /api/users/by-role?processName=sewing
+ */
 export async function GET(request: NextRequest) {
   try {
     const currentUser = await getCurrentUser();
@@ -25,23 +28,30 @@ export async function GET(request: NextRequest) {
       );
     }
 
-    // Get roles yang bisa handle process ini
-    const validRoles = getRoleForProcess(processName as any);
+    console.log(`[API] Finding users for process: ${processName}`);
 
-    // Get users dengan role tersebut
+    const validDepartments = getDepartmentForProcess(processName as any);
+
+    console.log(
+      `[API] Valid departments for ${processName}:`,
+      validDepartments
+    );
+
     const users = await prisma.user.findMany({
       where: {
-        role: { in: validRoles },
+        department: { in: validDepartments },
         isActive: true,
       },
       select: {
         id: true,
         name: true,
-        role: true,
-        department: true,
+        department: true, 
+        isAdmin: true,
       },
       orderBy: { name: "asc" },
     });
+
+    console.log(`[API] Found ${users.length} users`);
 
     return NextResponse.json({
       success: true,

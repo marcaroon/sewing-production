@@ -9,6 +9,7 @@ import { getCurrentUser } from "@/lib/auth";
 import Sidebar from "@/components/Sidebar";
 import RealtimeClock from "@/components/RealTimeClock";
 import { AuthProvider } from "@/context/AuthContext";
+import { headers } from "next/headers";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -25,6 +26,11 @@ export default async function RootLayout({
   const user = await getCurrentUser();
   const showLayout = !!user;
 
+  const headersList = await headers();
+  const pathname = headersList.get("x-pathname") || "";
+
+  const isFullscreenPage = pathname === "/monitoring";
+
   const initialDate = new Date().toLocaleString("id-ID", {
     weekday: "long",
     year: "numeric",
@@ -39,7 +45,7 @@ export default async function RootLayout({
     <html lang="id">
       <body className={inter.className}>
         <AuthProvider>
-          {showLayout && user ? (
+          {showLayout && user && !isFullscreenPage ? (
             // Authenticated Layout with Sidebar
             <div className="flex h-screen overflow-hidden bg-gray-50">
               {/* Sidebar */}

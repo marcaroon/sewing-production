@@ -86,7 +86,7 @@ export default function QRScannerPage() {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          qrCode: decodedText,
+          code: decodedText,
           scannedBy: currentUser?.name || "Unknown User",
           location: currentUser?.department || "Production Floor",
           action: "view",

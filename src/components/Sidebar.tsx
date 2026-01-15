@@ -92,10 +92,15 @@ export default function Sidebar({ user }: SidebarProps) {
             {menuItems.map((item) => {
               const Icon = item.icon;
               const isActive = pathname === item.href;
+
+              const isMonitoring = item.href === "/monitoring";
+
               return (
                 <Link
                   key={item.href}
                   href={item.href}
+                  target={isMonitoring ? "_blank" : undefined}
+                  rel={isMonitoring ? "noopener noreferrer" : undefined}
                   onClick={() => setMobileOpen(false)}
                   className={`flex items-center justify-between px-4 py-3 rounded-xl transition-all group ${
                     isActive

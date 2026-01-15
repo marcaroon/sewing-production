@@ -12,6 +12,7 @@ import {
   canModifyProcess,
   UserRole,
   ROLE_PROCESS_MAP,
+  Department,
 } from "@/lib/permissions";
 import { PROCESS_LABELS, PROCESS_DEPARTMENT_MAP } from "@/lib/constants-new";
 import { AlertTriangle, Clock, List, Package, User } from "lucide-react";
@@ -59,14 +60,11 @@ export default function WaitingListPage() {
 
     let filtered = [...waitingItems];
 
-    // Filter berdasarkan role user
     if (activeFilter === "my-processes") {
-      // Admin dan PPIC lihat semua
-      if (!["admin", "ppic"].includes(user.role || "")) {
-        // User lain hanya lihat process mereka
+      if (!user.isAdmin && user.department !== "PPIC") {
         filtered = filtered.filter((item) =>
           canModifyProcess(
-            user.role as UserRole,
+            user.department as Department,
             item.processName as ProcessName,
             user.isAdmin || false
           )
@@ -77,29 +75,36 @@ export default function WaitingListPage() {
     setFilteredItems(filtered);
   };
 
-  // Get user's allowed processes
   const getUserAllowedProcesses = (): ProcessName[] => {
     if (!user) return [];
-    if (user.isAdmin || user.role === "ppic") return [];
+    if (user.isAdmin || user.department === "PPIC") return [];
 
-    return ROLE_PROCESS_MAP[user.role as UserRole] || [];
+    const normalizeDept = (dept: string | undefined) => {
+      if (!dept) return "";
+      return dept.charAt(0).toUpperCase() + dept.slice(1).toLowerCase();
+    };
+
+    const dept = normalizeDept(user?.department);
+    return (ROLE_PROCESS_MAP as Record<string, ProcessName[]>)[dept] ?? [];
   };
 
   const myProcessCount = waitingItems.filter((item) =>
     canModifyProcess(
-      user?.role as UserRole,
+      user?.department as Department,
       item.processName as ProcessName,
       user?.isAdmin || false
     )
   ).length;
 
-  if (authLoading || isLoading) {
+  if (authLoading || isLoading || !user) {
     return (
       <div className="max-w-7xl mx-auto px-4 py-8">
-        <div className="flex items-center justify-center min-h-100">
+        <div className="flex items-center justify-center min-h-[60vh]">
           <div className="text-center">
             <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
-            <p className="text-gray-600">Loading waiting list...</p>
+            <p className="text-gray-600">
+              Memuat data pengguna dan waiting list...
+            </p>
           </div>
         </div>
       </div>
@@ -130,7 +135,7 @@ export default function WaitingListPage() {
 
   const allowedProcesses = getUserAllowedProcesses();
   const isAdmin = user?.isAdmin || false;
-  const isPPIC = user?.role === "ppic";
+  const isPPIC = user?.department === "ppic";
 
   return (
     <div className="max-w-7xl mx-auto px-4 py-8">

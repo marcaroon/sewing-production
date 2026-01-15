@@ -1,9 +1,9 @@
-// src/contexts/AuthContext.tsx - FIXED VERSION
+// src/context/AuthContext.tsx - FIXED VERSION
 "use client";
 
 import React, { createContext, useContext, useState, useEffect } from "react";
 import { SessionUser } from "@/lib/auth";
-import { UserRole, Permissions } from "@/lib/permissions";
+import { Permissions } from "@/lib/permissions";
 import { ProcessName } from "@/lib/types-new";
 
 interface AuthContextType {
@@ -19,11 +19,15 @@ interface AuthContextType {
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
-  const [user, setUser] = useState<(SessionUser & { isAdmin?: boolean }) | null>(null);
+  const [user, setUser] = useState<
+    (SessionUser & { isAdmin?: boolean }) | null
+  >(null);
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
     loadUser();
+    window.addEventListener("focus", loadUser);
+    return () => window.removeEventListener("focus", loadUser);
   }, []);
 
   const loadUser = async () => {
@@ -32,10 +36,13 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       const result = await response.json();
 
       if (result.success) {
+        // console.log("[AUTH] User loaded:", result.user);
+        // console.log("[AUTH] isAdmin:", result.user.isAdmin);
+        // console.log("[AUTH] department:", result.user.department);
         setUser(result.user);
       }
     } catch (error) {
-      console.error("Failed to load user:", error);
+      // console.error("Failed to load user:", error);
     } finally {
       setIsLoading(false);
     }
@@ -45,18 +52,27 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     permission: keyof typeof Permissions,
     ...args: unknown[]
   ): boolean => {
-    if (!user) return false;
+    if (!user) {
+      // console.log(`[PERMISSION] No user, permission denied: ${permission}`);
+      return false;
+    }
 
     const permissionFn = Permissions[permission];
     if (typeof permissionFn === "function") {
       try {
-        return (permissionFn as any)(
-          user.role as UserRole,
+        const result = (permissionFn as any)(
+          user.department,
           ...args,
           user.isAdmin || false
         );
+        // if (!result) {
+        //   console.log(
+        //     `[PERMISSION] DENIED: ${permission} for ${user.department} (isAdmin=${user.isAdmin})`
+        //   );
+        // }
+        return result;
       } catch (error) {
-        console.error("Permission check error:", error);
+        // console.error("Permission check error:", error);
         return false;
       }
     }
