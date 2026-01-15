@@ -1,15 +1,14 @@
-// app/api/process-steps/[id]/transition/route.ts - FIXED VERSION
-// Progress bar akan update ketika process completed
+// app/api/process-steps/[id]/transition/route.ts - SIMPLIFIED FLOW
+// Waiting → Received → In Progress → Completed → Back to Waiting (next process)
 
 import { NextRequest, NextResponse } from "next/server";
 import prisma from "@/lib/prisma";
 import {
-  isValidStateTransition,
+  PROCESS_DEPARTMENT_MAP,
   getNextProcess,
   getNextPhase,
-  PROCESS_DEPARTMENT_MAP,
 } from "@/lib/constants-new";
-import { canExecuteProcess, UserRole } from "@/lib/permissions";
+import { canExecuteProcess } from "@/lib/permissions";
 import { ProcessName } from "@/lib/types-new";
 import { getCurrentUser } from "@/lib/auth";
 
@@ -22,23 +21,19 @@ export async function POST(
 
     if (!currentUser) {
       return NextResponse.json(
-        {
-          success: false,
-          error: "Authentication required. Please log in.",
-        },
+        { success: false, error: "Authentication required" },
         { status: 401 }
       );
     }
 
     const processStepId = (await params).id;
     const body = await request.json();
+    const { action, performedBy, quantity, notes } = body;
 
-    const { newState, performedBy, assignedTo, assignedLine, quantity, notes } =
-      body;
-
-    if (!newState || !performedBy) {
+    // Simplified actions: 'receive', 'start', 'complete'
+    if (!action || !performedBy) {
       return NextResponse.json(
-        { success: false, error: "Missing required fields" },
+        { success: false, error: "Missing action or performedBy" },
         { status: 400 }
       );
     }
@@ -46,13 +41,7 @@ export async function POST(
     const processStep = await prisma.processStep.findUnique({
       where: { id: processStepId },
       include: {
-        order: {
-          include: {
-            buyer: true,
-            style: true,
-            sizeBreakdowns: true,
-          },
-        },
+        order: { include: { buyer: true, style: true } },
         rejects: true,
       },
     });
@@ -64,91 +53,119 @@ export async function POST(
       );
     }
 
-    if (
-      !canExecuteProcess(
-        currentUser.role as UserRole,
-        processStep.processName as ProcessName
-      )
-    ) {
+    // ✅ FIX: Check permission with isAdmin flag
+    const hasPermission = canExecuteProcess(
+      currentUser.department,
+      processStep.processName as ProcessName,
+      currentUser.isAdmin || false
+    );
+
+    if (!hasPermission) {
       return NextResponse.json(
         {
           success: false,
-          error: `You don't have permission to execute ${processStep.processName}...`,
+          error: `Permission denied. Only ${processStep.department} can execute ${processStep.processName}`,
         },
         { status: 403 }
       );
     }
 
-    // Determine current state
-    let currentState = "at_ppic";
-    if (processStep.completedTime) currentState = "completed";
-    else if (processStep.startedTime) currentState = "in_progress";
-    else if (processStep.assignedTime) currentState = "assigned";
-    else if (processStep.addedToWaitingTime) currentState = "waiting";
-
-    if (!isValidStateTransition(currentState as any, newState)) {
-      return NextResponse.json(
-        {
-          success: false,
-          error: `Invalid transition from ${currentState} to ${newState}`,
-        },
-        { status: 400 }
-      );
-    }
-
     const result = await prisma.$transaction(async (tx) => {
       const now = new Date();
-      const updateData: any = { updatedAt: now };
+      let updateData: any = { updatedAt: now };
+      let transitionFrom = "";
+      let transitionTo = "";
 
-      // Set appropriate timestamp
-      switch (newState) {
-        case "at_ppic":
-          updateData.arrivedAtPpicTime = now;
-          break;
-        case "waiting":
-          updateData.addedToWaitingTime = now;
-          if (processStep.addedToWaitingTime && newState !== "waiting") {
-            const waitStart = new Date(processStep.addedToWaitingTime);
-            updateData.waitingDuration = Math.round(
-              (now.getTime() - waitStart.getTime()) / (1000 * 60)
-            );
-          }
-          break;
-        case "assigned":
-          updateData.assignedTime = now;
-          if (assignedTo) updateData.assignedTo = assignedTo;
-          if (assignedLine) updateData.assignedLine = assignedLine;
-          break;
-        case "in_progress":
-          updateData.startedTime = now;
-          updateData.status = "in_progress";
-          break;
-        case "completed":
-          updateData.completedTime = now;
-          updateData.status = "completed";
+      // ========== ACTION: RECEIVE (from waiting list) ==========
+      if (action === "receive") {
+        if (processStep.status !== "pending") {
+          throw new Error("Can only receive process in pending status");
+        }
 
-          // IMPORTANT: Set quantityCompleted from quantity parameter
-          const completedQty = quantity || processStep.quantityReceived;
-          updateData.quantityCompleted = completedQty;
+        updateData.status = "in_progress";
+        updateData.addedToWaitingTime = processStep.addedToWaitingTime || now;
+        updateData.startedTime = now;
 
-          // Calculate durations
-          if (processStep.startedTime) {
-            const procStart = new Date(processStep.startedTime);
-            updateData.processingDuration = Math.round(
-              (now.getTime() - procStart.getTime()) / (1000 * 60)
-            );
-          }
-          if (processStep.arrivedAtPpicTime) {
-            const totalStart = new Date(processStep.arrivedAtPpicTime);
-            updateData.totalDuration = Math.round(
-              (now.getTime() - totalStart.getTime()) / (1000 * 60)
-            );
-          }
-          break;
+        // Calculate waiting duration
+        if (processStep.addedToWaitingTime) {
+          const waitStart = new Date(processStep.addedToWaitingTime);
+          updateData.waitingDuration = Math.round(
+            (now.getTime() - waitStart.getTime()) / (1000 * 60)
+          );
+        }
+
+        transitionFrom = "waiting";
+        transitionTo = "in_progress";
+
+        // Update transfer log status if exists
+        const pendingTransfer = await tx.transferLog.findFirst({
+          where: {
+            orderId: processStep.orderId,
+            toProcess: processStep.processName,
+            status: "pending",
+          },
+          orderBy: { transferDate: "desc" },
+        });
+
+        if (pendingTransfer) {
+          await tx.transferLog.update({
+            where: { id: pendingTransfer.id },
+            data: {
+              receivedBy: performedBy,
+              receivedDate: now,
+              isReceived: true,
+              status: "received",
+            },
+          });
+        }
+      }
+      // ========== ACTION: START (old flow, kept for compatibility) ==========
+      else if (action === "start") {
+        if (processStep.status === "completed") {
+          throw new Error("Cannot start completed process");
+        }
+
+        updateData.status = "in_progress";
+        updateData.startedTime = now;
+        transitionFrom = processStep.status;
+        transitionTo = "in_progress";
+      }
+      // ========== ACTION: COMPLETE ==========
+      else if (action === "complete") {
+        if (processStep.status !== "in_progress") {
+          throw new Error("Can only complete process that is in progress");
+        }
+
+        const completedQty = quantity || processStep.quantityReceived;
+        updateData.status = "completed";
+        updateData.completedTime = now;
+        updateData.quantityCompleted = completedQty;
+
+        // Calculate processing duration
+        if (processStep.startedTime) {
+          const procStart = new Date(processStep.startedTime);
+          updateData.processingDuration = Math.round(
+            (now.getTime() - procStart.getTime()) / (1000 * 60)
+          );
+        }
+
+        // Calculate total duration
+        if (processStep.addedToWaitingTime) {
+          const totalStart = new Date(processStep.addedToWaitingTime);
+          updateData.totalDuration = Math.round(
+            (now.getTime() - totalStart.getTime()) / (1000 * 60)
+          );
+        }
+
+        transitionFrom = "in_progress";
+        transitionTo = "completed";
+      } else {
+        throw new Error(`Unknown action: ${action}`);
       }
 
       if (notes) updateData.notes = notes;
 
+      // Update process step
       const updatedProcessStep = await tx.processStep.update({
         where: { id: processStepId },
         data: updateData,
@@ -159,8 +176,8 @@ export async function POST(
         data: {
           orderId: processStep.orderId,
           processStepId: processStepId,
-          fromState: currentState,
-          toState: newState,
+          fromState: transitionFrom,
+          toState: transitionTo,
           transitionTime: now,
           performedBy,
           processName: processStep.processName,
@@ -173,17 +190,16 @@ export async function POST(
       let nextProcessStep = null;
       let transferLog = null;
 
-      // ====== WHEN COMPLETED: Update Order totalCompleted & Create Transfer Log ======
-      if (newState === "completed") {
+      // ========== WHEN COMPLETED: Create Transfer & Next Process ==========
+      if (action === "complete") {
         const completedQty = quantity || processStep.quantityReceived;
 
-        // CRITICAL FIX: Update Order's totalCompleted
-        // This is what makes the progress bar work!
+        // Update Order totalCompleted
         await tx.order.update({
           where: { id: processStep.orderId },
           data: {
+            totalCompleted: completedQty,
             currentState: "at_ppic",
-            totalCompleted: completedQty, // Update total completed for progress bar
             updatedAt: now,
           },
         });
@@ -223,7 +239,7 @@ export async function POST(
                 )
               : null;
 
-          // Create Transfer Log (Surat Jalan)
+          // Create Transfer Log
           transferLog = await tx.transferLog.create({
             data: {
               transferNumber,
@@ -235,8 +251,8 @@ export async function POST(
               toDepartment: PROCESS_DEPARTMENT_MAP[nextProcess],
               transferDate: now,
               handedOverBy: performedBy,
-              quantityTransferred: updatedProcessStep.quantityCompleted,
-              quantityCompleted: updatedProcessStep.quantityCompleted,
+              quantityTransferred: completedQty,
+              quantityCompleted: completedQty,
               quantityRejected: updatedProcessStep.quantityRejected,
               quantityRework: updatedProcessStep.quantityRework,
               rejectSummary,
@@ -259,52 +275,52 @@ export async function POST(
               sequenceOrder,
               department: PROCESS_DEPARTMENT_MAP[nextProcess],
               status: "pending",
-              quantityReceived: updatedProcessStep.quantityCompleted,
-              arrivedAtPpicTime: now,
+              quantityReceived: completedQty,
+              addedToWaitingTime: now, // ✅ Langsung masuk waiting list
             },
           });
 
+          // Update order current process
           await tx.order.update({
             where: { id: processStep.orderId },
             data: {
               currentProcess: nextProcess,
               currentPhase: nextPhase || processStep.processPhase,
-              currentState: "at_ppic",
+              currentState: "waiting", // ✅ Status waiting
             },
           });
 
+          // Log transition untuk next process
           await tx.processTransition.create({
             data: {
               orderId: processStep.orderId,
               processStepId: nextProcessStep.id,
               fromState: "at_ppic",
-              toState: "at_ppic",
+              toState: "waiting",
               transitionTime: now,
               performedBy: "SYSTEM",
               processName: nextProcess,
               department: PROCESS_DEPARTMENT_MAP[nextProcess],
-              notes: `Auto-created from completion of ${processStep.processName}`,
+              notes: `Auto-added to waiting list from ${processStep.processName}`,
             },
           });
         } else {
-          // Last process - mark as completed
+          // Last process - mark order as delivered
           await tx.order.update({
             where: { id: processStep.orderId },
             data: {
               currentProcess: "delivered",
               currentState: "completed",
-              totalCompleted: completedQty, // Ensure totalCompleted is set
+              totalCompleted: completedQty,
             },
           });
         }
       } else {
-        // Update order's current state (not completed)
+        // Update order state for non-complete actions
         await tx.order.update({
           where: { id: processStep.orderId },
           data: {
-            currentState: newState,
-            ...(assignedTo && { assignedTo }),
-            ...(assignedLine && { assignedLine }),
+            currentState: transitionTo,
             updatedAt: now,
           },
         });
@@ -320,16 +336,16 @@ export async function POST(
 
     return NextResponse.json({
       success: true,
-      message: `Transitioned from ${currentState} to ${newState}`,
+      message: `Action ${action} completed successfully`,
       data: result,
     });
   } catch (error) {
-    console.error("Error transitioning process step:", error);
+    console.error("Error in process transition:", error);
     return NextResponse.json(
       {
         success: false,
-        error: "Failed to transition process step",
-        details: error instanceof Error ? error.message : "Unknown error",
+        error:
+          error instanceof Error ? error.message : "Failed to process action",
       },
       { status: 500 }
     );

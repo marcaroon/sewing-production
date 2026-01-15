@@ -1,16 +1,14 @@
-// components/ProcessStepCards.tsx - FIXED RBAC VERSION
+// components/ProcessStepCards.tsx - SIMPLIFIED FLOW VERSION
 "use client";
 
 import React, { useState, useEffect } from "react";
 import { useAuth } from "@/context/AuthContext";
 import {
-  ProcessState,
   ProcessStep,
-  ProductionPhase,
-  isProcessState,
   RejectType,
   RejectCategory,
   RejectAction,
+  ProductionPhase,
 } from "@/lib/types-new";
 import { Card, CardContent, CardHeader, CardTitle } from "./ui/Card";
 import { Badge } from "./ui/Badge";
@@ -18,31 +16,23 @@ import { Button } from "./ui/Button";
 import { Modal, ModalFooter } from "./ui/Modal";
 import {
   PROCESS_LABELS,
-  PROCESS_STATE_LABELS,
-  PROCESS_STATE_COLORS,
   PHASE_LABELS,
-  VALID_STATE_TRANSITIONS,
   REJECT_TYPE_LABELS,
-  REJECT_CATEGORY_LABELS,
-  REJECT_ACTION_LABELS,
-  getNextProcess,
-  PROCESS_DEPARTMENT_MAP,
 } from "@/lib/constants-new";
 import { formatDateTime, formatNumber } from "@/lib/utils";
-import apiClient from "@/lib/api-client";
 import {
   Package,
   CheckCircle2,
   XCircle,
   RotateCcw,
-  Clock,
   PlayCircle,
   AlertCircle,
-  ArrowRight,
   User,
   Eye,
   Lock,
   ShieldCheck,
+  CheckCircle,
+  ArrowRight,
 } from "lucide-react";
 
 interface ProcessStepCardProps {
@@ -56,50 +46,16 @@ export const ProcessStepCard: React.FC<ProcessStepCardProps> = ({
 }) => {
   const { user, checkPermission } = useAuth();
 
-  const [availableUsers, setAvailableUsers] = useState<any[]>([]);
-  const [isTransitionModalOpen, setIsTransitionModalOpen] = useState(false);
+  const [isActionModalOpen, setIsActionModalOpen] = useState(false);
   const [isRejectModalOpen, setIsRejectModalOpen] = useState(false);
+  const [currentAction, setCurrentAction] = useState<
+    "receive" | "complete" | ""
+  >("");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState("");
 
-  // Determine current state
-  let currentState = "at_ppic";
-  if (processStep.completedTime) {
-    currentState = "completed";
-  } else if (processStep.startedTime) {
-    currentState = "in_progress";
-  } else if (processStep.assignedTime) {
-    currentState = "assigned";
-  } else if (processStep.addedToWaitingTime) {
-    currentState = "waiting";
-  }
-
-  const currentStateTyped: ProcessState = isProcessState(currentState)
-    ? currentState
-    : "at_ppic";
-
-  const validNextStates = VALID_STATE_TRANSITIONS[currentStateTyped] || [];
-
-  const nextProcess = getNextProcess(
-    processStep.processName as any,
-    processStep.processPhase as any
-  );
-  const nextDepartment = nextProcess
-    ? PROCESS_DEPARTMENT_MAP[nextProcess]
-    : null;
-
-  const [transitionData, setTransitionData] = useState<{
-    newState: ProcessState | "";
-    performedBy: string;
-    assignedTo: string;
-    assignedLine: string;
-    quantity: number;
-    notes: string;
-  }>({
-    newState: (validNextStates[0] as ProcessState) || "",
-    performedBy: "",
-    assignedTo: "",
-    assignedLine: "",
+  const [actionData, setActionData] = useState({
+    performedBy: user?.name || "",
     quantity: processStep.quantityReceived,
     notes: "",
   });
@@ -108,23 +64,16 @@ export const ProcessStepCard: React.FC<ProcessStepCardProps> = ({
     rejectType: "material_defect" as RejectType,
     rejectCategory: "rework" as RejectCategory,
     quantity: 1,
-    size: "",
-    bundleNumber: "",
     description: "",
     rootCause: "",
     action: "rework" as RejectAction,
-    reportedBy: "",
+    reportedBy: user?.name || "",
   });
 
   const isAdmin = user?.isAdmin || false;
   const isPPIC = user?.department === "PPIC";
-  const userDepartment = user?.department || "";
 
-  /**
-   * ✅ CRITICAL FIX: Properly check permissions
-   * - Pass processName as second argument
-   * - isAdmin handled inside checkPermission
-   */
+  // ✅ FIX: Use checkPermission with processName argument
   const canExecute = user
     ? checkPermission("canTransitionProcess", processStep.processName)
     : false;
@@ -133,80 +82,71 @@ export const ProcessStepCard: React.FC<ProcessStepCardProps> = ({
     ? checkPermission("canRecordReject", processStep.processName)
     : false;
 
-  const canView = true; // Semua bisa view
-
-  // Debug logs
-  // useEffect(() => {
-  //   if (user) {
-  //     console.log("=== ProcessStepCard Permission Debug ===");
-  //     console.log("User:", user.name);
-  //     console.log("User Department:", user.department);
-  //     console.log("User isAdmin:", user.isAdmin);
-  //     console.log("Process:", processStep.processName);
-  //     console.log("Process Department:", processStep.department);
-  //     console.log("Can Execute:", canExecute);
-  //     console.log("Can Reject:", canReject);
-  //     console.log("======================================");
-  //   }
-  // }, [user, processStep, canExecute, canReject]);
-
-  // Load users saat assign
+  // Debug log
   useEffect(() => {
-    if (transitionData.newState === "assigned") {
-      loadAvailableUsers();
+    if (user) {
+      console.log("=== ProcessStepCard Debug ===");
+      console.log("User Department:", user.department);
+      console.log("Process Department:", processStep.department);
+      console.log("Process Name:", processStep.processName);
+      console.log("Can Execute:", canExecute);
+      console.log("Can Reject:", canReject);
+      console.log("Is Admin:", isAdmin);
+      console.log("============================");
     }
-  }, [transitionData.newState, processStep.processName]);
+  }, [user, canExecute, canReject]);
 
-  const loadAvailableUsers = async () => {
-    try {
-      const response = await fetch(
-        `/api/users/by-role?processName=${processStep.processName}`
-      );
-      const result = await response.json();
+  // Determine what actions are available
+  const canReceive = processStep.status === "pending" && canExecute;
+  const canComplete = processStep.status === "in_progress" && canExecute;
+  const isCompleted = processStep.status === "completed";
 
-      if (result.success) {
-        setAvailableUsers(result.data);
-      }
-    } catch (error) {
-      console.error("Failed to load users:", error);
-    }
+  const completionRate =
+    processStep.quantityReceived > 0
+      ? Math.round(
+          (processStep.quantityCompleted / processStep.quantityReceived) * 100
+        )
+      : 0;
+
+  const handleAction = async (action: "receive" | "complete") => {
+    setCurrentAction(action);
+    setActionData({
+      performedBy: user?.name || "",
+      quantity: processStep.quantityReceived,
+      notes: "",
+    });
+    setIsActionModalOpen(true);
   };
 
-  // Auto-fill performedBy dengan current user
-  useEffect(() => {
-    if (user && !transitionData.performedBy) {
-      setTransitionData((prev) => ({
-        ...prev,
-        performedBy: user.name,
-      }));
-    }
-    if (user && !rejectData.reportedBy) {
-      setRejectData((prev) => ({
-        ...prev,
-        reportedBy: user.name,
-      }));
-    }
-  }, [user]);
-
-  const handleTransition = async (e: React.FormEvent) => {
+  const handleSubmitAction = async (e: React.FormEvent) => {
     e.preventDefault();
     setError("");
     setIsSubmitting(true);
 
     try {
-      await apiClient.transitionProcessStep(processStep.id, {
-        newState: transitionData.newState as ProcessState,
-        performedBy: transitionData.performedBy,
-        assignedTo: transitionData.assignedTo || undefined,
-        assignedLine: transitionData.assignedLine || undefined,
-        quantity: transitionData.quantity || undefined,
-        notes: transitionData.notes || undefined,
-      });
+      const response = await fetch(
+        `/api/process-steps/${processStep.id}/transition`,
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            action: currentAction,
+            ...actionData,
+          }),
+        }
+      );
 
-      setIsTransitionModalOpen(false);
-      onUpdate();
+      const result = await response.json();
+
+      if (result.success) {
+        setIsActionModalOpen(false);
+        setCurrentAction("");
+        onUpdate();
+      } else {
+        setError(result.error || "Failed to process action");
+      }
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Failed to transition");
+      setError(err instanceof Error ? err.message : "Failed to process action");
     } finally {
       setIsSubmitting(false);
     }
@@ -218,34 +158,38 @@ export const ProcessStepCard: React.FC<ProcessStepCardProps> = ({
     setIsSubmitting(true);
 
     try {
-      await apiClient.recordReject(processStep.id, rejectData);
+      const response = await fetch(
+        `/api/process-steps/${processStep.id}/reject`,
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(rejectData),
+        }
+      );
 
-      setIsRejectModalOpen(false);
-      setRejectData({
-        rejectType: "material_defect",
-        rejectCategory: "rework",
-        quantity: 1,
-        size: "",
-        bundleNumber: "",
-        description: "",
-        rootCause: "",
-        action: "rework",
-        reportedBy: user?.name || "",
-      });
-      onUpdate();
+      const result = await response.json();
+
+      if (result.success) {
+        setIsRejectModalOpen(false);
+        setRejectData({
+          rejectType: "material_defect",
+          rejectCategory: "rework",
+          quantity: 1,
+          description: "",
+          rootCause: "",
+          action: "rework",
+          reportedBy: user?.name || "",
+        });
+        onUpdate();
+      } else {
+        setError(result.error || "Failed to record reject");
+      }
     } catch (err) {
       setError(err instanceof Error ? err.message : "Failed to record reject");
     } finally {
       setIsSubmitting(false);
     }
   };
-
-  const completionRate =
-    processStep.quantityReceived > 0
-      ? Math.round(
-          (processStep.quantityCompleted / processStep.quantityReceived) * 100
-        )
-      : 0;
 
   if (!user) {
     return (
@@ -267,7 +211,6 @@ export const ProcessStepCard: React.FC<ProcessStepCardProps> = ({
                 <CardTitle className="text-lg">
                   {PROCESS_LABELS[processStep.processName]}
                 </CardTitle>
-                {/* ✅ Show access indicator */}
                 {isAdmin && (
                   <div
                     title="Admin Full Access"
@@ -280,20 +223,17 @@ export const ProcessStepCard: React.FC<ProcessStepCardProps> = ({
                   </div>
                 )}
                 {!canExecute && !isAdmin && (
-                  <div title="View Only">
-                    <Lock className="w-4 h-4 text-gray-400" />
-                  </div>
+                  <Lock className="w-4 h-4 text-gray-400" />
                 )}
               </div>
               <div className="flex items-center gap-2 mt-2">
                 <p className="text-sm font-semibold text-gray-700">
                   {processStep.department}
                 </p>
-                {/* Show user's department if different */}
-                {userDepartment &&
-                  userDepartment !== processStep.department && (
+                {user.department &&
+                  user.department !== processStep.department && (
                     <Badge variant="default" size="sm">
-                      You: {userDepartment}
+                      You: {user.department}
                     </Badge>
                   )}
               </div>
@@ -302,13 +242,21 @@ export const ProcessStepCard: React.FC<ProcessStepCardProps> = ({
               <Badge variant="info" size="sm">
                 {PHASE_LABELS[processStep.processPhase as ProductionPhase]}
               </Badge>
-              <span
-                className={`px-2.5 py-1 rounded-full text-xs font-bold ${
-                  PROCESS_STATE_COLORS[currentState as ProcessState]
-                }`}
+              <Badge
+                variant={
+                  processStep.status === "completed"
+                    ? "success"
+                    : processStep.status === "in_progress"
+                    ? "warning"
+                    : "default"
+                }
               >
-                {PROCESS_STATE_LABELS[currentState as ProcessState]}
-              </span>
+                {processStep.status === "completed"
+                  ? "Completed"
+                  : processStep.status === "in_progress"
+                  ? "In Progress"
+                  : "Waiting"}
+              </Badge>
             </div>
           </div>
         </CardHeader>
@@ -328,82 +276,72 @@ export const ProcessStepCard: React.FC<ProcessStepCardProps> = ({
             <div className="flex items-center gap-3 p-3 bg-green-50 border border-green-200 rounded-lg">
               <CheckCircle2 className="w-5 h-5 text-green-600" />
               <div>
-                <p className="text-xs font-semibold text-green-700">
-                  Completed
-                </p>
+                <p className="text-xs font-semibold text-green-700">Selesai</p>
                 <p className="text-lg font-bold text-green-900">
                   {formatNumber(processStep.quantityCompleted)}
                 </p>
               </div>
             </div>
-            <div className="flex items-center gap-3 p-3 bg-red-50 border border-red-200 rounded-lg">
-              <XCircle className="w-5 h-5 text-red-600" />
-              <div>
-                <p className="text-xs font-semibold text-red-700">Rejected</p>
-                <p className="text-lg font-bold text-red-900">
-                  {formatNumber(processStep.quantityRejected)}
-                </p>
+            {processStep.quantityRejected > 0 && (
+              <div className="flex items-center gap-3 p-3 bg-red-50 border border-red-200 rounded-lg">
+                <XCircle className="w-5 h-5 text-red-600" />
+                <div>
+                  <p className="text-xs font-semibold text-red-700">Rejected</p>
+                  <p className="text-lg font-bold text-red-900">
+                    {formatNumber(processStep.quantityRejected)}
+                  </p>
+                </div>
               </div>
-            </div>
-            <div className="flex items-center gap-3 p-3 bg-yellow-50 border border-yellow-200 rounded-lg">
-              <RotateCcw className="w-5 h-5 text-yellow-600" />
-              <div>
-                <p className="text-xs font-semibold text-yellow-700">Rework</p>
-                <p className="text-lg font-bold text-yellow-900">
-                  {formatNumber(processStep.quantityRework)}
-                </p>
+            )}
+            {processStep.quantityRework > 0 && (
+              <div className="flex items-center gap-3 p-3 bg-yellow-50 border border-yellow-200 rounded-lg">
+                <RotateCcw className="w-5 h-5 text-yellow-600" />
+                <div>
+                  <p className="text-xs font-semibold text-yellow-700">
+                    Rework
+                  </p>
+                  <p className="text-lg font-bold text-yellow-900">
+                    {formatNumber(processStep.quantityRework)}
+                  </p>
+                </div>
               </div>
-            </div>
+            )}
           </div>
 
           {/* Progress Bar */}
-          <div>
-            <div className="flex justify-between items-center text-xs font-bold text-gray-700 mb-2">
-              <span>Progres</span>
-              <span className="text-blue-600">{completionRate}%</span>
+          {processStep.status === "in_progress" && (
+            <div>
+              <div className="flex justify-between items-center text-xs font-bold text-gray-700 mb-2">
+                <span>Progress</span>
+                <span className="text-blue-600">{completionRate}%</span>
+              </div>
+              <div className="w-full bg-gray-200 rounded-full h-3 overflow-hidden">
+                <div
+                  className="bg-blue-600 h-3 rounded-full transition-all duration-300"
+                  style={{ width: `${completionRate}%` }}
+                />
+              </div>
             </div>
-            <div className="w-full bg-gray-200 rounded-full h-3 overflow-hidden">
-              <div
-                className="bg-linear-to-r from-blue-500 to-blue-600 h-3 rounded-full transition-all duration-300"
-                style={{ width: `${completionRate}%` }}
-              />
-            </div>
-          </div>
+          )}
 
-          {/* Timestamps - Collapsed by default */}
-          {(processStep.arrivedAtPpicTime ||
-            processStep.addedToWaitingTime ||
-            processStep.assignedTime ||
+          {/* Timestamps */}
+          {(processStep.addedToWaitingTime ||
             processStep.startedTime ||
             processStep.completedTime) && (
-            <div className="bg-gray-50 border border-gray-200 rounded-lg p-4 space-y-2.5 text-xs">
-              {processStep.arrivedAtPpicTime && (
-                <div className="flex items-center justify-between">
-                  <span className="font-semibold text-gray-700">Di PPIC:</span>
-                  <span className="font-bold text-gray-900">
-                    {formatDateTime(processStep.arrivedAtPpicTime)}
-                  </span>
-                </div>
-              )}
+            <div className="bg-gray-50 border border-gray-200 rounded-lg p-4 space-y-2 text-xs">
               {processStep.addedToWaitingTime && (
                 <div className="flex items-center justify-between">
-                  <span className="font-semibold text-gray-700">Menunggu:</span>
+                  <span className="font-semibold text-gray-700">
+                    Added to Waiting:
+                  </span>
                   <span className="font-bold text-gray-900">
                     {formatDateTime(processStep.addedToWaitingTime)}
                   </span>
                 </div>
               )}
-              {processStep.assignedTime && (
-                <div className="flex items-center justify-between">
-                  <span className="font-semibold text-gray-700">Assigned:</span>
-                  <span className="font-bold text-gray-900">
-                    {formatDateTime(processStep.assignedTime)}
-                  </span>
-                </div>
-              )}
               {processStep.startedTime && (
                 <div className="flex items-center justify-between">
-                  <span className="font-semibold text-gray-700">Dimulai:</span>
+                  <span className="font-semibold text-gray-700">Started:</span>
                   <span className="font-bold text-gray-900">
                     {formatDateTime(processStep.startedTime)}
                   </span>
@@ -411,7 +349,9 @@ export const ProcessStepCard: React.FC<ProcessStepCardProps> = ({
               )}
               {processStep.completedTime && (
                 <div className="flex items-center justify-between">
-                  <span className="font-semibold text-gray-700">Selesai:</span>
+                  <span className="font-semibold text-gray-700">
+                    Completed:
+                  </span>
                   <span className="font-bold text-gray-900">
                     {formatDateTime(processStep.completedTime)}
                   </span>
@@ -420,58 +360,49 @@ export const ProcessStepCard: React.FC<ProcessStepCardProps> = ({
             </div>
           )}
 
-          {/* Assignment Info */}
-          {(processStep.assignedTo || processStep.assignedLine) && (
-            <div className="bg-purple-50 border border-purple-200 rounded-lg p-4 text-sm">
-              {processStep.assignedTo && (
-                <div className="flex items-center gap-2 mb-1">
-                  <User className="w-4 h-4 text-purple-600" />
-                  <span className="font-semibold text-purple-700">
-                    Assigned to:
-                  </span>
-                  <span className="font-bold text-purple-900">
-                    {processStep.assignedTo}
-                  </span>
-                </div>
-              )}
-              {processStep.assignedLine && (
-                <div className="flex items-center gap-2">
-                  <span className="font-semibold text-purple-700">Line:</span>
-                  <span className="font-bold text-purple-900">
-                    {processStep.assignedLine}
-                  </span>
-                </div>
-              )}
-            </div>
-          )}
-
-          {canExecute &&
-            currentState !== "completed" &&
-            validNextStates.length > 0 && (
-              <div className="flex gap-2 pt-3 border-t-2 border-gray-200">
+          {/* Action Buttons */}
+          {canExecute && !isCompleted && (
+            <div className="flex gap-2 pt-3 border-t-2 border-gray-200">
+              {canReceive && (
                 <Button
-                  onClick={() => setIsTransitionModalOpen(true)}
+                  onClick={() => handleAction("receive")}
                   variant="primary"
                   size="md"
                   className="flex-1"
                 >
-                  <ArrowRight className="w-4 h-4" />
-                  Next: {PROCESS_STATE_LABELS[validNextStates[0]]}
+                  <CheckCircle className="w-4 h-4" />
+                  Terima dari Waiting List
                 </Button>
-                {canReject && currentState === "in_progress" && (
-                  <Button
-                    onClick={() => setIsRejectModalOpen(true)}
-                    variant="danger"
-                    size="md"
-                  >
-                    <AlertCircle className="w-4 h-4" />
-                    Reject
-                  </Button>
-                )}
-              </div>
-            )}
+              )}
 
-          {!canExecute && (
+              {canComplete && (
+                <>
+                  <Button
+                    onClick={() => handleAction("complete")}
+                    variant="success"
+                    size="md"
+                    className="flex-1"
+                  >
+                    <ArrowRight className="w-4 h-4" />
+                    Complete Process
+                  </Button>
+                  {canReject && (
+                    <Button
+                      onClick={() => setIsRejectModalOpen(true)}
+                      variant="danger"
+                      size="md"
+                    >
+                      <AlertCircle className="w-4 h-4" />
+                      Reject
+                    </Button>
+                  )}
+                </>
+              )}
+            </div>
+          )}
+
+          {/* View-Only Notice */}
+          {!canExecute && !isCompleted && (
             <div className="mt-4 p-3 bg-gray-50 border-2 border-gray-300 rounded-lg">
               <div className="flex items-start gap-3 text-sm">
                 {isAdmin ? (
@@ -482,8 +413,8 @@ export const ProcessStepCard: React.FC<ProcessStepCardProps> = ({
                         Admin View Mode
                       </p>
                       <p className="text-gray-600">
-                        You have full access but viewing in read-only mode.
-                        Buttons will appear when process is active.
+                        You have full access. Action buttons will appear based
+                        on process status.
                       </p>
                     </div>
                   </>
@@ -493,8 +424,7 @@ export const ProcessStepCard: React.FC<ProcessStepCardProps> = ({
                     <div>
                       <p className="font-bold text-gray-900 mb-1">PPIC View</p>
                       <p className="text-gray-600">
-                        PPIC can assign processes but cannot execute them. Use
-                        "Assign Next Process" for this order.
+                        PPIC can monitor but cannot execute processes directly.
                       </p>
                     </div>
                   </>
@@ -509,7 +439,7 @@ export const ProcessStepCard: React.FC<ProcessStepCardProps> = ({
                           {processStep.department}
                         </span>
                         . Your department:{" "}
-                        <span className="font-bold">{userDepartment}</span>.
+                        <span className="font-bold">{user.department}</span>.
                       </p>
                     </div>
                   </>
@@ -517,45 +447,110 @@ export const ProcessStepCard: React.FC<ProcessStepCardProps> = ({
               </div>
             </div>
           )}
+
+          {/* Completed Badge */}
+          {isCompleted && (
+            <div className="bg-green-50 border-2 border-green-300 rounded-lg p-4">
+              <div className="flex items-center gap-3">
+                <CheckCircle className="w-6 h-6 text-green-600" />
+                <div>
+                  <p className="font-bold text-green-900">Process Completed</p>
+                  <p className="text-sm text-green-700 mt-1">
+                    Completed at{" "}
+                    {processStep.completedTime &&
+                      formatDateTime(processStep.completedTime)}
+                  </p>
+                </div>
+              </div>
+            </div>
+          )}
         </CardContent>
       </Card>
 
-      {/* Transition Modal - Keep existing implementation */}
+      {/* Action Modal */}
       <Modal
-        isOpen={isTransitionModalOpen}
-        onClose={() => !isSubmitting && setIsTransitionModalOpen(false)}
-        title="Process Transition"
-        size="lg"
+        isOpen={isActionModalOpen}
+        onClose={() => !isSubmitting && setIsActionModalOpen(false)}
+        title={
+          currentAction === "receive"
+            ? "Terima dari Waiting List"
+            : "Complete Process"
+        }
+        size="md"
       >
-        <form onSubmit={handleTransition}>
-          <div className="space-y-6">
+        <form onSubmit={handleSubmitAction}>
+          <div className="space-y-4">
             {error && (
               <div className="bg-red-50 border border-red-200 rounded p-3 text-sm text-red-800">
                 {error}
               </div>
             )}
 
+            <div className="bg-blue-50 border-2 border-blue-200 rounded-lg p-4">
+              <p className="font-bold text-blue-900 mb-2">
+                {currentAction === "receive"
+                  ? "Terima Order"
+                  : "Menyelesaikan Proses"}
+              </p>
+              <p className="text-sm text-blue-800">
+                Process:{" "}
+                <span className="font-bold">
+                  {PROCESS_LABELS[processStep.processName]}
+                </span>
+              </p>
+              <p className="text-sm text-blue-800">
+                Quantity:{" "}
+                <span className="font-bold">
+                  {formatNumber(processStep.quantityReceived)} pcs
+                </span>
+              </p>
+            </div>
+
             <div>
               <label className="block text-sm font-medium text-gray-900 mb-2">
-                New State *
+                Performed By *
               </label>
-              <select
-                value={transitionData.newState}
+              <input
+                type="text"
+                value={actionData.performedBy}
+                className="w-full px-4 py-2.5 border-2 border-gray-300 rounded-lg bg-gray-100 font-medium text-gray-900"
+                disabled
+              />
+            </div>
+
+            {currentAction === "complete" && (
+              <div>
+                <label className="block text-sm font-medium text-gray-900 mb-2">
+                  Quantity Completed
+                </label>
+                <input
+                  type="number"
+                  value={actionData.quantity}
+                  onChange={(e) =>
+                    setActionData({
+                      ...actionData,
+                      quantity: parseInt(e.target.value) || 0,
+                    })
+                  }
+                  className="w-full px-4 py-2.5 border-2 border-gray-300 rounded-lg text-gray-900"
+                  min="0"
+                  max={processStep.quantityReceived}
+                />
+              </div>
+            )}
+
+            <div>
+              <label className="block text-sm font-medium text-gray-900 mb-2">
+                Notes (Optional)
+              </label>
+              <textarea
+                value={actionData.notes}
                 onChange={(e) =>
-                  setTransitionData({
-                    ...transitionData,
-                    newState: e.target.value as ProcessState,
-                  })
+                  setActionData({ ...actionData, notes: e.target.value })
                 }
-                className="w-full px-4 py-2.5 border rounded-lg"
-                required
-              >
-                {validNextStates.map((state: ProcessState) => (
-                  <option key={state} value={state}>
-                    {PROCESS_STATE_LABELS[state]}
-                  </option>
-                ))}
-              </select>
+                className="w-full px-4 py-2.5 border-2 border-gray-300 rounded-lg text-gray-900"
+                rows={3}
+              />
             </div>
           </div>
 
@@ -563,19 +558,27 @@ export const ProcessStepCard: React.FC<ProcessStepCardProps> = ({
             <Button
               type="button"
               variant="outline"
-              onClick={() => setIsTransitionModalOpen(false)}
+              onClick={() => setIsActionModalOpen(false)}
               disabled={isSubmitting}
             >
               Batal
             </Button>
-            <Button type="submit" variant="primary" disabled={isSubmitting}>
-              {isSubmitting ? "Processing..." : "Confirm Transition"}
+            <Button
+              type="submit"
+              variant={currentAction === "receive" ? "primary" : "success"}
+              disabled={isSubmitting}
+            >
+              {isSubmitting
+                ? "Processing..."
+                : currentAction === "receive"
+                ? "Terima"
+                : "Complete"}
             </Button>
           </ModalFooter>
         </form>
       </Modal>
 
-      {/* Reject Modal - Keep existing implementation */}
+      {/* Reject Modal - Keep as is */}
       <Modal
         isOpen={isRejectModalOpen}
         onClose={() => !isSubmitting && setIsRejectModalOpen(false)}
@@ -589,6 +592,78 @@ export const ProcessStepCard: React.FC<ProcessStepCardProps> = ({
                 {error}
               </div>
             )}
+
+            <div>
+              <label className="block text-sm font-medium text-gray-900 mb-2">
+                Reject Type *
+              </label>
+              <select
+                value={rejectData.rejectType}
+                onChange={(e) =>
+                  setRejectData({
+                    ...rejectData,
+                    rejectType: e.target.value as RejectType,
+                  })
+                }
+                className="w-full px-4 py-2.5 border rounded-lg"
+                required
+              >
+                {Object.entries(REJECT_TYPE_LABELS).map(([key, label]) => (
+                  <option key={key} value={key}>
+                    {label}
+                  </option>
+                ))}
+              </select>
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-gray-900 mb-2">
+                Category *
+              </label>
+              <div className="flex gap-4">
+                <label className="flex items-center gap-2">
+                  <input
+                    type="radio"
+                    value="rework"
+                    checked={rejectData.rejectCategory === "rework"}
+                    onChange={(e) =>
+                      setRejectData({ ...rejectData, rejectCategory: "rework" })
+                    }
+                  />
+                  <span>Rework</span>
+                </label>
+                <label className="flex items-center gap-2">
+                  <input
+                    type="radio"
+                    value="reject"
+                    checked={rejectData.rejectCategory === "reject"}
+                    onChange={(e) =>
+                      setRejectData({ ...rejectData, rejectCategory: "reject" })
+                    }
+                  />
+                  <span>Reject</span>
+                </label>
+              </div>
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-gray-900 mb-2">
+                Quantity *
+              </label>
+              <input
+                type="number"
+                value={rejectData.quantity}
+                onChange={(e) =>
+                  setRejectData({
+                    ...rejectData,
+                    quantity: parseInt(e.target.value) || 0,
+                  })
+                }
+                className="w-full px-4 py-2.5 border rounded-lg"
+                min="1"
+                required
+              />
+            </div>
 
             <div>
               <label className="block text-sm font-medium text-gray-900 mb-2">
