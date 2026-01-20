@@ -1,4 +1,4 @@
-// src/lib/permissions.ts - COMPLETELY FIXED VERSION
+// src/lib/permissions.ts - COMPLETELY FIXED VERSION with Better Logging
 import { ProcessName } from "./types-new";
 
 export type Department =
@@ -36,42 +36,88 @@ export const DEPARTMENT_PROCESS_MAP: Record<Department, ProcessName[]> = {
 };
 
 /**
- * ✅ FIXED: Admin bypass semua permission checks
- * ✅ FIXED: Case-insensitive department matching
+ * ✅ FIXED: Normalize department name to match DEPARTMENT_PROCESS_MAP keys
+ * Handle all common variations and case sensitivity
+ */
+function normalizeDepartment(dept: string | undefined): Department {
+  if (!dept) {
+    console.warn("[PERMISSION] Empty department, defaulting to PPIC");
+    return "PPIC";
+  }
+
+  const deptLower = dept.toLowerCase().trim();
+
+  // Map common variations to correct keys
+  const mapping: Record<string, Department> = {
+    ppic: "PPIC",
+    warehouse: "Warehouse",
+    cutting: "Cutting",
+    numbering: "Numbering",
+    shiwake: "Shiwake",
+    "shiwake/sorting": "Shiwake",
+    sorting: "Shiwake",
+    sewing: "Sewing",
+    "qc sewing": "QC Sewing",
+    qcsewing: "QC Sewing",
+    qc: "QC Sewing",
+    ironing: "Ironing",
+    "final qc": "Final QC",
+    finalqc: "Final QC",
+    packing: "Packing",
+    shipping: "Shipping",
+    loading: "Loading",
+  };
+
+  const normalized = mapping[deptLower];
+
+  if (!normalized) {
+    console.warn(
+      `[PERMISSION] Unknown department "${dept}", defaulting to PPIC`
+    );
+    return "PPIC";
+  }
+
+  return normalized;
+}
+
+/**
+ * ✅ FIXED: Can execute process with detailed logging
  */
 export function canExecuteProcess(
-  userDepartment: string,
+  userDepartment: string | undefined,
   processName: ProcessName,
   isAdmin: boolean = false
 ): boolean {
+  console.group(`[PERMISSION CHECK] canExecuteProcess`);
+  console.log("Raw User Department:", userDepartment);
+  console.log("Process Name:", processName);
+  console.log("Is Admin:", isAdmin);
+
   // ✅ CRITICAL FIX: Admin ALWAYS can execute
   if (isAdmin) {
-    console.log("[PERMISSION] Admin bypass - GRANTED");
+    console.log("✅ Decision: GRANTED (Admin bypass)");
+    console.groupEnd();
     return true;
   }
 
-  // Normalize department name (handle case sensitivity)
+  // Normalize department name
   const normalizedDept = normalizeDepartment(userDepartment);
-
-  console.log("[PERMISSION CHECK]");
-  console.log("- User Department (raw):", userDepartment);
-  console.log("- User Department (normalized):", normalizedDept);
-  console.log("- Process Name:", processName);
-  console.log("- isAdmin:", isAdmin);
+  console.log("Normalized Department:", normalizedDept);
 
   // PPIC tidak bisa execute (hanya assign)
   if (normalizedDept === "PPIC") {
-    console.log("[PERMISSION] PPIC cannot execute - DENIED");
+    console.log("❌ Decision: DENIED (PPIC cannot execute)");
+    console.groupEnd();
     return false;
   }
 
   // Check department permission
-  const allowedProcesses =
-    DEPARTMENT_PROCESS_MAP[normalizedDept as Department] || [];
-  const canExecute = allowedProcesses.includes(processName);
+  const allowedProcesses = DEPARTMENT_PROCESS_MAP[normalizedDept] || [];
+  console.log("Allowed processes for", normalizedDept, ":", allowedProcesses);
 
-  console.log("- Allowed processes for", normalizedDept, ":", allowedProcesses);
-  console.log("- Decision:", canExecute ? "GRANTED" : "DENIED");
+  const canExecute = allowedProcesses.includes(processName);
+  console.log(canExecute ? "✅ Decision: GRANTED" : "❌ Decision: DENIED");
+  console.groupEnd();
 
   return canExecute;
 }
@@ -101,38 +147,8 @@ export function getDepartmentForProcess(
     }
   }
 
+  console.log(`[PERMISSION] Departments for ${processName}:`, departments);
   return departments;
-}
-
-/**
- * Normalize department name to match DEPARTMENT_PROCESS_MAP keys
- */
-function normalizeDepartment(dept: string): Department {
-  if (!dept) return "PPIC";
-
-  const deptLower = dept.toLowerCase().trim();
-
-  // Map common variations to correct keys
-  const mapping: Record<string, Department> = {
-    ppic: "PPIC",
-    warehouse: "Warehouse",
-    cutting: "Cutting",
-    numbering: "Numbering",
-    shiwake: "Shiwake",
-    "shiwake/sorting": "Shiwake",
-    sorting: "Shiwake",
-    sewing: "Sewing",
-    "qc sewing": "QC Sewing",
-    qcsewing: "QC Sewing",
-    ironing: "Ironing",
-    "final qc": "Final QC",
-    finalqc: "Final QC",
-    packing: "Packing",
-    shipping: "Shipping",
-    loading: "Loading",
-  };
-
-  return mapping[deptLower] || (dept as Department);
 }
 
 /**
@@ -148,8 +164,7 @@ export function canReceiveTransfer(
   const normalizedDept = normalizeDepartment(userDepartment);
   if (normalizedDept === "PPIC") return false;
 
-  const allowedProcesses =
-    DEPARTMENT_PROCESS_MAP[normalizedDept as Department] || [];
+  const allowedProcesses = DEPARTMENT_PROCESS_MAP[normalizedDept] || [];
   return allowedProcesses.includes(toProcessName);
 }
 
@@ -159,10 +174,10 @@ export function canReceiveTransfer(
 export const Permissions = {
   // ==================== ORDER MANAGEMENT ====================
   canCreateOrder: (department: string, isAdmin: boolean = false) =>
-    isAdmin || department === "PPIC",
+    isAdmin || normalizeDepartment(department) === "PPIC",
 
   canEditOrder: (department: string, isAdmin: boolean = false) =>
-    isAdmin || department === "PPIC",
+    isAdmin || normalizeDepartment(department) === "PPIC",
 
   canDeleteOrder: (department: string, isAdmin: boolean = false) => isAdmin,
 
@@ -170,7 +185,7 @@ export const Permissions = {
 
   // ==================== PROCESS ASSIGNMENT (PPIC + ADMIN) ====================
   canAssignProcess: (department: string, isAdmin: boolean = false) =>
-    isAdmin || department === "PPIC",
+    isAdmin || normalizeDepartment(department) === "PPIC",
 
   // ==================== PROCESS EXECUTION (DEPARTMENT-BASED + ADMIN) ====================
   canTransitionProcess: (
@@ -206,7 +221,7 @@ export const Permissions = {
 
   // ==================== INVENTORY ====================
   canManageInventory: (department: string, isAdmin: boolean = false) =>
-    isAdmin || department === "Warehouse",
+    isAdmin || normalizeDepartment(department) === "Warehouse",
 
   // ==================== USERS ====================
   canManageUsers: (department: string, isAdmin: boolean = false) => isAdmin,

@@ -605,7 +605,7 @@ export const ProcessStepCard: React.FC<ProcessStepCardProps> = ({
                     rejectType: e.target.value as RejectType,
                   })
                 }
-                className="w-full px-4 py-2.5 border rounded-lg"
+                className="w-full px-4 py-2.5 text-gray-800 border rounded-lg"
                 required
               >
                 {Object.entries(REJECT_TYPE_LABELS).map(([key, label]) => (
@@ -621,7 +621,7 @@ export const ProcessStepCard: React.FC<ProcessStepCardProps> = ({
                 Category *
               </label>
               <div className="flex gap-4">
-                <label className="flex items-center gap-2">
+                <label className="flex items-center text-gray-800 gap-2">
                   <input
                     type="radio"
                     value="rework"
@@ -632,7 +632,7 @@ export const ProcessStepCard: React.FC<ProcessStepCardProps> = ({
                   />
                   <span>Rework</span>
                 </label>
-                <label className="flex items-center gap-2">
+                <label className="flex items-center text-gray-800 gap-2">
                   <input
                     type="radio"
                     value="reject"
@@ -659,7 +659,7 @@ export const ProcessStepCard: React.FC<ProcessStepCardProps> = ({
                     quantity: parseInt(e.target.value) || 0,
                   })
                 }
-                className="w-full px-4 py-2.5 border rounded-lg"
+                className="w-full px-4 py-2.5 text-gray-800 border rounded-lg"
                 min="1"
                 required
               />
@@ -674,7 +674,7 @@ export const ProcessStepCard: React.FC<ProcessStepCardProps> = ({
                 onChange={(e) =>
                   setRejectData({ ...rejectData, description: e.target.value })
                 }
-                className="w-full px-4 py-2.5 border rounded-lg"
+                className="w-full px-4 py-2.5 text-gray-800 border rounded-lg"
                 rows={3}
                 required
               />

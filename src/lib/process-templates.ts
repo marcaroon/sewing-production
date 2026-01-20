@@ -1,9 +1,6 @@
-// src/lib/process-templates.ts
-// Process Template System untuk Pre-defined Flow
+// src/lib/process-templates.ts - FIXED (No draft, no material_request)
 
 import { ProcessName } from "./types-new";
-
-// ==================== PROCESS TEMPLATES ====================
 
 export interface ProcessTemplate {
   id: string;
@@ -21,8 +18,6 @@ export const PROCESS_TEMPLATES: Record<string, ProcessTemplate> = {
     description: "Kemeja standar dengan proses lengkap",
     category: "shirt",
     processes: [
-      "draft",
-      "material_request",
       "material_issued",
       "cutting",
       "numbering",
@@ -46,8 +41,6 @@ export const PROCESS_TEMPLATES: Record<string, ProcessTemplate> = {
     description: "Kemeja sederhana tanpa numbering",
     category: "shirt",
     processes: [
-      "draft",
-      "material_request",
       "material_issued",
       "cutting",
       "sewing",
@@ -69,8 +62,6 @@ export const PROCESS_TEMPLATES: Record<string, ProcessTemplate> = {
     description: "Celana panjang standar",
     category: "pants",
     processes: [
-      "draft",
-      "material_request",
       "material_issued",
       "cutting",
       "numbering",
@@ -93,8 +84,6 @@ export const PROCESS_TEMPLATES: Record<string, ProcessTemplate> = {
     description: "Celana sederhana tanpa numbering & shiwake",
     category: "pants",
     processes: [
-      "draft",
-      "material_request",
       "material_issued",
       "cutting",
       "sewing",
@@ -115,8 +104,6 @@ export const PROCESS_TEMPLATES: Record<string, ProcessTemplate> = {
     description: "Jaket dengan proses kompleks",
     category: "jacket",
     processes: [
-      "draft",
-      "material_request",
       "material_issued",
       "cutting",
       "numbering",
@@ -140,7 +127,6 @@ export const PROCESS_TEMPLATES: Record<string, ProcessTemplate> = {
     description: "Order express dengan proses minimal",
     category: "express",
     processes: [
-      "draft",
       "material_issued",
       "cutting",
       "sewing",
@@ -157,8 +143,6 @@ export const PROCESS_TEMPLATES: Record<string, ProcessTemplate> = {
     description: "Semua proses (default)",
     category: "all",
     processes: [
-      "draft",
-      "material_request",
       "material_issued",
       "cutting",
       "numbering",

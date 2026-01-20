@@ -1,5 +1,4 @@
-// src/app/api/orders/route.ts - SIMPLIFIED CREATION
-// Langsung masuk ke proses pertama di waiting list (no draft, no material_request)
+// src/app/api/orders/route.ts - COMPLETELY FIXED (Remove material_request & draft)
 
 import { NextRequest, NextResponse } from "next/server";
 import prisma from "@/lib/prisma";
@@ -87,11 +86,12 @@ export async function POST(request: NextRequest) {
       totalProcessSteps = processFlow.length;
     }
 
-    // ✅ SIMPLIFIED: Remove 'draft' and 'material_request' from flow
-    processFlow = processFlow.filter(
-      (p) => p !== "draft" && p !== "material_request"
-    );
+    // ✅ CRITICAL FIX: Remove 'draft' and 'material_request' dari flow
+    const invalidProcesses = ["draft", "material_request"];
+    processFlow = processFlow.filter((p) => !invalidProcesses.includes(p));
     totalProcessSteps = processFlow.length;
+
+    console.log("[CREATE ORDER] Final process flow:", processFlow);
 
     if (processFlow.length === 0) {
       return NextResponse.json(
@@ -100,9 +100,12 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Get first REAL process
+    // ✅ Get first REAL process (tidak ada draft/material_request lagi)
     const firstProcess = processFlow[0];
     const firstDepartment = PROCESS_DEPARTMENT_MAP[firstProcess] || "Unknown";
+
+    console.log("[CREATE ORDER] First process:", firstProcess);
+    console.log("[CREATE ORDER] First department:", firstDepartment);
 
     const result = await prisma.$transaction(async (tx) => {
       const now = new Date();
@@ -123,7 +126,7 @@ export async function POST(request: NextRequest) {
           currentPhase: "production",
           currentProcess: firstProcess, // ✅ First real process
           currentState: "waiting", // ✅ Langsung waiting
-          materialsIssued: true, // ✅ Materials already issued when creating order
+          materialsIssued: true, // ✅ Materials already issued
           createdBy,
           notes: notes || null,
           sizeBreakdowns: {
@@ -143,6 +146,8 @@ export async function POST(request: NextRequest) {
         },
       });
 
+      console.log("[CREATE ORDER] Order created with ID:", order.id);
+
       // ✅ Create FIRST process step in WAITING status
       const firstProcessStep = await tx.processStep.create({
         data: {
@@ -160,6 +165,11 @@ export async function POST(request: NextRequest) {
           notes: `Order created - Ready for ${firstProcess}`,
         },
       });
+
+      console.log(
+        "[CREATE ORDER] First process step created:",
+        firstProcessStep.id
+      );
 
       // Create initial transition
       await tx.processTransition.create({
@@ -335,13 +345,16 @@ export async function POST(request: NextRequest) {
       accessories: result.accessories,
     };
 
+    console.log("[CREATE ORDER] Success! Order:", result.order.orderNumber);
+    console.log("[CREATE ORDER] First process in waiting list:", firstProcess);
+
     return NextResponse.json({
       success: true,
       data: transformedOrder,
       message: `Order ${result.order.orderNumber} created and added to waiting list for ${firstProcess}`,
     });
   } catch (error) {
-    console.error("Error creating order:", error);
+    console.error("[CREATE ORDER] Error:", error);
     return NextResponse.json(
       {
         success: false,

@@ -1,11 +1,11 @@
-// src/app/api/users/by-role/route.ts - FIXED: Use Department
+// src/app/api/users/by-role/route.ts - FIXED with Department Normalization
 import { NextRequest, NextResponse } from "next/server";
 import prisma from "@/lib/prisma";
 import { getCurrentUser } from "@/lib/auth";
 import { getDepartmentForProcess } from "@/lib/permissions";
 
 /**
- * ✅ FIXED: Get users by DEPARTMENT (not role)
+ * ✅ FIXED: Get users by DEPARTMENT with case-insensitive matching
  * GET /api/users/by-role?processName=sewing
  */
 export async function GET(request: NextRequest) {
@@ -32,15 +32,17 @@ export async function GET(request: NextRequest) {
 
     const validDepartments = getDepartmentForProcess(processName as any);
 
-    console.log(
-      `[API] Valid departments for ${processName}:`,
-      validDepartments
-    );
+    console.log(`[API] Valid departments for ${processName}:`, validDepartments);
 
     const users = await prisma.user.findMany({
       where: {
-        department: { in: validDepartments },
         isActive: true,
+        OR: validDepartments.map(dept => ({
+          department: {
+            equals: dept,
+            mode: 'insensitive' as any
+          }
+        }))
       },
       select: {
         id: true,
@@ -51,7 +53,7 @@ export async function GET(request: NextRequest) {
       orderBy: { name: "asc" },
     });
 
-    console.log(`[API] Found ${users.length} users`);
+    console.log(`[API] Found ${users.length} users for ${processName}`);
 
     return NextResponse.json({
       success: true,
