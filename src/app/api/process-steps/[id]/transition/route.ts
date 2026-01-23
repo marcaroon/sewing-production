@@ -7,6 +7,8 @@ import {
   PROCESS_DEPARTMENT_MAP,
   getNextProcess,
   getNextPhase,
+  PRODUCTION_PROCESSES,
+  DELIVERY_PROCESSES,
 } from "@/lib/constants-new";
 import { canExecuteProcess } from "@/lib/permissions";
 import { ProcessName } from "@/lib/types-new";
@@ -191,6 +193,7 @@ export async function POST(
       let transferLog = null;
 
       // ========== WHEN COMPLETED: Create Transfer & Next Process ==========
+      // ========== WHEN COMPLETED: Create Transfer & Next Process ==========
       if (action === "complete") {
         const completedQty = quantity || processStep.quantityReceived;
 
@@ -204,10 +207,39 @@ export async function POST(
           },
         });
 
-        const nextProcess = getNextProcess(
-          processStep.processName as any,
-          processStep.processPhase as any
+        // ✅ FIX: Get NEXT process from order's processFlow
+        const order = await tx.order.findUnique({
+          where: { id: processStep.orderId },
+        });
+
+        if (!order) throw new Error("Order not found");
+
+        let processFlow: ProcessName[];
+        if (order.processFlow) {
+          try {
+            processFlow = JSON.parse(order.processFlow);
+          } catch (e) {
+            processFlow = [...PRODUCTION_PROCESSES, ...DELIVERY_PROCESSES];
+          }
+        } else {
+          processFlow = [...PRODUCTION_PROCESSES, ...DELIVERY_PROCESSES];
+        }
+
+        // Find current process index in flow
+        const currentIndex = processFlow.findIndex(
+          (p) => p === processStep.processName
         );
+
+        let nextProcess: ProcessName | null = null;
+        if (currentIndex >= 0 && currentIndex < processFlow.length - 1) {
+          nextProcess = processFlow[currentIndex + 1];
+        }
+
+        console.log(
+          `[TRANSITION] Current: ${processStep.processName} (index ${currentIndex})`
+        );
+        console.log(`[TRANSITION] Next: ${nextProcess}`);
+        console.log(`[TRANSITION] Flow:`, processFlow);
 
         if (nextProcess) {
           const nextPhase = getNextPhase(

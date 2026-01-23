@@ -40,6 +40,7 @@ export const PPICAssignmentModal: React.FC<PPICAssignmentModalProps> = ({
   const [availableProcesses, setAvailableProcesses] = useState<ProcessName[]>(
     []
   );
+  const [orderProcessFlow, setOrderProcessFlow] = useState<ProcessName[]>([]);
   const [selectedProcess, setSelectedProcess] = useState<ProcessName | "">("");
   const [assignedBy, setAssignedBy] = useState("");
   const [notes, setNotes] = useState("");
@@ -70,6 +71,20 @@ export const PPICAssignmentModal: React.FC<PPICAssignmentModalProps> = ({
       const steps = await apiClient.getProcessStepsByOrderId(orderId);
       console.log("All Process Steps:", steps);
 
+      const order = await apiClient.getOrderById(orderId);
+      console.log("Order processFlow:", order.processFlow);
+
+      let orderProcessFlow: ProcessName[] = [];
+      if (order.processFlow) {
+        try {
+          orderProcessFlow = JSON.parse(order.processFlow);
+          console.log("Parsed processFlow:", orderProcessFlow);
+          setOrderProcessFlow(orderProcessFlow);
+        } catch (e) {
+          console.error("Failed to parse processFlow:", e);
+        }
+      }
+
       // Separate by status
       const completed = steps
         .filter((s) => s.status === "completed")
@@ -82,9 +97,18 @@ export const PPICAssignmentModal: React.FC<PPICAssignmentModalProps> = ({
       console.log("Completed:", completed);
       console.log("In Progress:", inProgress);
 
-      // Get available processes (exclude completed AND in_progress)
-      const available = getAvailableNextProcesses(completed, inProgress);
-      console.log("Available:", available);
+      let available: ProcessName[];
+      if (orderProcessFlow.length > 0) {
+        // Filter dari order's process flow
+        available = orderProcessFlow.filter(
+          (p) => !completed.includes(p) && !inProgress.includes(p)
+        );
+        console.log("Available (from order flow):", available);
+      } else {
+        // Fallback ke getAvailableNextProcesses
+        available = getAvailableNextProcesses(completed, inProgress);
+        console.log("Available (fallback):", available);
+      }
 
       // Keep them separate
       setCompletedProcesses(completed);
@@ -165,7 +189,34 @@ export const PPICAssignmentModal: React.FC<PPICAssignmentModalProps> = ({
               <p className="text-blue-800">
                 <span className="font-medium">Status:</span> Menunggu PPIC
               </p>
-              
+
+              {orderProcessFlow.length > 0 && (
+                <div className="mt-3 pt-3 border-t border-blue-200">
+                  <p className="text-blue-900 font-medium mb-2">
+                    📋 Order Template ({orderProcessFlow.length} steps):
+                  </p>
+                  <div className="flex flex-wrap gap-1">
+                    {orderProcessFlow.map((p, idx) => (
+                      <span
+                        key={p}
+                        className={`text-xs px-2 py-1 rounded ${
+                          completedProcesses.includes(p)
+                            ? "bg-green-100 text-green-800 line-through"
+                            : inProgressProcesses.includes(p)
+                            ? "bg-orange-100 text-orange-800"
+                            : "bg-gray-100 text-gray-800"
+                        }`}
+                      >
+                        {idx + 1}. {PROCESS_LABELS[p]}
+                      </span>
+                    ))}
+                  </div>
+                  <p className="text-xs text-blue-600 mt-2">
+                    ℹ️ Template ini dipilih saat order dibuat
+                  </p>
+                </div>
+              )}
+
               {/* Show completed processes */}
               {completedProcesses.length > 0 && (
                 <div className="mt-3 pt-3 border-t border-blue-200">
@@ -173,15 +224,18 @@ export const PPICAssignmentModal: React.FC<PPICAssignmentModalProps> = ({
                     ✅ Completed Processes ({completedProcesses.length}):
                   </p>
                   <div className="flex flex-wrap gap-1">
-                    {completedProcesses.map(p => (
-                      <span key={p} className="text-xs bg-green-100 text-green-800 px-2 py-1 rounded">
+                    {completedProcesses.map((p) => (
+                      <span
+                        key={p}
+                        className="text-xs bg-green-100 text-green-800 px-2 py-1 rounded"
+                      >
                         {PROCESS_LABELS[p]}
                       </span>
                     ))}
                   </div>
                 </div>
               )}
-              
+
               {/* Show in-progress processes */}
               {inProgressProcesses.length > 0 && (
                 <div className="mt-2">
@@ -189,14 +243,18 @@ export const PPICAssignmentModal: React.FC<PPICAssignmentModalProps> = ({
                     ⏳ In Progress/Pending ({inProgressProcesses.length}):
                   </p>
                   <div className="flex flex-wrap gap-1">
-                    {inProgressProcesses.map(p => (
-                      <span key={p} className="text-xs bg-orange-100 text-orange-800 px-2 py-1 rounded">
+                    {inProgressProcesses.map((p) => (
+                      <span
+                        key={p}
+                        className="text-xs bg-orange-100 text-orange-800 px-2 py-1 rounded"
+                      >
                         {PROCESS_LABELS[p]}
                       </span>
                     ))}
                   </div>
                   <p className="text-xs text-orange-700 mt-2">
-                    ℹ️ Process di atas tidak bisa di-assign lagi karena sedang berjalan
+                    ℹ️ Process di atas tidak bisa di-assign lagi karena sedang
+                    berjalan
                   </p>
                 </div>
               )}
@@ -235,9 +293,8 @@ export const PPICAssignmentModal: React.FC<PPICAssignmentModalProps> = ({
               )}
 
               {/* Delivery Processes */}
-              {DELIVERY_PROCESSES.filter((p) =>
-                availableProcesses.includes(p)
-              ).length > 0 && (
+              {DELIVERY_PROCESSES.filter((p) => availableProcesses.includes(p))
+                .length > 0 && (
                 <optgroup label="🚚 Delivery Phase">
                   {DELIVERY_PROCESSES.filter((p) =>
                     availableProcesses.includes(p)
@@ -252,7 +309,8 @@ export const PPICAssignmentModal: React.FC<PPICAssignmentModalProps> = ({
 
             {availableProcesses.length === 0 && (
               <p className="text-sm text-red-600 mt-2">
-                ⚠️ Tidak ada lagi proses tersedia. Order telah selesai atau semua proses sedang berjalan.
+                ⚠️ Tidak ada lagi proses tersedia. Order telah selesai atau
+                semua proses sedang berjalan.
               </p>
             )}
           </div>

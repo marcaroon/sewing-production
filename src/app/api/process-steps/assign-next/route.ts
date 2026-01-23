@@ -58,6 +58,27 @@ export async function POST(request: NextRequest) {
       const isDelivery = DELIVERY_PROCESSES.includes(nextProcessName as any);
       const nextPhase = isDelivery ? "delivery" : "production";
 
+      if (!order) {
+        throw new Error("Order not found");
+      }
+    
+      // ✅ ADD THIS BLOCK
+      let processFlow: ProcessName[];
+      if (order.processFlow) {
+        try {
+          processFlow = JSON.parse(order.processFlow);
+        } catch (e) {
+          processFlow = [...PRODUCTION_PROCESSES, ...DELIVERY_PROCESSES];
+        }
+      } else {
+        processFlow = [...PRODUCTION_PROCESSES, ...DELIVERY_PROCESSES];
+      }
+    
+      // ✅ VALIDATE: Check if nextProcessName is in the flow
+      if (!processFlow.includes(nextProcessName as ProcessName)) {
+        throw new Error(`Process ${nextProcessName} is not in this order's process flow. Available: ${processFlow.join(', ')}`);
+      }
+      
       // Cari step terakhir (completed atau pending pertama)
       const completedSteps = order.processSteps.filter(s => s.status === "completed");
       let baseQuantity: number;
