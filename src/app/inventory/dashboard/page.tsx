@@ -18,6 +18,7 @@ import {
   ArrowRight,
   Clock,
 } from "lucide-react";
+import { InventoryImporter } from "@/components/InventoryImporter";
 
 interface InventoryStats {
   totalMaterials: number;
@@ -118,30 +119,23 @@ export default function InventoryDashboardPage() {
               Monitor stock levels, usage, and transactions
             </p>
           </div>
-          <div className="flex items-center gap-3">
+
+          {/* BAGIAN INI YANG DIUBAH MENJADI LEBIH SEDERHANA */}
+          <div className="flex items-center gap-2">
             <Button
               onClick={handleRefresh}
               variant="outline"
-              size="sm"
               disabled={isRefreshing}
+              className="flex items-center gap-2"
             >
               <RefreshCw
                 className={`w-4 h-4 ${isRefreshing ? "animate-spin" : ""}`}
               />
-              Muat Ulang
+              <span className="hidden sm:inline">Muat Ulang</span>
             </Button>
-            <Link href="/inventory/materials">
-              <Button variant="primary">
-                <Plus className="w-4 h-4" />
-                Tambah Bahan
-              </Button>
-            </Link>
-            <Link href="/inventory/accessories">
-              <Button variant="success">
-                <Plus className="w-4 h-4" />
-                Tambah Aksesoris
-              </Button>
-            </Link>
+
+            {/* Dropdown Menu (Berisi: Tambah Bahan, Tambah Aksesoris, Import, Template) */}
+            <InventoryImporter />
           </div>
         </div>
       </div>

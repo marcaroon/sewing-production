@@ -34,6 +34,9 @@ import {
   CheckCircle,
   ArrowRight,
 } from "lucide-react";
+import { RejectReworkDetailModal } from "./RejectReworkDetailModal";
+import { TransitionHistoryModal } from "./TransitionHistoryModal";
+import { History } from "lucide-react";
 
 interface ProcessStepCardProps {
   processStep: ProcessStep;
@@ -51,8 +54,11 @@ export const ProcessStepCard: React.FC<ProcessStepCardProps> = ({
   const [currentAction, setCurrentAction] = useState<
     "receive" | "complete" | ""
   >("");
+  const [isRejectDetailModalOpen, setIsRejectDetailModalOpen] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState("");
+
+  const [isHistoryModalOpen, setIsHistoryModalOpen] = useState(false);
 
   const [actionData, setActionData] = useState({
     performedBy: user?.name || "",
@@ -211,6 +217,13 @@ export const ProcessStepCard: React.FC<ProcessStepCardProps> = ({
                 <CardTitle className="text-lg">
                   {PROCESS_LABELS[processStep.processName]}
                 </CardTitle>
+                <button
+                  onClick={() => setIsHistoryModalOpen(true)}
+                  className="p-1.5 text-gray-500 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors tooltip-trigger"
+                  title="Lihat Riwayat & Catatan"
+                >
+                  <History className="w-5 h-5" />
+                </button>
                 {isAdmin && (
                   <div
                     title="Admin Full Access"
@@ -283,28 +296,38 @@ export const ProcessStepCard: React.FC<ProcessStepCardProps> = ({
               </div>
             </div>
             {processStep.quantityRejected > 0 && (
-              <div className="flex items-center gap-3 p-3 bg-red-50 border border-red-200 rounded-lg">
+              <button
+                onClick={() => setIsRejectDetailModalOpen(true)}
+                className="flex items-center gap-3 p-3 bg-red-50 border-2 border-red-200 rounded-lg hover:bg-red-100 hover:border-red-300 transition-all cursor-pointer group"
+              >
                 <XCircle className="w-5 h-5 text-red-600" />
-                <div>
+                <div className="text-left flex-1">
                   <p className="text-xs font-semibold text-red-700">Rejected</p>
                   <p className="text-lg font-bold text-red-900">
                     {formatNumber(processStep.quantityRejected)}
                   </p>
+                  <p className="text-xs text-red-600 mt-0.5 ">Lihat detail</p>
                 </div>
-              </div>
+              </button>
             )}
             {processStep.quantityRework > 0 && (
-              <div className="flex items-center gap-3 p-3 bg-yellow-50 border border-yellow-200 rounded-lg">
+              <button
+                onClick={() => setIsRejectDetailModalOpen(true)}
+                className="flex items-center gap-3 p-3 bg-yellow-50 border-2 border-yellow-200 rounded-lg hover:bg-yellow-100 hover:border-yellow-300 transition-all cursor-pointer group"
+              >
                 <RotateCcw className="w-5 h-5 text-yellow-600" />
-                <div>
+                <div className="text-left flex-1">
                   <p className="text-xs font-semibold text-yellow-700">
                     Rework
                   </p>
                   <p className="text-lg font-bold text-yellow-900">
                     {formatNumber(processStep.quantityRework)}
                   </p>
+                  <p className="text-xs text-yellow-600 mt-0.5 ">
+                    Lihat detail
+                  </p>
                 </div>
-              </div>
+              </button>
             )}
           </div>
 
@@ -696,6 +719,20 @@ export const ProcessStepCard: React.FC<ProcessStepCardProps> = ({
           </ModalFooter>
         </form>
       </Modal>
+      <RejectReworkDetailModal
+        isOpen={isRejectDetailModalOpen}
+        onClose={() => setIsRejectDetailModalOpen(false)}
+        processStepId={processStep.id}
+        processName={PROCESS_LABELS[processStep.processName]}
+      />
+      <TransitionHistoryModal
+        isOpen={isHistoryModalOpen}
+        onClose={() => setIsHistoryModalOpen(false)}
+        processStepId={processStep.id}
+        processName={
+          PROCESS_LABELS[processStep.processName] || processStep.processName
+        }
+      />
     </>
   );
 };

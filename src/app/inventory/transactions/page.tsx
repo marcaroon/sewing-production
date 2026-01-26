@@ -3,6 +3,7 @@
 "use client";
 
 import React, { useEffect, useState } from "react";
+import { useRouter } from "next/navigation"; // Import useRouter
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/Card";
 import { Badge } from "@/components/ui/Badge";
 import { Button } from "@/components/ui/Button";
@@ -13,9 +14,11 @@ import {
   ArrowDownToLine,
   ArrowUpFromLine,
   Filter,
+  ArrowLeft, // Import ArrowLeft
 } from "lucide-react";
 
 export default function TransactionsPage() {
+  const router = useRouter(); // Inisialisasi router
   const [transactions, setTransactions] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [filter, setFilter] = useState({
@@ -115,23 +118,38 @@ export default function TransactionsPage() {
     <div className="max-w-7xl mx-auto px-4 py-8">
       {/* Header */}
       <div className="mb-8">
-        <div className="flex items-center justify-between mb-4">
+        <div className="flex flex-col gap-4">
+          {/* Tombol Back */}
           <div>
-            <h1 className="text-3xl font-bold text-gray-900 mb-2">
-              Transaksi Stok
-            </h1>
-            <p className="text-gray-600">
-              All material and accessory movements
-            </p>
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => router.back()}
+              className="text-gray-600 hover:text-gray-900 pl-0"
+            >
+              <ArrowLeft className="w-4 h-4 mr-2" />
+              Kembali
+            </Button>
           </div>
-          <Button onClick={loadTransactions} variant="outline" size="sm">
-            <RefreshCw className="w-4 h-4" />
-            Muat Ulang
-          </Button>
+
+          <div className="flex items-center justify-between">
+            <div>
+              <h1 className="text-3xl font-bold text-gray-900 mb-2">
+                Transaksi Stok
+              </h1>
+              <p className="text-gray-600">
+                Riwayat pergerakan bahan dan aksesoris
+              </p>
+            </div>
+            <Button onClick={loadTransactions} variant="outline" size="sm">
+              <RefreshCw className="w-4 h-4 mr-2" />
+              Muat Ulang
+            </Button>
+          </div>
         </div>
 
         {/* Filters */}
-        <Card>
+        <Card className="mt-6">
           <CardContent className="pt-6">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
@@ -143,7 +161,7 @@ export default function TransactionsPage() {
                   onChange={(e) =>
                     setFilter({ ...filter, type: e.target.value })
                   }
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg"
+                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                 >
                   <option value="all">Semua Jenis</option>
                   <option value="material">Hanya Bahan</option>
@@ -159,7 +177,7 @@ export default function TransactionsPage() {
                   onChange={(e) =>
                     setFilter({ ...filter, transactionType: e.target.value })
                   }
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg"
+                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                 >
                   <option value="all">Semua Transaksi</option>
                   <option value="in">Stok Masuk</option>
@@ -291,7 +309,10 @@ export default function TransactionsPage() {
                 </thead>
                 <tbody>
                   {filteredTransactions.map((tx) => (
-                    <tr key={tx.id} className="border-b border-gray-100">
+                    <tr
+                      key={tx.id}
+                      className="border-b border-gray-100 hover:bg-gray-50"
+                    >
                       <td className="py-3 px-4 text-sm text-gray-900">
                         {formatDateTime(tx.transactionDate)}
                       </td>
@@ -308,7 +329,7 @@ export default function TransactionsPage() {
                           }
                           size="sm"
                         >
-                          {tx.itemType}
+                          {tx.itemType === "material" ? "Bahan" : "Aksesoris"}
                         </Badge>
                       </td>
                       <td className="py-3 px-4">
@@ -322,7 +343,11 @@ export default function TransactionsPage() {
                           }
                           size="sm"
                         >
-                          {tx.transactionType}
+                          {tx.transactionType === "in"
+                            ? "Masuk"
+                            : tx.transactionType === "out"
+                            ? "Keluar"
+                            : tx.transactionType}
                         </Badge>
                       </td>
                       <td
@@ -333,19 +358,35 @@ export default function TransactionsPage() {
                         {tx.quantity > 0 ? "+" : ""}
                         {formatNumber(tx.quantity)} {tx.unit}
                       </td>
+
+                      {/* MODIFIKASI: Kolom Reference */}
                       <td className="py-3 px-4 text-sm text-gray-700">
-                        {tx.referenceType && (
-                          <span>
-                            {tx.referenceType}
-                            {tx.referenceId && `: ${tx.referenceId}`}
-                          </span>
-                        )}
-                        {tx.remarks && (
-                          <p className="text-xs text-gray-500 mt-1">
-                            {tx.remarks}
-                          </p>
+                        {tx.referenceType === "order" ? (
+                          <div className="flex flex-col">
+                            <span className="font-bold text-gray-500">
+                              {/* Ambil teks setelah 'order ' dari remarks */}
+                              {tx.remarks?.includes("order ")
+                                ? tx.remarks.split("order ")[1]
+                                : tx.remarks || "Order"}
+                            </span>
+                          </div>
+                        ) : (
+                          <>
+                            {tx.referenceType && (
+                              <span className="font-medium">
+                                {tx.referenceType}
+                                {tx.referenceId && `: ${tx.referenceId}`}
+                              </span>
+                            )}
+                            {tx.remarks && (
+                              <p className="text-xs text-gray-500 mt-1">
+                                {tx.remarks}
+                              </p>
+                            )}
+                          </>
                         )}
                       </td>
+
                       <td className="py-3 px-4 text-sm text-gray-700">
                         {tx.performedBy}
                       </td>

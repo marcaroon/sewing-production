@@ -14,6 +14,38 @@ import { canExecuteProcess } from "@/lib/permissions";
 import { ProcessName } from "@/lib/types-new";
 import { getCurrentUser } from "@/lib/auth";
 
+export async function GET(
+  request: NextRequest,
+  { params }: { params: Promise<{ id: string }> }
+) {
+  try {
+    const processStepId = (await params).id;
+
+    const transitions = await prisma.processTransition.findMany({
+      where: {
+        processStepId: processStepId,
+      },
+      orderBy: {
+        transitionTime: "desc", // Urutkan dari yang terbaru
+      },
+    });
+
+    return NextResponse.json({
+      success: true,
+      data: transitions,
+    });
+  } catch (error) {
+    console.error("Error fetching transition history:", error);
+    return NextResponse.json(
+      {
+        success: false,
+        error: "Failed to fetch transition history",
+      },
+      { status: 500 }
+    );
+  }
+}
+
 export async function POST(
   request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
