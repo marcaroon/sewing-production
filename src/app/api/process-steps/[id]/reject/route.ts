@@ -78,7 +78,7 @@ export async function POST(
           size,
           bundleNumber,
           description,
-          rootCause: rootCause || null, // Ensure null instead of undefined
+          rootCause: rootCause || null,
           action,
           images: images ? JSON.stringify(images) : null,
           reworkCompleted: false,
@@ -86,11 +86,12 @@ export async function POST(
       });
 
       // 2. Update process step quantities
-      const updateData: any = {
-        quantityRejected: processStep.quantityRejected + quantity,
-      };
+      // PERBAIKAN DI SINI: Pisahkan logika update agar tidak double count
+      const updateData: any = {};
 
-      if (rejectCategory === "rework") {
+      if (rejectCategory === "reject") {
+        updateData.quantityRejected = processStep.quantityRejected + quantity;
+      } else if (rejectCategory === "rework") {
         updateData.quantityRework = processStep.quantityRework + quantity;
       }
 
@@ -100,12 +101,15 @@ export async function POST(
       });
 
       // 3. Update order totals
+      // PERBAIKAN DI SINI: Pisahkan logika update order juga
       const orderUpdateData: any = {
-        totalRejected: processStep.order.totalRejected + quantity,
         updatedAt: new Date(),
       };
 
-      if (rejectCategory === "rework") {
+      if (rejectCategory === "reject") {
+        orderUpdateData.totalRejected =
+          processStep.order.totalRejected + quantity;
+      } else if (rejectCategory === "rework") {
         orderUpdateData.totalRework = processStep.order.totalRework + quantity;
       }
 
@@ -285,12 +289,17 @@ export async function PUT_CompleteRework(
           },
         });
       } else if (finalDisposition === "scrapped") {
-        // Remove from rework, don't add to completed
+        // Remove from rework, DON'T add to completed, maybe track as scrap?
+        // Logic: if scrapped from rework, it effectively becomes a reject.
+        // But for now, just removing from rework is safe to avoid double counting if you track scraps separately.
         await tx.processStep.update({
           where: { id: rejectLog.processStepId },
           data: {
             quantityRework: {
               decrement: rejectLog.quantity,
+            },
+            quantityRejected: {
+              increment: rejectLog.quantity, // Move from rework to rejected
             },
           },
         });

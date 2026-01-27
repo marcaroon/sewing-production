@@ -1,4 +1,4 @@
-// components/ProcessStepCards.tsx - SIMPLIFIED FLOW VERSION
+// src/components/ProcessStepCards.tsx - SIMPLIFIED FLOW VERSION
 "use client";
 
 import React, { useState, useEffect } from "react";
@@ -25,9 +25,7 @@ import {
   CheckCircle2,
   XCircle,
   RotateCcw,
-  PlayCircle,
   AlertCircle,
-  User,
   Eye,
   Lock,
   ShieldCheck,
@@ -35,8 +33,6 @@ import {
   ArrowRight,
 } from "lucide-react";
 import { RejectReworkDetailModal } from "./RejectReworkDetailModal";
-import { TransitionHistoryModal } from "./TransitionHistoryModal";
-import { History } from "lucide-react";
 
 interface ProcessStepCardProps {
   processStep: ProcessStep;
@@ -51,14 +47,12 @@ export const ProcessStepCard: React.FC<ProcessStepCardProps> = ({
 
   const [isActionModalOpen, setIsActionModalOpen] = useState(false);
   const [isRejectModalOpen, setIsRejectModalOpen] = useState(false);
+  const [isRejectDetailModalOpen, setIsRejectDetailModalOpen] = useState(false); // Pastikan state ini ada
   const [currentAction, setCurrentAction] = useState<
     "receive" | "complete" | ""
   >("");
-  const [isRejectDetailModalOpen, setIsRejectDetailModalOpen] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState("");
-
-  const [isHistoryModalOpen, setIsHistoryModalOpen] = useState(false);
 
   const [actionData, setActionData] = useState({
     performedBy: user?.name || "",
@@ -79,7 +73,6 @@ export const ProcessStepCard: React.FC<ProcessStepCardProps> = ({
   const isAdmin = user?.isAdmin || false;
   const isPPIC = user?.department === "PPIC";
 
-  // ✅ FIX: Use checkPermission with processName argument
   const canExecute = user
     ? checkPermission("canTransitionProcess", processStep.processName)
     : false;
@@ -87,20 +80,6 @@ export const ProcessStepCard: React.FC<ProcessStepCardProps> = ({
   const canReject = user
     ? checkPermission("canRecordReject", processStep.processName)
     : false;
-
-  // Debug log
-  useEffect(() => {
-    if (user) {
-      console.log("=== ProcessStepCard Debug ===");
-      console.log("User Department:", user.department);
-      console.log("Process Department:", processStep.department);
-      console.log("Process Name:", processStep.processName);
-      console.log("Can Execute:", canExecute);
-      console.log("Can Reject:", canReject);
-      console.log("Is Admin:", isAdmin);
-      console.log("============================");
-    }
-  }, [user, canExecute, canReject]);
 
   // Determine what actions are available
   const canReceive = processStep.status === "pending" && canExecute;
@@ -177,6 +156,7 @@ export const ProcessStepCard: React.FC<ProcessStepCardProps> = ({
 
       if (result.success) {
         setIsRejectModalOpen(false);
+        // Reset form completely for next entry
         setRejectData({
           rejectType: "material_defect",
           rejectCategory: "rework",
@@ -215,20 +195,11 @@ export const ProcessStepCard: React.FC<ProcessStepCardProps> = ({
             <div className="flex-1">
               <div className="flex items-center gap-2 mb-1">
                 <CardTitle className="text-lg">
-                  {PROCESS_LABELS[processStep.processName]}
+                  {PROCESS_LABELS[processStep.processName] ||
+                    processStep.processName}
                 </CardTitle>
-                <button
-                  onClick={() => setIsHistoryModalOpen(true)}
-                  className="p-1.5 text-gray-500 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors tooltip-trigger"
-                  title="Lihat Riwayat & Catatan"
-                >
-                  <History className="w-5 h-5" />
-                </button>
                 {isAdmin && (
-                  <div
-                    title="Admin Full Access"
-                    className="flex items-center gap-1"
-                  >
+                  <div className="flex items-center gap-1">
                     <ShieldCheck className="w-4 h-4 text-green-600" />
                     <span className="text-xs font-bold text-green-600">
                       ADMIN
@@ -295,39 +266,41 @@ export const ProcessStepCard: React.FC<ProcessStepCardProps> = ({
                 </p>
               </div>
             </div>
+
+            {/* REJECT BOX - KLIK UNTUK LIHAT DETAIL */}
             {processStep.quantityRejected > 0 && (
-              <button
+              <div
+                className="flex items-center gap-3 p-3 bg-red-50 border border-red-200 rounded-lg cursor-pointer hover:bg-red-100 transition-colors"
                 onClick={() => setIsRejectDetailModalOpen(true)}
-                className="flex items-center gap-3 p-3 bg-red-50 border-2 border-red-200 rounded-lg hover:bg-red-100 hover:border-red-300 transition-all cursor-pointer group"
+                title="Klik untuk lihat detail reject"
               >
                 <XCircle className="w-5 h-5 text-red-600" />
-                <div className="text-left flex-1">
+                <div>
                   <p className="text-xs font-semibold text-red-700">Rejected</p>
                   <p className="text-lg font-bold text-red-900">
                     {formatNumber(processStep.quantityRejected)}
                   </p>
-                  <p className="text-xs text-red-600 mt-0.5 ">Lihat detail</p>
                 </div>
-              </button>
+              </div>
             )}
+
+            {/* REWORK BOX - KLIK UNTUK LIHAT DETAIL */}
             {processStep.quantityRework > 0 && (
-              <button
+              <div
+                className="flex items-center gap-3 p-3 bg-yellow-50 border border-yellow-200 rounded-lg cursor-pointer hover:bg-yellow-100 transition-colors"
                 onClick={() => setIsRejectDetailModalOpen(true)}
-                className="flex items-center gap-3 p-3 bg-yellow-50 border-2 border-yellow-200 rounded-lg hover:bg-yellow-100 hover:border-yellow-300 transition-all cursor-pointer group"
+                title="Klik untuk lihat detail rework"
               >
                 <RotateCcw className="w-5 h-5 text-yellow-600" />
-                <div className="text-left flex-1">
+                <div>
                   <p className="text-xs font-semibold text-yellow-700">
                     Rework
                   </p>
                   <p className="text-lg font-bold text-yellow-900">
                     {formatNumber(processStep.quantityRework)}
                   </p>
-                  <p className="text-xs text-yellow-600 mt-0.5 ">
-                    Lihat detail
-                  </p>
                 </div>
-              </button>
+              </div>
             )}
           </div>
 
@@ -416,7 +389,7 @@ export const ProcessStepCard: React.FC<ProcessStepCardProps> = ({
                       size="md"
                     >
                       <AlertCircle className="w-4 h-4" />
-                      Reject
+                      Reject/Rework
                     </Button>
                   )}
                 </>
@@ -435,10 +408,7 @@ export const ProcessStepCard: React.FC<ProcessStepCardProps> = ({
                       <p className="font-bold text-gray-900 mb-1">
                         Admin View Mode
                       </p>
-                      <p className="text-gray-600">
-                        You have full access. Action buttons will appear based
-                        on process status.
-                      </p>
+                      <p className="text-gray-600">You have full access.</p>
                     </div>
                   </>
                 ) : isPPIC ? (
@@ -446,9 +416,7 @@ export const ProcessStepCard: React.FC<ProcessStepCardProps> = ({
                     <Eye className="w-5 h-5 text-purple-600 mt-0.5" />
                     <div>
                       <p className="font-bold text-gray-900 mb-1">PPIC View</p>
-                      <p className="text-gray-600">
-                        PPIC can monitor but cannot execute processes directly.
-                      </p>
+                      <p className="text-gray-600">PPIC monitoring access.</p>
                     </div>
                   </>
                 ) : (
@@ -457,12 +425,11 @@ export const ProcessStepCard: React.FC<ProcessStepCardProps> = ({
                     <div>
                       <p className="font-bold text-gray-900 mb-1">View Only</p>
                       <p className="text-gray-600">
-                        This process is handled by{" "}
+                        Handled by{" "}
                         <span className="font-bold">
                           {processStep.department}
                         </span>
-                        . Your department:{" "}
-                        <span className="font-bold">{user.department}</span>.
+                        .
                       </p>
                     </div>
                   </>
@@ -502,6 +469,7 @@ export const ProcessStepCard: React.FC<ProcessStepCardProps> = ({
         size="md"
       >
         <form onSubmit={handleSubmitAction}>
+          {/* Form Content tetap sama */}
           <div className="space-y-4">
             {error && (
               <div className="bg-red-50 border border-red-200 rounded p-3 text-sm text-red-800">
@@ -564,7 +532,7 @@ export const ProcessStepCard: React.FC<ProcessStepCardProps> = ({
 
             <div>
               <label className="block text-sm font-medium text-gray-900 mb-2">
-                Notes (Optional)
+                Notes
               </label>
               <textarea
                 value={actionData.notes}
@@ -601,7 +569,7 @@ export const ProcessStepCard: React.FC<ProcessStepCardProps> = ({
         </form>
       </Modal>
 
-      {/* Reject Modal - Keep as is */}
+      {/* Reject Input Modal */}
       <Modal
         isOpen={isRejectModalOpen}
         onClose={() => !isSubmitting && setIsRejectModalOpen(false)}
@@ -609,6 +577,7 @@ export const ProcessStepCard: React.FC<ProcessStepCardProps> = ({
         size="lg"
       >
         <form onSubmit={handleReject}>
+          {/* Form Content tetap sama, tapi logika submit sudah memastikan bisa input lagi */}
           <div className="space-y-4">
             {error && (
               <div className="bg-red-50 border border-red-200 rounded p-3 text-sm text-red-800">
@@ -644,27 +613,35 @@ export const ProcessStepCard: React.FC<ProcessStepCardProps> = ({
                 Category *
               </label>
               <div className="flex gap-4">
-                <label className="flex items-center text-gray-800 gap-2">
+                <label className="flex items-center text-gray-800 gap-2 cursor-pointer">
                   <input
                     type="radio"
                     value="rework"
                     checked={rejectData.rejectCategory === "rework"}
-                    onChange={(e) =>
-                      setRejectData({ ...rejectData, rejectCategory: "rework" })
+                    onChange={() =>
+                      setRejectData({
+                        ...rejectData,
+                        rejectCategory: "rework",
+                        action: "rework",
+                      })
                     }
                   />
-                  <span>Rework</span>
+                  <span>Rework (Bisa diperbaiki)</span>
                 </label>
-                <label className="flex items-center text-gray-800 gap-2">
+                <label className="flex items-center text-gray-800 gap-2 cursor-pointer">
                   <input
                     type="radio"
                     value="reject"
                     checked={rejectData.rejectCategory === "reject"}
-                    onChange={(e) =>
-                      setRejectData({ ...rejectData, rejectCategory: "reject" })
+                    onChange={() =>
+                      setRejectData({
+                        ...rejectData,
+                        rejectCategory: "reject",
+                        action: "scrap",
+                      })
                     }
                   />
-                  <span>Reject</span>
+                  <span>Reject (Scrap/Buang)</span>
                 </label>
               </div>
             </div>
@@ -700,6 +677,7 @@ export const ProcessStepCard: React.FC<ProcessStepCardProps> = ({
                 className="w-full px-4 py-2.5 text-gray-800 border rounded-lg"
                 rows={3}
                 required
+                placeholder="Jelaskan detail kerusakan..."
               />
             </div>
           </div>
@@ -714,20 +692,16 @@ export const ProcessStepCard: React.FC<ProcessStepCardProps> = ({
               Batal
             </Button>
             <Button type="submit" variant="danger" disabled={isSubmitting}>
-              {isSubmitting ? "Recording..." : "Record Reject"}
+              {isSubmitting ? "Recording..." : "Record"}
             </Button>
           </ModalFooter>
         </form>
       </Modal>
+
+      {/* DETAIL MODAL (Pastikan dipanggil) */}
       <RejectReworkDetailModal
         isOpen={isRejectDetailModalOpen}
         onClose={() => setIsRejectDetailModalOpen(false)}
-        processStepId={processStep.id}
-        processName={PROCESS_LABELS[processStep.processName]}
-      />
-      <TransitionHistoryModal
-        isOpen={isHistoryModalOpen}
-        onClose={() => setIsHistoryModalOpen(false)}
         processStepId={processStep.id}
         processName={
           PROCESS_LABELS[processStep.processName] || processStep.processName
