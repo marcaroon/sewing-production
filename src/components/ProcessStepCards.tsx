@@ -1,4 +1,5 @@
-// src/components/ProcessStepCards.tsx - SIMPLIFIED FLOW VERSION
+// src/components/ProcessStepCards.tsx
+
 "use client";
 
 import React, { useState, useEffect } from "react";
@@ -25,12 +26,17 @@ import {
   CheckCircle2,
   XCircle,
   RotateCcw,
+  PlayCircle,
   AlertCircle,
+  User,
   Eye,
   Lock,
   ShieldCheck,
   CheckCircle,
   ArrowRight,
+  FileText, // Icon Baru
+  Layers, // Icon Baru
+  Calendar, // Icon Baru
 } from "lucide-react";
 import { RejectReworkDetailModal } from "./RejectReworkDetailModal";
 
@@ -47,7 +53,7 @@ export const ProcessStepCard: React.FC<ProcessStepCardProps> = ({
 
   const [isActionModalOpen, setIsActionModalOpen] = useState(false);
   const [isRejectModalOpen, setIsRejectModalOpen] = useState(false);
-  const [isRejectDetailModalOpen, setIsRejectDetailModalOpen] = useState(false); // Pastikan state ini ada
+  const [isRejectDetailModalOpen, setIsRejectDetailModalOpen] = useState(false);
   const [currentAction, setCurrentAction] = useState<
     "receive" | "complete" | ""
   >("");
@@ -92,6 +98,11 @@ export const ProcessStepCard: React.FC<ProcessStepCardProps> = ({
           (processStep.quantityCompleted / processStep.quantityReceived) * 100
         )
       : 0;
+
+  // --- AMBIL INFO ORDER ---
+  // Kita menggunakan casting (as any) untuk mengakses properti 'order'
+  // karena mungkin type ProcessStep belum diupdate di types-new.ts
+  const orderInfo = (processStep as any).order;
 
   const handleAction = async (action: "receive" | "complete") => {
     setCurrentAction(action);
@@ -156,7 +167,6 @@ export const ProcessStepCard: React.FC<ProcessStepCardProps> = ({
 
       if (result.success) {
         setIsRejectModalOpen(false);
-        // Reset form completely for next entry
         setRejectData({
           rejectType: "material_defect",
           rejectCategory: "rework",
@@ -189,35 +199,81 @@ export const ProcessStepCard: React.FC<ProcessStepCardProps> = ({
 
   return (
     <>
-      <Card className="border-l-4 border-l-blue-600">
+      <Card>
         <CardHeader>
+          {/* --- BAGIAN BARU: HEADER INFORMASI ORDER --- */}
+          {orderInfo && (
+            <div className="mb-4 pb-3 border-b border-gray-100 bg-gray-50 -mx-6 -mt-6 px-6 pt-4 rounded-t-lg">
+              <div className="flex justify-between items-start mb-2">
+                <div className="flex items-center gap-2">
+                  <FileText className="w-5 h-5 text-blue-700" />
+                  <h3 className="text-lg font-extrabold text-gray-900 tracking-tight">
+                    {orderInfo.orderNumber}
+                  </h3>
+                </div>
+                {orderInfo.productionDeadline && (
+                  <div className="flex items-center gap-1 text-xs font-semibold text-red-600 bg-red-50 px-2 py-1 rounded border border-red-100">
+                    <Calendar className="w-3 h-3" />
+                    Due:{" "}
+                    {new Date(orderInfo.productionDeadline).toLocaleDateString(
+                      "id-ID",
+                      { day: "numeric", month: "short" }
+                    )}
+                  </div>
+                )}
+              </div>
+
+              <div className="grid grid-cols-2 gap-4 text-sm">
+                <div
+                  className="flex items-center gap-2 text-gray-700"
+                  title="Buyer"
+                >
+                  <User className="w-4 h-4 text-gray-400" />
+                  <span className="font-medium truncate">
+                    {orderInfo.buyer?.name || "Unknown Buyer"}
+                  </span>
+                </div>
+                <div
+                  className="flex items-center gap-2 text-gray-700"
+                  title="Style"
+                >
+                  <Layers className="w-4 h-4 text-gray-400" />
+                  <span className="font-medium truncate">
+                    {orderInfo.style?.styleCode} - {orderInfo.style?.name}
+                  </span>
+                </div>
+              </div>
+            </div>
+          )}
+          {/* --- SELESAI HEADER ORDER --- */}
+
           <div className="flex items-start justify-between">
             <div className="flex-1">
               <div className="flex items-center gap-2 mb-1">
-                <CardTitle className="text-lg">
+                <CardTitle className="text-xl text-blue-800">
                   {PROCESS_LABELS[processStep.processName] ||
                     processStep.processName}
                 </CardTitle>
                 {isAdmin && (
-                  <div className="flex items-center gap-1">
+                  <div
+                    title="Admin Full Access"
+                    className="flex items-center gap-1"
+                  >
                     <ShieldCheck className="w-4 h-4 text-green-600" />
-                    <span className="text-xs font-bold text-green-600">
-                      ADMIN
-                    </span>
                   </div>
                 )}
                 {!canExecute && !isAdmin && (
                   <Lock className="w-4 h-4 text-gray-400" />
                 )}
               </div>
-              <div className="flex items-center gap-2 mt-2">
-                <p className="text-sm font-semibold text-gray-700">
+              <div className="flex items-center gap-2 mt-1">
+                <p className="text-xs font-bold uppercase tracking-wider text-gray-500 bg-gray-100 px-2 py-0.5 rounded">
                   {processStep.department}
                 </p>
                 {user.department &&
                   user.department !== processStep.department && (
-                    <Badge variant="default" size="sm">
-                      You: {user.department}
+                    <Badge variant="default" size="sm" className="text-[10px]">
+                      Your Dept: {user.department}
                     </Badge>
                   )}
               </div>
@@ -231,15 +287,15 @@ export const ProcessStepCard: React.FC<ProcessStepCardProps> = ({
                   processStep.status === "completed"
                     ? "success"
                     : processStep.status === "in_progress"
-                    ? "warning"
-                    : "default"
+                    ? "info"
+                    : "warning"
                 }
               >
                 {processStep.status === "completed"
                   ? "Completed"
                   : processStep.status === "in_progress"
                   ? "In Progress"
-                  : "Waiting"}
+                  : "Waiting List"}
               </Badge>
             </div>
           </div>
@@ -267,12 +323,12 @@ export const ProcessStepCard: React.FC<ProcessStepCardProps> = ({
               </div>
             </div>
 
-            {/* REJECT BOX - KLIK UNTUK LIHAT DETAIL */}
+            {/* REJECT BOX - Clickable */}
             {processStep.quantityRejected > 0 && (
               <div
                 className="flex items-center gap-3 p-3 bg-red-50 border border-red-200 rounded-lg cursor-pointer hover:bg-red-100 transition-colors"
                 onClick={() => setIsRejectDetailModalOpen(true)}
-                title="Klik untuk lihat detail reject"
+                title="Klik untuk melihat detail Reject"
               >
                 <XCircle className="w-5 h-5 text-red-600" />
                 <div>
@@ -284,12 +340,12 @@ export const ProcessStepCard: React.FC<ProcessStepCardProps> = ({
               </div>
             )}
 
-            {/* REWORK BOX - KLIK UNTUK LIHAT DETAIL */}
+            {/* REWORK BOX - Clickable */}
             {processStep.quantityRework > 0 && (
               <div
                 className="flex items-center gap-3 p-3 bg-yellow-50 border border-yellow-200 rounded-lg cursor-pointer hover:bg-yellow-100 transition-colors"
                 onClick={() => setIsRejectDetailModalOpen(true)}
-                title="Klik untuk lihat detail rework"
+                title="Klik untuk melihat detail Rework"
               >
                 <RotateCcw className="w-5 h-5 text-yellow-600" />
                 <div>
@@ -328,7 +384,7 @@ export const ProcessStepCard: React.FC<ProcessStepCardProps> = ({
               {processStep.addedToWaitingTime && (
                 <div className="flex items-center justify-between">
                   <span className="font-semibold text-gray-700">
-                    Added to Waiting:
+                    Masuk Waiting List:
                   </span>
                   <span className="font-bold text-gray-900">
                     {formatDateTime(processStep.addedToWaitingTime)}
@@ -337,7 +393,9 @@ export const ProcessStepCard: React.FC<ProcessStepCardProps> = ({
               )}
               {processStep.startedTime && (
                 <div className="flex items-center justify-between">
-                  <span className="font-semibold text-gray-700">Started:</span>
+                  <span className="font-semibold text-gray-700">
+                    Mulai Dikerjakan:
+                  </span>
                   <span className="font-bold text-gray-900">
                     {formatDateTime(processStep.startedTime)}
                   </span>
@@ -345,9 +403,7 @@ export const ProcessStepCard: React.FC<ProcessStepCardProps> = ({
               )}
               {processStep.completedTime && (
                 <div className="flex items-center justify-between">
-                  <span className="font-semibold text-gray-700">
-                    Completed:
-                  </span>
+                  <span className="font-semibold text-gray-700">Selesai:</span>
                   <span className="font-bold text-gray-900">
                     {formatDateTime(processStep.completedTime)}
                   </span>
@@ -358,16 +414,15 @@ export const ProcessStepCard: React.FC<ProcessStepCardProps> = ({
 
           {/* Action Buttons */}
           {canExecute && !isCompleted && (
-            <div className="flex gap-2 pt-3 border-t-2 border-gray-200">
+            <div className="flex gap-2 pt-3 border-t-2 border-gray-200 mt-2">
               {canReceive && (
                 <Button
                   onClick={() => handleAction("receive")}
                   variant="primary"
                   size="md"
-                  className="flex-1"
+                  className="flex-1 w-full justify-center py-3 text-base"
                 >
-                  <CheckCircle className="w-4 h-4" />
-                  Terima dari Waiting List
+                  Terima Proses
                 </Button>
               )}
 
@@ -379,8 +434,8 @@ export const ProcessStepCard: React.FC<ProcessStepCardProps> = ({
                     size="md"
                     className="flex-1"
                   >
-                    <ArrowRight className="w-4 h-4" />
-                    Complete Process
+                    <ArrowRight className="w-4 h-4 mr-2" />
+                    Selesai
                   </Button>
                   {canReject && (
                     <Button
@@ -388,7 +443,7 @@ export const ProcessStepCard: React.FC<ProcessStepCardProps> = ({
                       variant="danger"
                       size="md"
                     >
-                      <AlertCircle className="w-4 h-4" />
+                      <AlertCircle className="w-4 h-4 mr-2" />
                       Reject/Rework
                     </Button>
                   )}
@@ -399,41 +454,18 @@ export const ProcessStepCard: React.FC<ProcessStepCardProps> = ({
 
           {/* View-Only Notice */}
           {!canExecute && !isCompleted && (
-            <div className="mt-4 p-3 bg-gray-50 border-2 border-gray-300 rounded-lg">
-              <div className="flex items-start gap-3 text-sm">
-                {isAdmin ? (
-                  <>
-                    <Eye className="w-5 h-5 text-blue-600 mt-0.5" />
-                    <div>
-                      <p className="font-bold text-gray-900 mb-1">
-                        Admin View Mode
-                      </p>
-                      <p className="text-gray-600">You have full access.</p>
-                    </div>
-                  </>
-                ) : isPPIC ? (
-                  <>
-                    <Eye className="w-5 h-5 text-purple-600 mt-0.5" />
-                    <div>
-                      <p className="font-bold text-gray-900 mb-1">PPIC View</p>
-                      <p className="text-gray-600">PPIC monitoring access.</p>
-                    </div>
-                  </>
-                ) : (
-                  <>
-                    <Lock className="w-5 h-5 text-orange-600 mt-0.5" />
-                    <div>
-                      <p className="font-bold text-gray-900 mb-1">View Only</p>
-                      <p className="text-gray-600">
-                        Handled by{" "}
-                        <span className="font-bold">
-                          {processStep.department}
-                        </span>
-                        .
-                      </p>
-                    </div>
-                  </>
-                )}
+            <div className="mt-4 p-3 bg-gray-50 border border-gray-200 rounded-lg">
+              <div className="flex items-center gap-2 text-sm text-gray-500">
+                <Lock className="w-4 h-4" />
+                <div>
+                  <span className="font-bold">View Only Mode</span>
+                  <p className="text-xs">
+                    Proses ini ditangani oleh dept:{" "}
+                    <span className="font-bold text-gray-700">
+                      {processStep.department}
+                    </span>
+                  </p>
+                </div>
               </div>
             </div>
           )}
@@ -444,9 +476,9 @@ export const ProcessStepCard: React.FC<ProcessStepCardProps> = ({
               <div className="flex items-center gap-3">
                 <CheckCircle className="w-6 h-6 text-green-600" />
                 <div>
-                  <p className="font-bold text-green-900">Process Completed</p>
+                  <p className="font-bold text-green-900">Proses Selesai</p>
                   <p className="text-sm text-green-700 mt-1">
-                    Completed at{" "}
+                    Pada{" "}
                     {processStep.completedTime &&
                       formatDateTime(processStep.completedTime)}
                   </p>
@@ -463,13 +495,12 @@ export const ProcessStepCard: React.FC<ProcessStepCardProps> = ({
         onClose={() => !isSubmitting && setIsActionModalOpen(false)}
         title={
           currentAction === "receive"
-            ? "Terima dari Waiting List"
-            : "Complete Process"
+            ? "Terima Job dari Waiting List"
+            : "Selesaikan Proses"
         }
         size="md"
       >
         <form onSubmit={handleSubmitAction}>
-          {/* Form Content tetap sama */}
           <div className="space-y-4">
             {error && (
               <div className="bg-red-50 border border-red-200 rounded p-3 text-sm text-red-800">
@@ -477,19 +508,15 @@ export const ProcessStepCard: React.FC<ProcessStepCardProps> = ({
               </div>
             )}
 
-            <div className="bg-blue-50 border-2 border-blue-200 rounded-lg p-4">
-              <p className="font-bold text-blue-900 mb-2">
-                {currentAction === "receive"
-                  ? "Terima Order"
-                  : "Menyelesaikan Proses"}
+            {/* Konfirmasi Order di Modal */}
+            <div className="bg-blue-50 p-3 rounded-lg border border-blue-200 text-sm mb-4">
+              <p className="font-bold text-blue-900">
+                {orderInfo?.orderNumber}
               </p>
-              <p className="text-sm text-blue-800">
-                Process:{" "}
-                <span className="font-bold">
-                  {PROCESS_LABELS[processStep.processName]}
-                </span>
+              <p className="text-blue-800">
+                {PROCESS_LABELS[processStep.processName]}
               </p>
-              <p className="text-sm text-blue-800">
+              <p className="mt-1 text-blue-700">
                 Quantity:{" "}
                 <span className="font-bold">
                   {formatNumber(processStep.quantityReceived)} pcs
@@ -499,7 +526,7 @@ export const ProcessStepCard: React.FC<ProcessStepCardProps> = ({
 
             <div>
               <label className="block text-sm font-medium text-gray-900 mb-2">
-                Performed By *
+                Dikerjakan Oleh *
               </label>
               <input
                 type="text"
@@ -512,7 +539,7 @@ export const ProcessStepCard: React.FC<ProcessStepCardProps> = ({
             {currentAction === "complete" && (
               <div>
                 <label className="block text-sm font-medium text-gray-900 mb-2">
-                  Quantity Completed
+                  Jumlah Selesai (Quantity Completed)
                 </label>
                 <input
                   type="number"
@@ -532,7 +559,7 @@ export const ProcessStepCard: React.FC<ProcessStepCardProps> = ({
 
             <div>
               <label className="block text-sm font-medium text-gray-900 mb-2">
-                Notes
+                Catatan (Opsional)
               </label>
               <textarea
                 value={actionData.notes}
@@ -541,6 +568,7 @@ export const ProcessStepCard: React.FC<ProcessStepCardProps> = ({
                 }
                 className="w-full px-4 py-2.5 border-2 border-gray-300 rounded-lg text-gray-900"
                 rows={3}
+                placeholder="Contoh: Mesin no 3, lembur 1 jam..."
               />
             </div>
           </div>
@@ -562,8 +590,8 @@ export const ProcessStepCard: React.FC<ProcessStepCardProps> = ({
               {isSubmitting
                 ? "Processing..."
                 : currentAction === "receive"
-                ? "Terima"
-                : "Complete"}
+                ? "Terima & Mulai"
+                : "Simpan Selesai"}
             </Button>
           </ModalFooter>
         </form>
@@ -573,11 +601,10 @@ export const ProcessStepCard: React.FC<ProcessStepCardProps> = ({
       <Modal
         isOpen={isRejectModalOpen}
         onClose={() => !isSubmitting && setIsRejectModalOpen(false)}
-        title="Record Reject/Rework"
+        title="Laporkan Reject/Rework"
         size="lg"
       >
         <form onSubmit={handleReject}>
-          {/* Form Content tetap sama, tapi logika submit sudah memastikan bisa input lagi */}
           <div className="space-y-4">
             {error && (
               <div className="bg-red-50 border border-red-200 rounded p-3 text-sm text-red-800">
@@ -585,9 +612,16 @@ export const ProcessStepCard: React.FC<ProcessStepCardProps> = ({
               </div>
             )}
 
+            {/* Konfirmasi Order di Modal Reject */}
+            <div className="bg-red-50 p-3 rounded-lg border border-red-200 text-sm mb-4">
+              <p className="font-bold text-red-900">
+                Melaporkan Masalah untuk: {orderInfo?.orderNumber}
+              </p>
+            </div>
+
             <div>
               <label className="block text-sm font-medium text-gray-900 mb-2">
-                Reject Type *
+                Jenis Masalah (Type) *
               </label>
               <select
                 value={rejectData.rejectType}
@@ -610,10 +644,10 @@ export const ProcessStepCard: React.FC<ProcessStepCardProps> = ({
 
             <div>
               <label className="block text-sm font-medium text-gray-900 mb-2">
-                Category *
+                Kategori Tindakan *
               </label>
               <div className="flex gap-4">
-                <label className="flex items-center text-gray-800 gap-2 cursor-pointer">
+                <label className="flex items-center text-gray-800 gap-2 cursor-pointer border p-3 rounded hover:bg-gray-50 flex-1 transition-colors">
                   <input
                     type="radio"
                     value="rework"
@@ -626,9 +660,16 @@ export const ProcessStepCard: React.FC<ProcessStepCardProps> = ({
                       })
                     }
                   />
-                  <span>Rework (Bisa diperbaiki)</span>
+                  <div>
+                    <span className="font-bold block text-yellow-700">
+                      Rework
+                    </span>
+                    <span className="text-xs text-gray-500">
+                      Bisa diperbaiki (Masuk keranjang rework)
+                    </span>
+                  </div>
                 </label>
-                <label className="flex items-center text-gray-800 gap-2 cursor-pointer">
+                <label className="flex items-center text-gray-800 gap-2 cursor-pointer border p-3 rounded hover:bg-gray-50 flex-1 transition-colors">
                   <input
                     type="radio"
                     value="reject"
@@ -641,14 +682,17 @@ export const ProcessStepCard: React.FC<ProcessStepCardProps> = ({
                       })
                     }
                   />
-                  <span>Reject (Scrap/Buang)</span>
+                  <div>
+                    <span className="font-bold block text-red-700">Reject</span>
+                    <span className="text-xs text-gray-500">Scrap/Buang</span>
+                  </div>
                 </label>
               </div>
             </div>
 
             <div>
               <label className="block text-sm font-medium text-gray-900 mb-2">
-                Quantity *
+                Jumlah (Quantity) *
               </label>
               <input
                 type="number"
@@ -667,7 +711,7 @@ export const ProcessStepCard: React.FC<ProcessStepCardProps> = ({
 
             <div>
               <label className="block text-sm font-medium text-gray-900 mb-2">
-                Description *
+                Keterangan Masalah *
               </label>
               <textarea
                 value={rejectData.description}
@@ -677,7 +721,7 @@ export const ProcessStepCard: React.FC<ProcessStepCardProps> = ({
                 className="w-full px-4 py-2.5 text-gray-800 border rounded-lg"
                 rows={3}
                 required
-                placeholder="Jelaskan detail kerusakan..."
+                placeholder="Jelaskan detail kerusakan agar mudah diperbaiki/dianalisa..."
               />
             </div>
           </div>
@@ -692,13 +736,13 @@ export const ProcessStepCard: React.FC<ProcessStepCardProps> = ({
               Batal
             </Button>
             <Button type="submit" variant="danger" disabled={isSubmitting}>
-              {isSubmitting ? "Recording..." : "Record"}
+              {isSubmitting ? "Menyimpan..." : "Simpan Laporan"}
             </Button>
           </ModalFooter>
         </form>
       </Modal>
 
-      {/* DETAIL MODAL (Pastikan dipanggil) */}
+      {/* Detail Modal untuk Histori Reject/Rework */}
       <RejectReworkDetailModal
         isOpen={isRejectDetailModalOpen}
         onClose={() => setIsRejectDetailModalOpen(false)}

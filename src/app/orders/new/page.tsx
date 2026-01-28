@@ -1,12 +1,11 @@
-// src/app/orders/new/page.tsx - UPDATED with Process Template Selection
+// src/app/orders/new/page.tsx
 
 "use client";
 
 import React, { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import { Buyer, Style, SizeType, ProcessName } from "@/lib/types-new";
+import { Buyer, Style, ProcessName } from "@/lib/types-new";
 import {
-  SIZE_OPTIONS,
   BUYER_TYPE_LABELS,
   PROCESS_LABELS,
   PROCESS_DEPARTMENT_MAP,
@@ -19,7 +18,13 @@ import { Button } from "@/components/ui/Button";
 import { Badge } from "@/components/ui/Badge";
 import apiClient from "@/lib/api-client";
 import { MaterialAccessorySelector } from "@/components/MaterialAccessorySelector";
-import { AlertCircle } from "lucide-react";
+import { AlertCircle, ArrowLeft, Plus, Trash2 } from "lucide-react";
+
+// Tipe data untuk baris size breakdown
+interface SizeRow {
+  size: string;
+  quantity: number;
+}
 
 export default function NewOrderPage() {
   const router = useRouter();
@@ -53,7 +58,7 @@ export default function NewOrderPage() {
   });
 
   const [formData, setFormData] = useState({
-    orderNumber: "", // NEW: Manual input
+    orderNumber: "",
     buyerId: "",
     styleId: "",
     orderDate: new Date().toISOString().split("T")[0],
@@ -64,9 +69,13 @@ export default function NewOrderPage() {
     processTemplateId: "full_process",
   });
 
-  const [sizeBreakdown, setSizeBreakdown] = useState<{
-    [key in SizeType]?: number;
-  }>({});
+  // --- DYNAMIC SIZE STATE ---
+  const [sizeRows, setSizeRows] = useState<SizeRow[]>([
+    { size: "S", quantity: 0 },
+    { size: "M", quantity: 0 },
+    { size: "L", quantity: 0 },
+    { size: "XL", quantity: 0 },
+  ]);
 
   const [errors, setErrors] = useState<{ [key: string]: string }>({});
 
@@ -86,6 +95,10 @@ export default function NewOrderPage() {
 
   const templateOptions = getTemplateOptions();
   const selectedTemplate = getTemplateById(formData.processTemplateId);
+
+  // Custom Process Flow State
+  const [customProcessFlow, setCustomProcessFlow] = useState<ProcessName[]>([]);
+  const [isCustomizing, setIsCustomizing] = useState(false);
 
   useEffect(() => {
     loadData();
@@ -108,11 +121,7 @@ export default function NewOrderPage() {
     }
   };
 
-  // Tambahkan di bagian state declarations
-  const [customProcessFlow, setCustomProcessFlow] = useState<ProcessName[]>([]);
-  const [isCustomizing, setIsCustomizing] = useState(false);
-
-  // Tambahkan useEffect untuk sync dengan template
+  // Sync template flow
   useEffect(() => {
     if (formData.processTemplateId && !isCustomizing) {
       const template = getTemplateById(formData.processTemplateId);
@@ -122,7 +131,35 @@ export default function NewOrderPage() {
     }
   }, [formData.processTemplateId]);
 
-  // Tambahkan setelah state declarations
+  // --- DYNAMIC SIZE FUNCTIONS ---
+
+  const addSizeRow = () => {
+    setSizeRows([...sizeRows, { size: "", quantity: 0 }]);
+  };
+
+  const removeSizeRow = (index: number) => {
+    const newRows = [...sizeRows];
+    newRows.splice(index, 1);
+    setSizeRows(newRows);
+  };
+
+  const handleSizeChange = (
+    index: number,
+    field: keyof SizeRow,
+    value: string | number
+  ) => {
+    const newRows = [...sizeRows];
+    // @ts-ignore
+    newRows[index][field] = value;
+    setSizeRows(newRows);
+  };
+
+  const getTotalQuantity = () => {
+    return sizeRows.reduce((sum, row) => sum + (Number(row.quantity) || 0), 0);
+  };
+
+  // --- PROCESS FLOW FUNCTIONS ---
+
   const addProcessToFlow = (processName: ProcessName) => {
     if (!customProcessFlow.includes(processName)) {
       setCustomProcessFlow([...customProcessFlow, processName]);
@@ -167,7 +204,8 @@ export default function NewOrderPage() {
     }
   };
 
-  // Tambahkan setelah loadData function
+  // --- CREATE NEW DATA HANDLERS ---
+
   const handleCreateBuyer = async () => {
     try {
       const response = await fetch("/api/buyers", {
@@ -178,11 +216,8 @@ export default function NewOrderPage() {
 
       const result = await response.json();
       if (result.success) {
-        // Reload buyers
         await loadData();
-        // Set as selected
         setFormData({ ...formData, buyerId: result.data.id });
-        // Reset form
         setNewBuyer({
           name: "",
           type: "repeat",
@@ -234,7 +269,9 @@ export default function NewOrderPage() {
       alert("Failed to create style");
     }
   };
-  // Check if order number exists
+
+  // --- ORDER NUMBER CHECK ---
+
   const checkOrderNumberExists = async (orderNumber: string) => {
     if (!orderNumber.trim()) return;
 
@@ -276,11 +313,9 @@ export default function NewOrderPage() {
   };
 
   const handleOrderNumberChange = (value: string) => {
-    // Auto-uppercase and remove special characters except dash
     const cleaned = value.toUpperCase().replace(/[^A-Z0-9-]/g, "");
     setFormData({ ...formData, orderNumber: cleaned });
 
-    // Clear error when typing
     if (errors.orderNumber) {
       const newErrors = { ...errors };
       delete newErrors.orderNumber;
@@ -297,25 +332,11 @@ export default function NewOrderPage() {
   const selectedBuyer = buyers.find((b) => b.id === formData.buyerId);
   const selectedStyle = styles.find((s) => s.id === formData.styleId);
 
-  const handleSizeChange = (size: SizeType, value: string) => {
-    const qty = parseInt(value) || 0;
-    setSizeBreakdown((prev) => ({
-      ...prev,
-      [size]: qty > 0 ? qty : undefined,
-    }));
-  };
-
-  const getTotalQuantity = () => {
-    return Object.values(sizeBreakdown).reduce(
-      (sum, qty) => sum + (qty || 0),
-      0
-    );
-  };
+  // --- VALIDATION & SUBMIT ---
 
   const validate = (): boolean => {
     const newErrors: { [key: string]: string } = {};
 
-    // Validate order number
     if (!formData.orderNumber.trim()) {
       newErrors.orderNumber = "Order number is required";
     } else if (formData.orderNumber.trim().length < 3) {
@@ -369,12 +390,10 @@ export default function NewOrderPage() {
     try {
       const totalQuantity = getTotalQuantity();
 
-      const sizeBreakdownArray = SIZE_OPTIONS.filter(
-        (size) => sizeBreakdown[size] && sizeBreakdown[size]! > 0
-      ).map((size) => ({
-        size,
-        quantity: sizeBreakdown[size]!,
-      }));
+      // Filter rows yang valid (size ada nama dan qty > 0)
+      const validSizeBreakdown = sizeRows.filter(
+        (row) => row.size.trim() !== "" && row.quantity > 0
+      );
 
       const orderData = {
         orderNumber: formData.orderNumber.trim().toUpperCase(),
@@ -384,7 +403,7 @@ export default function NewOrderPage() {
         productionDeadline: formData.productionDeadline,
         deliveryDeadline: formData.deliveryDeadline,
         totalQuantity,
-        sizeBreakdown: sizeBreakdownArray,
+        sizeBreakdown: validSizeBreakdown,
         createdBy: formData.createdBy,
         notes: formData.notes,
         processTemplateId: isCustomizing
@@ -404,7 +423,6 @@ export default function NewOrderPage() {
       const result = await response.json();
 
       if (result.success) {
-        // Generate QR codes
         try {
           await apiClient.generateOrderQR(result.data.id);
         } catch (qrError) {
@@ -423,19 +441,6 @@ export default function NewOrderPage() {
     }
   };
 
-  // if (isLoading) {
-  //   return (
-  //     <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-  //       <div className="flex items-center justify-center min-h-100">
-  //         <div className="text-center">
-  //           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
-  //           <p className="text-gray-600">Memuat form data...</p>
-  //         </div>
-  //       </div>
-  //     </div>
-  //   );
-  // }
-
   return (
     <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
       {/* Header */}
@@ -446,19 +451,7 @@ export default function NewOrderPage() {
             className="text-gray-600 hover:text-gray-900"
             disabled={isSubmitting}
           >
-            <svg
-              className="w-6 h-6"
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-                d="M15 19l-7-7 7-7"
-              />
-            </svg>
+            <ArrowLeft className="w-6 h-6" />
           </button>
           <div>
             <h1 className="text-3xl font-bold text-gray-900">
@@ -492,13 +485,6 @@ export default function NewOrderPage() {
                 maxLength={50}
               />
 
-              {/* {isCheckingOrderNumber && (
-                <p className="text-sm text-blue-600 mt-1 flex items-center gap-1">
-                  <div className="animate-spin rounded-full h-3 w-3 border-b-2 border-blue-600"></div>
-                  Mengecek kesediaan...
-                </p>
-              )} */}
-
               {errors.orderNumber && (
                 <p className="text-sm text-red-600 mt-1 flex items-center gap-1">
                   <AlertCircle className="w-4 h-4" />
@@ -510,23 +496,13 @@ export default function NewOrderPage() {
                 !errors.orderNumber &&
                 !isCheckingOrderNumber && (
                   <p className="text-sm text-green-600 mt-1 flex items-center gap-1">
-                    <svg
-                      className="w-4 h-4"
-                      fill="currentColor"
-                      viewBox="0 0 20 20"
-                    >
-                      <path
-                        fillRule="evenodd"
-                        d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
-                        clipRule="evenodd"
-                      />
-                    </svg>
                     Order number is available
                   </p>
                 )}
             </div>
           </CardContent>
         </Card>
+
         {/* Buyer Selection */}
         <Card>
           <CardHeader>
@@ -973,7 +949,7 @@ export default function NewOrderPage() {
           </CardContent>
         </Card>
 
-        {/* NEW: Process Template Selection - WITH CUSTOMIZATION */}
+        {/* Process Template Selection */}
         <Card>
           <CardHeader>
             <CardTitle>Pilih Template Proses</CardTitle>
@@ -1217,46 +1193,96 @@ export default function NewOrderPage() {
           </CardContent>
         </Card>
 
-        {/* Size Breakdown */}
+        {/* --- DYNAMIC SIZE BREAKDOWN (UPDATED) --- */}
         <Card>
-          <CardHeader>
+          <CardHeader className="flex flex-row items-center justify-between">
             <CardTitle>Size Breakdown</CardTitle>
+            <div className="text-right">
+              <span className="text-sm text-gray-500 mr-2">
+                Total Quantity:
+              </span>
+              <span className="text-xl font-bold text-blue-600">
+                {getTotalQuantity()} pcs
+              </span>
+            </div>
           </CardHeader>
           <CardContent>
             <div className="space-y-4">
-              <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                {SIZE_OPTIONS.map((size) => (
-                  <div key={size}>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
-                      Size {size}
-                    </label>
+              {/* Header Tabel */}
+              <div className="grid grid-cols-12 gap-4 mb-2 font-medium text-gray-700 text-sm">
+                <div className="col-span-5">Ukuran (Size)</div>
+                <div className="col-span-5">Jumlah (Qty)</div>
+                <div className="col-span-2 text-center">Aksi</div>
+              </div>
+
+              {/* Baris Input Dynamic */}
+              {sizeRows.map((row, index) => (
+                <div
+                  key={index}
+                  className="grid grid-cols-12 gap-4 items-center"
+                >
+                  <div className="col-span-5">
                     <input
-                      type="number"
-                      min="0"
-                      value={sizeBreakdown[size] || ""}
-                      onChange={(e) => handleSizeChange(size, e.target.value)}
-                      placeholder="0"
-                      className="w-full px-4 py-2 border text-gray-600 border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                      type="text"
+                      value={row.size}
+                      onChange={(e) =>
+                        handleSizeChange(index, "size", e.target.value)
+                      }
+                      placeholder="Contoh: XL, 32, All Size"
+                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 text-gray-700"
+                      required
                       disabled={isSubmitting}
                     />
                   </div>
-                ))}
-              </div>
+                  <div className="col-span-5">
+                    <input
+                      type="number"
+                      min="0"
+                      value={row.quantity}
+                      onChange={(e) =>
+                        handleSizeChange(
+                          index,
+                          "quantity",
+                          parseInt(e.target.value) || 0
+                        )
+                      }
+                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 text-gray-700"
+                      required
+                      disabled={isSubmitting}
+                    />
+                  </div>
+                  <div className="col-span-2 text-center">
+                    {sizeRows.length > 1 && (
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        onClick={() => removeSizeRow(index)}
+                        className="text-red-500 hover:text-red-700 hover:bg-red-50"
+                        title="Hapus baris"
+                        disabled={isSubmitting}
+                      >
+                        <Trash2 className="w-5 h-5" />
+                      </Button>
+                    )}
+                  </div>
+                </div>
+              ))}
 
               {errors.sizes && (
                 <p className="text-sm text-red-600">{errors.sizes}</p>
               )}
 
-              {getTotalQuantity() > 0 && (
-                <div className="bg-green-50 border border-green-200 rounded-lg p-4">
-                  <p className="text-green-900 font-medium">
-                    Jumlah Total: {getTotalQuantity()} pieces
-                  </p>
-                  <p className="text-green-700 text-sm mt-1">
-                    Estimasi Bundle: {Math.ceil(getTotalQuantity() / 10)}
-                  </p>
-                </div>
-              )}
+              {/* Tombol Tambah Baris */}
+              <Button
+                type="button"
+                variant="outline"
+                onClick={addSizeRow}
+                className="w-full mt-2 border-dashed border-2 hover:border-blue-500 hover:text-blue-600"
+                disabled={isSubmitting}
+              >
+                <Plus className="w-4 h-4 mr-2" />
+                Tambah Ukuran Lain
+              </Button>
             </div>
           </CardContent>
         </Card>
@@ -1294,7 +1320,7 @@ export default function NewOrderPage() {
                   onChange={(e) =>
                     setFormData({ ...formData, orderDate: e.target.value })
                   }
-                  className="w-full px-4 py-2 text-gray-400 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  className="w-full px-4 py-2 text-gray-500 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                   disabled={isSubmitting}
                 />
               </div>
@@ -1312,7 +1338,7 @@ export default function NewOrderPage() {
                       productionDeadline: e.target.value,
                     })
                   }
-                  className={`w-full px-4 py-2 text-gray-400 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent ${
+                  className={`w-full px-4 py-2 text-gray-500 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent ${
                     errors.productionDeadline
                       ? "border-red-500"
                       : "border-gray-300"
@@ -1339,7 +1365,7 @@ export default function NewOrderPage() {
                       deliveryDeadline: e.target.value,
                     })
                   }
-                  className={`w-full px-4 py-2 text-gray-400 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent ${
+                  className={`w-full px-4 py-2 text-gray-500 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent ${
                     errors.deliveryDeadline
                       ? "border-red-500"
                       : "border-gray-300"
@@ -1372,7 +1398,7 @@ export default function NewOrderPage() {
                 onChange={(e) =>
                   setFormData({ ...formData, createdBy: e.target.value })
                 }
-                className={`w-full px-4 py-2 text-gray-400 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent ${
+                className={`w-full px-4 py-2 text-gray-600 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent ${
                   errors.createdBy ? "border-red-500" : "border-gray-300"
                 }`}
                 placeholder="Your name"
@@ -1392,7 +1418,7 @@ export default function NewOrderPage() {
                   setFormData({ ...formData, notes: e.target.value })
                 }
                 rows={4}
-                className="w-full px-4 py-2 border text-gray-400 border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                className="w-full px-4 py-2 border text-gray-600 border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                 placeholder="Any special instructions or notes..."
                 disabled={isSubmitting}
               />
