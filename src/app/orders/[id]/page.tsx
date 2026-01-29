@@ -494,6 +494,25 @@ export default function OrderDetailPage() {
                   </p>
                 </div>
                 <div>
+                  <p className="text-sm text-gray-600">
+                    Tanggal Mulai Produksi
+                  </p>
+                  {order.productionStartedAt ? (
+                    <div>
+                      <p className="font-semibold text-blue-700">
+                        {formatDate(new Date(order.productionStartedAt))}{" "}
+                      </p>
+                    </div>
+                  ) : (
+                    <Badge
+                      variant="info"
+                      className="mt-1 bg-gray-50 text-gray-600 border-gray-300"
+                    >
+                      Order Belum Dimulai
+                    </Badge>
+                  )}
+                </div>
+                <div>
                   <p className="text-sm text-gray-600">Batas Waktu Produksi</p>
                   <p
                     className={`font-semibold ${

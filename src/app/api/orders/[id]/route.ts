@@ -63,7 +63,9 @@ export async function GET(
         },
       },
       style: order.style,
+      article: order.article || undefined,
       orderDate: order.orderDate,
+      productionStartedAt: order.productionStartedAt,
       productionDeadline: order.productionDeadline,
       deliveryDeadline: order.deliveryDeadline,
       totalQuantity: order.totalQuantity,
@@ -130,10 +132,12 @@ export async function PUT(
 
     if (assignedLine !== undefined) updateData.assignedLine = assignedLine;
     if (assignedTo !== undefined) updateData.assignedTo = assignedTo;
-    if (totalCompleted !== undefined) updateData.totalCompleted = totalCompleted;
+    if (totalCompleted !== undefined)
+      updateData.totalCompleted = totalCompleted;
     if (totalRejected !== undefined) updateData.totalRejected = totalRejected;
     if (totalRework !== undefined) updateData.totalRework = totalRework;
-    if (materialsIssued !== undefined) updateData.materialsIssued = materialsIssued;
+    if (materialsIssued !== undefined)
+      updateData.materialsIssued = materialsIssued;
     if (hasLeftover !== undefined) updateData.hasLeftover = hasLeftover;
     if (notes !== undefined) updateData.notes = notes;
 

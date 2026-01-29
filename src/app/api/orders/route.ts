@@ -13,6 +13,7 @@ export async function POST(request: NextRequest) {
       orderNumber,
       buyerId,
       styleId,
+      article,
       orderDate,
       productionDeadline,
       deliveryDeadline,
@@ -24,6 +25,7 @@ export async function POST(request: NextRequest) {
       customProcessFlow,
       selectedMaterials,
       selectedAccessories,
+      assignedLine,
     } = body;
 
     // Validate order number
@@ -116,6 +118,7 @@ export async function POST(request: NextRequest) {
           orderNumber: orderNumber.trim().toUpperCase(),
           buyerId,
           styleId,
+          article,
           orderDate: new Date(orderDate),
           productionDeadline: new Date(productionDeadline),
           deliveryDeadline: new Date(deliveryDeadline),
@@ -124,11 +127,12 @@ export async function POST(request: NextRequest) {
           processFlow: JSON.stringify(processFlow),
           totalProcessSteps,
           currentPhase: "production",
-          currentProcess: firstProcess, // ✅ First real process
-          currentState: "waiting", // ✅ Langsung waiting
-          materialsIssued: true, // ✅ Materials already issued
+          currentProcess: firstProcess,
+          currentState: "waiting",
+          materialsIssued: true,
           createdBy,
           notes: notes || null,
+          assignedLine: assignedLine || null,
           sizeBreakdowns: {
             create: sizeBreakdown.map((sb: any) => ({
               size: sb.size,
@@ -416,8 +420,10 @@ export async function GET(request: NextRequest) {
         },
       },
       style: order.style,
+      article: order.article,
       orderDate: order.orderDate,
       productionDeadline: order.productionDeadline,
+      productionStartedAt: order.productionStartedAt,
       deliveryDeadline: order.deliveryDeadline,
       totalQuantity: order.totalQuantity,
       totalCompleted: order.totalCompleted,

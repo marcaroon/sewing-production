@@ -4,7 +4,7 @@
 
 import React, { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import { Buyer, Style, ProcessName } from "@/lib/types-new";
+import { Buyer, Style, ProcessName, SewingLine } from "@/lib/types-new";
 import {
   BUYER_TYPE_LABELS,
   PROCESS_LABELS,
@@ -36,6 +36,10 @@ export default function NewOrderPage() {
 
   const [showBuyerForm, setShowBuyerForm] = useState(false);
   const [showStyleForm, setShowStyleForm] = useState(false);
+  const [showLineForm, setShowLineForm] = useState(false);
+
+  const [sewingLines, setSewingLines] = useState<any[]>([]);
+  const [selectedLine, setSelectedLine] = useState<string>("");
 
   const [newBuyer, setNewBuyer] = useState({
     name: "",
@@ -57,10 +61,18 @@ export default function NewOrderPage() {
     estimatedSewingTime: 0,
   });
 
+  const [newLine, setNewLine] = useState({
+    lineName: "",
+    capacity: 0,
+    department: "sewing" as "cutting" | "sewing" | "finishing",
+    status: "active" as "active" | "inactive",
+  });
+
   const [formData, setFormData] = useState({
     orderNumber: "",
     buyerId: "",
     styleId: "",
+    article: "",
     orderDate: new Date().toISOString().split("T")[0],
     productionDeadline: "",
     deliveryDeadline: "",
@@ -130,6 +142,34 @@ export default function NewOrderPage() {
       }
     }
   }, [formData.processTemplateId]);
+
+  useEffect(() => {
+    const fetchMasterData = async () => {
+      try {
+        const [buyersRes, stylesRes, linesRes] = await Promise.all([
+          apiClient.getBuyers(),
+          apiClient.getStyles(),
+          // Asumsi Anda punya endpoint ini, jika belum bisa pakai fetch manual
+          fetch("/api/sewing-lines").then((res) => res.json()),
+        ]);
+
+        if (buyersRes) setBuyers(buyersRes);
+        if (stylesRes) setStyles(stylesRes);
+
+        // Handle response sewing lines
+        if (linesRes.success) {
+          // Filter hanya line yang aktif jika perlu
+          setSewingLines(
+            linesRes.data.filter((l: any) => l.status === "active")
+          );
+        }
+      } catch (error) {
+        console.error("Error fetching master data:", error);
+      }
+    };
+
+    fetchMasterData();
+  }, []);
 
   // --- DYNAMIC SIZE FUNCTIONS ---
 
@@ -213,11 +253,12 @@ export default function NewOrderPage() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(newBuyer),
       });
-
       const result = await response.json();
+
       if (result.success) {
-        await loadData();
+        setBuyers([...buyers, result.data]);
         setFormData({ ...formData, buyerId: result.data.id });
+        setShowBuyerForm(false);
         setNewBuyer({
           name: "",
           type: "repeat",
@@ -228,8 +269,6 @@ export default function NewOrderPage() {
           returRequired: false,
           storageLocation: "",
         });
-        setShowBuyerForm(false);
-        alert("Buyer created successfully!");
       } else {
         alert(result.error || "Failed to create buyer");
       }
@@ -246,11 +285,12 @@ export default function NewOrderPage() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(newStyle),
       });
-
       const result = await response.json();
+
       if (result.success) {
-        await loadData();
+        setStyles([...styles, result.data]);
         setFormData({ ...formData, styleId: result.data.id });
+        setShowStyleForm(false);
         setNewStyle({
           styleCode: "",
           name: "",
@@ -259,8 +299,6 @@ export default function NewOrderPage() {
           estimatedCuttingTime: 0,
           estimatedSewingTime: 0,
         });
-        setShowStyleForm(false);
-        alert("Style created successfully!");
       } else {
         alert(result.error || "Failed to create style");
       }
@@ -270,7 +308,38 @@ export default function NewOrderPage() {
     }
   };
 
-  // --- ORDER NUMBER CHECK ---
+  const handleCreateLine = async () => {
+    try {
+      const response = await fetch("/api/sewing-lines", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(newLine),
+      });
+      const result = await response.json();
+
+      if (result.success) {
+        setSewingLines([...sewingLines, result.data]);
+        setSelectedLine(result.data.lineName);
+        setShowLineForm(false);
+        setNewLine({
+          lineName: "",
+          capacity: 0,
+          department: "sewing",
+          status: "active",
+        });
+      } else {
+        alert(result.error || "Failed to create line");
+      }
+    } catch (error) {
+      console.error("Error creating line:", error);
+      alert("Failed to create line");
+    }
+  };
+
+  // --- VALIDATION & SUBMIT ---
+
+  const selectedBuyer = buyers.find((b) => b.id === formData.buyerId);
+  const selectedStyle = styles.find((s) => s.id === formData.styleId);
 
   const checkOrderNumberExists = async (orderNumber: string) => {
     if (!orderNumber.trim()) return;
@@ -329,10 +398,43 @@ export default function NewOrderPage() {
     }
   };
 
-  const selectedBuyer = buyers.find((b) => b.id === formData.buyerId);
-  const selectedStyle = styles.find((s) => s.id === formData.styleId);
+  const validateForm = () => {
+    const newErrors: { [key: string]: string } = {};
 
-  // --- VALIDATION & SUBMIT ---
+    if (!formData.orderNumber.trim())
+      newErrors.orderNumber = "Order number is required";
+    if (!formData.buyerId) newErrors.buyerId = "Please select a buyer";
+    if (!formData.styleId) newErrors.styleId = "Please select a style";
+    if (!formData.productionDeadline)
+      newErrors.productionDeadline = "Production deadline is required";
+    if (!formData.deliveryDeadline)
+      newErrors.deliveryDeadline = "Delivery deadline is required";
+    if (!formData.createdBy.trim())
+      newErrors.createdBy = "Created by is required";
+    if (!formData.processTemplateId)
+      newErrors.processTemplateId = "Please select a process template";
+
+    if (sizeRows.length === 0 || sizeRows.every((row) => !row.size.trim())) {
+      newErrors.sizes = "Please add at least one size";
+    }
+
+    if (getTotalQuantity() === 0) {
+      newErrors.sizes = "Total quantity must be greater than 0";
+    }
+
+    if (
+      formData.productionDeadline &&
+      formData.deliveryDeadline &&
+      new Date(formData.productionDeadline) >
+        new Date(formData.deliveryDeadline)
+    ) {
+      newErrors.productionDeadline =
+        "Production deadline must be before delivery deadline";
+    }
+
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
+  };
 
   const validate = (): boolean => {
     const newErrors: { [key: string]: string } = {};
@@ -345,6 +447,7 @@ export default function NewOrderPage() {
 
     if (!formData.buyerId) newErrors.buyerId = "Please select a buyer";
     if (!formData.styleId) newErrors.styleId = "Please select a style";
+    if (!formData.article) newErrors.article = "Order article is required";
     if (!formData.productionDeadline)
       newErrors.productionDeadline = "Please set production deadline";
     if (!formData.deliveryDeadline)
@@ -399,6 +502,7 @@ export default function NewOrderPage() {
         orderNumber: formData.orderNumber.trim().toUpperCase(),
         buyerId: formData.buyerId,
         styleId: formData.styleId,
+        article: formData.article,
         orderDate: formData.orderDate,
         productionDeadline: formData.productionDeadline,
         deliveryDeadline: formData.deliveryDeadline,
@@ -499,6 +603,36 @@ export default function NewOrderPage() {
                     Order number is available
                   </p>
                 )}
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader>
+            <CardTitle>Article</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Article Name
+              </label>
+              <input
+                type="text"
+                value={formData.article}
+                onChange={(e) =>
+                  setFormData((prev) => ({
+                    ...prev,
+                    article: e.target.value,
+                  }))
+                }
+                className="w-full px-4 py-2 text-gray-600 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                placeholder="e.g., Spring 2025, Summer Collection, Article A"
+                disabled={isSubmitting}
+                maxLength={100}
+              />
+              <p className="mt-2 text-xs text-gray-500">
+                Optional: Specify article name or collection for this order
+              </p>
             </div>
           </CardContent>
         </Card>
@@ -617,8 +751,8 @@ export default function NewOrderPage() {
                         onChange={(e) =>
                           setNewBuyer({ ...newBuyer, code: e.target.value })
                         }
-                        className="w-full px-4 py-2 border text-gray-900 border-gray-300 rounded-lg"
-                        placeholder="e.g., NIKE-001"
+                        className="w-full px-4 py-2 text-gray-900 border border-gray-300 rounded-lg"
+                        placeholder="e.g., NIKE-ID"
                       />
                     </div>
                   </div>
@@ -637,8 +771,8 @@ export default function NewOrderPage() {
                       }
                       className="w-full px-4 py-2 text-gray-900 border border-gray-300 rounded-lg"
                     >
-                      <option value="repeat">Repeat Buyer</option>
-                      <option value="one-time">One-Time Buyer</option>
+                      <option value="repeat">Repeat</option>
+                      <option value="one-time">One-Time</option>
                     </select>
                   </div>
 
@@ -674,65 +808,10 @@ export default function NewOrderPage() {
                     </div>
                   </div>
 
-                  <div className="space-y-2">
-                    <label className="flex items-center gap-2">
-                      <input
-                        type="checkbox"
-                        checked={newBuyer.canReuse}
-                        onChange={(e) =>
-                          setNewBuyer({
-                            ...newBuyer,
-                            canReuse: e.target.checked,
-                          })
-                        }
-                        className="w-4 h-4"
-                      />
-                      <span className="text-sm text-gray-900">
-                        Material can be reused
-                      </span>
-                    </label>
-                    <label className="flex items-center gap-2">
-                      <input
-                        type="checkbox"
-                        checked={newBuyer.returRequired}
-                        onChange={(e) =>
-                          setNewBuyer({
-                            ...newBuyer,
-                            returRequired: e.target.checked,
-                          })
-                        }
-                        className="w-4 h-4"
-                      />
-                      <span className="text-sm text-gray-900">
-                        Return required
-                      </span>
-                    </label>
-                  </div>
-
-                  {newBuyer.canReuse && (
-                    <div>
-                      <label className="block text-sm font-medium text-gray-900 mb-2">
-                        Storage Location
-                      </label>
-                      <input
-                        type="text"
-                        value={newBuyer.storageLocation}
-                        onChange={(e) =>
-                          setNewBuyer({
-                            ...newBuyer,
-                            storageLocation: e.target.value,
-                          })
-                        }
-                        className="w-full px-4 py-2 border border-gray-300 rounded-lg"
-                        placeholder="e.g., Warehouse A, Rack 5"
-                      />
-                    </div>
-                  )}
-
                   <Button
                     type="button"
-                    onClick={handleCreateBuyer}
                     variant="primary"
+                    onClick={handleCreateBuyer}
                     className="w-full"
                   >
                     Create Buyer
@@ -743,7 +822,7 @@ export default function NewOrderPage() {
           </CardContent>
         </Card>
 
-        {/* Style Selection - UPDATED */}
+        {/* Style Selection */}
         <Card>
           <CardHeader>
             <div className="flex items-center justify-between">
@@ -760,7 +839,6 @@ export default function NewOrderPage() {
           </CardHeader>
           <CardContent>
             <div className="space-y-4">
-              {/* Existing Style Selection */}
               {!showStyleForm && (
                 <>
                   <div>
@@ -792,20 +870,21 @@ export default function NewOrderPage() {
                   </div>
 
                   {selectedStyle && (
-                    <div className="bg-gray-50 border border-gray-200 rounded-lg p-4">
+                    <div className="bg-green-50 border border-green-200 rounded-lg p-4">
                       <div className="grid grid-cols-2 gap-4 text-sm">
                         <div>
-                          <p className="text-gray-700 font-medium">
-                            Kode Style
-                          </p>
-                          <p className="text-gray-900">
-                            {selectedStyle.styleCode}
-                          </p>
+                          <p className="text-green-900 font-medium">Category</p>
+                          <Badge variant="success">
+                            {selectedStyle.category}
+                          </Badge>
                         </div>
                         <div>
-                          <p className="text-gray-700 font-medium">Kategori</p>
-                          <p className="text-gray-900 capitalize">
-                            {selectedStyle.category}
+                          <p className="text-green-900 font-medium">
+                            Est. Time
+                          </p>
+                          <p className="text-green-800">
+                            Cutting: {selectedStyle.estimatedCuttingTime}h |
+                            Sewing: {selectedStyle.estimatedSewingTime}h
                           </p>
                         </div>
                       </div>
@@ -814,10 +893,11 @@ export default function NewOrderPage() {
                 </>
               )}
 
-              {/* New Style Form */}
               {showStyleForm && (
-                <div className="bg-green-50 border-2 border-green-300 rounded-lg p-4 space-y-4">
-                  <h4 className="font-bold text-green-900">Create New Style</h4>
+                <div className="bg-purple-50 border-2 border-purple-300 rounded-lg p-4 space-y-4">
+                  <h4 className="font-bold text-purple-900">
+                    Create New Style
+                  </h4>
 
                   <div className="grid grid-cols-2 gap-4">
                     <div>
@@ -834,7 +914,7 @@ export default function NewOrderPage() {
                           })
                         }
                         className="w-full px-4 py-2 text-gray-900 border border-gray-300 rounded-lg"
-                        placeholder="e.g., ST-001"
+                        placeholder="e.g., SH-2025-001"
                       />
                     </div>
                     <div>
@@ -848,7 +928,7 @@ export default function NewOrderPage() {
                           setNewStyle({ ...newStyle, name: e.target.value })
                         }
                         className="w-full px-4 py-2 text-gray-900 border border-gray-300 rounded-lg"
-                        placeholder="e.g., Polo Shirt Regular"
+                        placeholder="e.g., Classic Blue Shirt"
                       />
                     </div>
                   </div>
@@ -894,54 +974,220 @@ export default function NewOrderPage() {
                       }
                       className="w-full px-4 py-2 text-gray-900 border border-gray-300 rounded-lg"
                       rows={3}
-                      placeholder="Style description..."
                     />
                   </div>
 
                   <div className="grid grid-cols-2 gap-4">
                     <div>
                       <label className="block text-sm font-medium text-gray-900 mb-2">
-                        Est. Cutting Time (min)
+                        Est. Cutting Time (hours)
                       </label>
                       <input
                         type="number"
+                        min="0"
                         value={newStyle.estimatedCuttingTime}
                         onChange={(e) =>
                           setNewStyle({
                             ...newStyle,
-                            estimatedCuttingTime: parseInt(e.target.value) || 0,
+                            estimatedCuttingTime:
+                              parseFloat(e.target.value) || 0,
                           })
                         }
                         className="w-full px-4 py-2 text-gray-900 border border-gray-300 rounded-lg"
-                        min="0"
                       />
                     </div>
                     <div>
                       <label className="block text-sm font-medium text-gray-900 mb-2">
-                        Est. Sewing Time (min/pc)
+                        Est. Sewing Time (hours)
                       </label>
                       <input
                         type="number"
+                        min="0"
                         value={newStyle.estimatedSewingTime}
                         onChange={(e) =>
                           setNewStyle({
                             ...newStyle,
-                            estimatedSewingTime: parseInt(e.target.value) || 0,
+                            estimatedSewingTime:
+                              parseFloat(e.target.value) || 0,
                           })
                         }
                         className="w-full px-4 py-2 text-gray-900 border border-gray-300 rounded-lg"
-                        min="0"
                       />
                     </div>
                   </div>
 
                   <Button
                     type="button"
-                    onClick={handleCreateStyle}
                     variant="primary"
+                    onClick={handleCreateStyle}
                     className="w-full"
                   >
                     Create Style
+                  </Button>
+                </div>
+              )}
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* Assigned Line Selection */}
+        <Card>
+          <CardHeader>
+            <div className="flex items-center justify-between">
+              <CardTitle>Assigned Line (Opsional)</CardTitle>
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                onClick={() => setShowLineForm(!showLineForm)}
+              >
+                {showLineForm ? "Cancel" : "+ New Line"}
+              </Button>
+            </div>
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-4">
+              {!showLineForm && (
+                <>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      Sewing Line
+                    </label>
+                    <select
+                      value={selectedLine}
+                      onChange={(e) => setSelectedLine(e.target.value)}
+                      className="w-full px-4 py-2 text-gray-600 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                      disabled={isSubmitting}
+                    >
+                      <option value="">-- Pilih Line --</option>
+                      {sewingLines.map((line) => (
+                        <option key={line.id} value={line.lineName}>
+                          {line.lineName} (Kapasitas: {line.capacity})
+                        </option>
+                      ))}
+                    </select>
+                    <p className="text-xs text-gray-500 mt-1">
+                      Line produksi yang akan mengerjakan order ini.
+                    </p>
+                  </div>
+
+                  {selectedLine && (
+                    <div className="bg-orange-50 border border-orange-200 rounded-lg p-4">
+                      <div className="grid grid-cols-2 gap-4 text-sm">
+                        <div>
+                          <p className="text-orange-900 font-medium">
+                            Line Terpilih
+                          </p>
+                          <Badge variant="warning">{selectedLine}</Badge>
+                        </div>
+                        <div>
+                          <p className="text-orange-900 font-medium">
+                            Kapasitas
+                          </p>
+                          <p className="text-orange-800">
+                            {
+                              sewingLines.find(
+                                (l) => l.lineName === selectedLine
+                              )?.capacity
+                            }{" "}
+                            pcs/hari
+                          </p>
+                        </div>
+                      </div>
+                    </div>
+                  )}
+                </>
+              )}
+
+              {showLineForm && (
+                <div className="bg-purple-50 border-2 border-purple-300 rounded-lg p-4 space-y-4">
+                  <h4 className="font-bold text-purple-900">Create New Line</h4>
+
+                  <div className="grid grid-cols-2 gap-4">
+                    <div>
+                      <label className="block text-sm font-medium text-gray-900 mb-2">
+                        Line Name *
+                      </label>
+                      <input
+                        type="text"
+                        value={newLine.lineName}
+                        onChange={(e) =>
+                          setNewLine({ ...newLine, lineName: e.target.value })
+                        }
+                        className="w-full px-4 py-2 text-gray-900 border border-gray-300 rounded-lg"
+                        placeholder="e.g., Line A, Line 1"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-900 mb-2">
+                        Capacity (pcs/day) *
+                      </label>
+                      <input
+                        type="number"
+                        min="0"
+                        value={newLine.capacity}
+                        onChange={(e) =>
+                          setNewLine({
+                            ...newLine,
+                            capacity: parseInt(e.target.value) || 0,
+                          })
+                        }
+                        className="w-full px-4 py-2 text-gray-900 border border-gray-300 rounded-lg"
+                        placeholder="e.g., 500"
+                      />
+                    </div>
+                  </div>
+
+                  <div className="grid grid-cols-2 gap-4">
+                    <div>
+                      <label className="block text-sm font-medium text-gray-900 mb-2">
+                        Department *
+                      </label>
+                      <select
+                        value={newLine.department}
+                        onChange={(e) =>
+                          setNewLine({
+                            ...newLine,
+                            department: e.target.value as
+                              | "cutting"
+                              | "sewing"
+                              | "finishing",
+                          })
+                        }
+                        className="w-full px-4 py-2 text-gray-900 border border-gray-300 rounded-lg"
+                      >
+                        <option value="cutting">Cutting</option>
+                        <option value="sewing">Sewing</option>
+                        <option value="finishing">Finishing</option>
+                      </select>
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-900 mb-2">
+                        Status *
+                      </label>
+                      <select
+                        value={newLine.status}
+                        onChange={(e) =>
+                          setNewLine({
+                            ...newLine,
+                            status: e.target.value as "active" | "inactive",
+                          })
+                        }
+                        className="w-full px-4 py-2 text-gray-900 border border-gray-300 rounded-lg"
+                      >
+                        <option value="active">Active</option>
+                        <option value="inactive">Inactive</option>
+                      </select>
+                    </div>
+                  </div>
+
+                  <Button
+                    type="button"
+                    variant="primary"
+                    onClick={handleCreateLine}
+                    className="w-full"
+                  >
+                    Create Line
                   </Button>
                 </div>
               )}
@@ -994,24 +1240,11 @@ export default function NewOrderPage() {
               {selectedTemplate && customProcessFlow.length > 0 && (
                 <div className="bg-purple-50 border-2 border-purple-300 rounded-lg p-4">
                   <div className="flex items-center justify-between mb-4">
-                    <h4 className="font-bold text-purple-900 flex items-center gap-2">
-                      <svg
-                        className="w-5 h-5"
-                        fill="none"
-                        stroke="currentColor"
-                        viewBox="0 0 24 24"
-                      >
-                        <path
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          strokeWidth={2}
-                          d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"
-                        />
-                      </svg>
-                      Process Flow Editor
+                    <h4 className="font-semibold text-purple-900 flex items-center gap-2">
+                      {selectedTemplate.name}
                       {isCustomizing && (
-                        <Badge variant="warning" size="sm">
-                          Modified
+                        <Badge variant="warning" className="text-xs">
+                          Customized
                         </Badge>
                       )}
                     </h4>
@@ -1100,47 +1333,35 @@ export default function NewOrderPage() {
                           </button>
                         </div>
 
-                        {/* Step Number */}
-                        <span className="font-bold text-sm text-purple-700 w-8">
-                          {idx + 1}.
-                        </span>
-
-                        {/* Process Name */}
-                        <span className="flex-1 text-sm font-semibold text-gray-800">
-                          {PROCESS_LABELS[process]}
-                        </span>
-
-                        {/* Department Badge */}
-                        <Badge variant="info" size="sm">
-                          {PROCESS_DEPARTMENT_MAP[process]}
-                        </Badge>
+                        {/* Process Info */}
+                        <div className="flex-1 flex items-center gap-2">
+                          <span className="font-mono text-sm text-purple-600 font-bold">
+                            #{idx + 1}
+                          </span>
+                          <div>
+                            <p className="font-semibold text-purple-900">
+                              {PROCESS_LABELS[process]}
+                            </p>
+                            <p className="text-xs text-purple-600">
+                              {PROCESS_DEPARTMENT_MAP[process]}
+                            </p>
+                          </div>
+                        </div>
 
                         {/* Remove Button */}
                         <button
                           type="button"
                           onClick={() => removeProcessFromFlow(process)}
-                          className="text-red-500 hover:text-red-700 hover:bg-red-100 rounded p-1"
-                          title="Remove from flow"
+                          className="text-red-500 hover:text-red-700 hover:bg-red-50 rounded p-1"
+                          title="Remove process"
                         >
-                          <svg
-                            className="w-4 h-4"
-                            fill="none"
-                            stroke="currentColor"
-                            viewBox="0 0 24 24"
-                          >
-                            <path
-                              strokeLinecap="round"
-                              strokeLinejoin="round"
-                              strokeWidth={2}
-                              d="M6 18L18 6M6 6l12 12"
-                            />
-                          </svg>
+                          <Trash2 className="w-4 h-4" />
                         </button>
                       </div>
                     ))}
                   </div>
 
-                  {/* Add Process Dropdown */}
+                  {/* Add More Processes */}
                   <div className="mt-4">
                     <label className="block text-sm font-semibold text-purple-900 mb-2">
                       Add More Processes:

@@ -199,13 +199,30 @@ export async function POST(
 
       if (notes) updateData.notes = notes;
 
-      // Update process step
       const updatedProcessStep = await tx.processStep.update({
         where: { id: processStepId },
         data: updateData,
       });
 
-      // Log transition
+      if (
+        processStep.processName === "cutting" &&
+        updateData.status === "in_progress"
+      ) {
+        const currentOrder = await tx.order.findUnique({
+          where: { id: processStep.orderId },
+          select: { productionStartedAt: true },
+        });
+
+        if (!currentOrder?.productionStartedAt) {
+          await tx.order.update({
+            where: { id: processStep.orderId },
+            data: {
+              productionStartedAt: now,
+            },
+          });
+        }
+      }
+
       const transition = await tx.processTransition.create({
         data: {
           orderId: processStep.orderId,
@@ -224,7 +241,6 @@ export async function POST(
       let nextProcessStep = null;
       let transferLog = null;
 
-      // ========== WHEN COMPLETED: Create Transfer & Next Process ==========
       // ========== WHEN COMPLETED: Create Transfer & Next Process ==========
       if (action === "complete") {
         const completedQty = quantity || processStep.quantityReceived;

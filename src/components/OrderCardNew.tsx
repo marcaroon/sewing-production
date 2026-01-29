@@ -18,6 +18,7 @@ import {
   CheckCircle2,
   Clock,
   AlertTriangle,
+  PlayCircle,
 } from "lucide-react";
 import { DualProgressBarsCompact } from "@/components/DualProgressBars";
 
@@ -104,6 +105,23 @@ export const OrderCardNew: React.FC<OrderCardProps> = ({ order }) => {
                 <p className="font-bold text-gray-900">
                   {formatNumber(order.totalQuantity)} pcs
                 </p>
+              </div>
+            </div>
+            <div className="flex items-start gap-2">
+              <PlayCircle className="w-4 h-4 text-blue-600 mt-0.5" />
+              <div>
+                <span className="text-gray-600 text-xs block">
+                  Mulai Produksi
+                </span>
+                {order.productionStartedAt ? (
+                  <p className="font-bold text-blue-700">
+                    {formatDate(new Date(order.productionStartedAt))}{" "}
+                  </p>
+                ) : (
+                  <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-gray-100 text-gray-800 mt-0.5">
+                    Belum Dimulai
+                  </span>
+                )}
               </div>
             </div>
             <div className="flex items-start gap-2">

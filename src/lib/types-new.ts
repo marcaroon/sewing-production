@@ -120,6 +120,7 @@ export interface Order {
   orderDate: Date;
 
   // TWO DEADLINES
+  productionStartedAt?: Date;
   productionDeadline: Date; // Deadline produksi selesai
   deliveryDeadline: Date; // Deadline kirim ke buyer
 

@@ -57,9 +57,11 @@ model Order {
   orderNumber           String   @unique
   buyerId               String
   styleId               String
+  article               String?
   orderDate             DateTime
   
   // TWO DEADLINES
+  productionStartedAt   DateTime?
   productionDeadline    DateTime  // Deadline untuk selesai produksi
   deliveryDeadline      DateTime  // Deadline untuk pengiriman ke buyer
   
