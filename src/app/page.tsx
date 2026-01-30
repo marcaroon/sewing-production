@@ -39,12 +39,6 @@ export default function LandingPage() {
               >
                 Login
               </a>
-              <a
-                href="/auth/register"
-                className="bg-linear-to-r from-blue-600 to-blue-700 text-white px-6 py-2.5 rounded-lg hover:shadow-lg transition-all font-semibold"
-              >
-                Get Started
-              </a>
             </div>
           </div>
         </div>
@@ -55,10 +49,10 @@ export default function LandingPage() {
         <div className="max-w-7xl mx-auto">
           <div className="grid lg:grid-cols-2 gap-12 items-center">
             <div className="max-w-2xl">
-              <div className="inline-flex items-center gap-2 bg-blue-50 border border-blue-200 text-blue-700 px-4 py-2 rounded-full text-sm font-semibold mb-6">
+              {/* <div className="inline-flex items-center gap-2 bg-blue-50 border border-blue-200 text-blue-700 px-4 py-2 rounded-full text-sm font-semibold mb-6">
                 <Zap className="w-4 h-4" />
                 Complete Production Solution
-              </div>
+              </div> */}
 
               <h1 className="text-5xl lg:text-6xl font-bold text-gray-900 mb-6 leading-tight">
                 Transform Your
@@ -74,24 +68,8 @@ export default function LandingPage() {
                 optimize your entire workflow.
               </p>
 
-              <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4 mb-10">
-                <a
-                  href="/auth/register"
-                  className="inline-flex items-center gap-2 bg-linear-to-r from-blue-600 to-blue-700 text-white px-8 py-4 rounded-xl hover:shadow-xl transition-all font-semibold"
-                >
-                  Start Free Trial
-                  <ArrowRight className="w-5 h-5" />
-                </a>
-                <a
-                  href="/auth/login"
-                  className="inline-flex items-center gap-2 bg-white border-2 border-gray-200 text-gray-900 px-8 py-4 rounded-xl hover:border-gray-300 hover:shadow-md transition-all font-semibold"
-                >
-                  Sign In
-                </a>
-              </div>
-
               {/* Stats Grid */}
-              <div className="grid grid-cols-3 gap-6 pt-6 border-t border-gray-200">
+              {/* <div className="grid grid-cols-3 gap-6 pt-6 border-t border-gray-200">
                 {[
                   {
                     icon: <Clock className="w-5 h-5 text-blue-600" />,
@@ -117,7 +95,7 @@ export default function LandingPage() {
                     <div className="text-sm text-gray-600">{stat.label}</div>
                   </div>
                 ))}
-              </div>
+              </div> */}
             </div>
 
             {/* Visual Element - Professional Dashboard Preview */}
@@ -248,7 +226,7 @@ export default function LandingPage() {
       </section>
 
       {/* Benefits Section */}
-      <section className="py-24 px-6 lg:px-8 bg-linear-to-br from-gray-50 to-blue-50">
+      {/* <section className="py-24 px-6 lg:px-8 bg-linear-to-br from-gray-50 to-blue-50">
         <div className="max-w-7xl mx-auto">
           <div className="grid lg:grid-cols-2 gap-12 items-center">
             <div>
@@ -325,10 +303,10 @@ export default function LandingPage() {
             </div>
           </div>
         </div>
-      </section>
+      </section> */}
 
       {/* CTA Section - Professional */}
-      <section className="py-24 px-6 lg:px-8 bg-linear-to-r from-blue-600 to-blue-700">
+      {/* <section className="py-24 px-6 lg:px-8 bg-linear-to-r from-blue-600 to-blue-700">
         <div className="max-w-4xl mx-auto text-center">
           <h2 className="text-4xl lg:text-5xl font-bold text-white mb-6">
             Ready to Transform Your Production?
@@ -353,7 +331,7 @@ export default function LandingPage() {
             </a>
           </div>
         </div>
-      </section>
+      </section> */}
 
       {/* Footer - Professional */}
       <footer className="bg-gray-900 border-t border-gray-800 py-12 px-6 lg:px-8">

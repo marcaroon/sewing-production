@@ -59,9 +59,7 @@ function LoginForm() {
           <h1 className="text-3xl font-bold text-gray-900 mb-2">
             Selamat Datang Kembali
           </h1>
-          <p className="text-gray-600">
-            Masuk ke Production Management System
-          </p>
+          <p className="text-gray-600">Masuk ke Production Management System</p>
         </div>
 
         {/* Login Card */}
@@ -162,19 +160,6 @@ function LoginForm() {
                   </>
                 )}
               </Button>
-
-              {/* Register Link */}
-              <div className="text-center pt-4 border-t-2 border-gray-200">
-                <p className="text-gray-600">
-                  Belum mempunyai akun?{" "}
-                  <Link
-                    href="/auth/register"
-                    className="text-blue-600 hover:text-blue-700 font-bold"
-                  >
-                    Daftar disini
-                  </Link>
-                </p>
-              </div>
             </form>
           </CardContent>
         </Card>

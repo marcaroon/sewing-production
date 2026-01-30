@@ -1,10 +1,23 @@
 // src/app/api/auth/register/route.ts
 import { NextRequest, NextResponse } from "next/server";
 import prisma from "@/lib/prisma";
-import { hashPassword } from "@/lib/auth";
+import { hashPassword, getCurrentUser } from "@/lib/auth";
 
 export async function POST(request: NextRequest) {
   try {
+    // 1. SECURITY CHECK: Cek apakah user sudah login & apakah dia Admin
+    const currentUser = await getCurrentUser();
+
+    if (!currentUser || !currentUser.isAdmin) {
+      return NextResponse.json(
+        {
+          success: false,
+          error: "Unauthorized: Access denied. Admin privileges required.",
+        },
+        { status: 403 }
+      );
+    }
+
     const body = await request.json();
     const { email, password, name, department, role, phone } = body;
 
@@ -58,13 +71,13 @@ export async function POST(request: NextRequest) {
         role,
         phone: phone || null,
         isActive: true,
-        emailVerified: false,
+        emailVerified: true,
       },
     });
 
     return NextResponse.json({
       success: true,
-      message: "Registration successful",
+      message: "User created successfully",
       user: {
         id: user.id,
         email: user.email,
@@ -74,11 +87,11 @@ export async function POST(request: NextRequest) {
       },
     });
   } catch (error) {
-    console.error("Registration error:", error);
+    console.error("User creation error:", error);
     return NextResponse.json(
       {
         success: false,
-        error: "An error occurred during registration",
+        error: "An error occurred during user creation",
       },
       { status: 500 }
     );

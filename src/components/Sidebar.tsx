@@ -17,6 +17,7 @@ import {
   X,
   User,
   ChevronRight,
+  UserPlus,
 } from "lucide-react";
 
 type SidebarProps = {
@@ -48,6 +49,8 @@ export default function Sidebar({ user }: SidebarProps) {
 
   const canCreateOrder = user.isAdmin || ["ppic"].includes(user?.role || "");
 
+  const isAdmin = user?.isAdmin === true;
+
   return (
     <>
       {/* Mobile Toggle Button */}
@@ -74,15 +77,13 @@ export default function Sidebar({ user }: SidebarProps) {
       >
         <div className="flex flex-col h-full">
           {/* Logo Section - Professional */}
-          <div className="px-6 py-6 border-b border-gray-200 bg-linear-to-r from-blue-600 to-blue-700">
+          <div className="px-6 py-6 border-b mx-4 mt-4 rounded-xl border-gray-200 bg-linear-to-r from-blue-600 to-blue-700">
             <div className="flex items-center gap-3">
               <div>
-                <h1 className="text-lg font-bold text-white">
-                  Production Control
-                </h1>
-                <p className="text-xs text-blue-100 font-medium">
-                  Management System
-                </p>
+                <h1 className="text-3xl font-bold text-white">PCMS</h1>
+                {/* <p className="text-xs text-blue-100 font-normal mt-1">
+                  Production Control Management System
+                </p> */}
               </div>
             </div>
           </div>
@@ -101,26 +102,42 @@ export default function Sidebar({ user }: SidebarProps) {
                   target={isMonitoring ? "_blank" : undefined}
                   rel={isMonitoring ? "noopener noreferrer" : undefined}
                   onClick={() => setMobileOpen(false)}
-                  className={`flex items-center justify-between px-4 py-3.5 rounded-xl transition-all group relative ${
+                  className={`flex items-center justify-between px-4 py-3.5 rounded-xl transition-all group ${
                     isActive
-                      ? "bg-linear-to-r from-blue-600 to-blue-700 text-white shadow-lg shadow-blue-200"
+                      ? "bg-blue-50 text-blue-700 font-semibold"
                       : "text-gray-700 hover:bg-gray-100"
                   }`}
                 >
                   <div className="flex items-center gap-3">
-                    <Icon
-                      className={`w-5 h-5 ${
-                        isActive
-                          ? "text-white"
-                          : "text-gray-500 group-hover:text-gray-700"
-                      }`}
-                    />
-                    <span className="font-semibold">{item.label}</span>
+                    <Icon className="w-5 h-5 text-blue-600" />
+                    <span className="font-medium">{item.label}</span>
                   </div>
                   {isActive && <ChevronRight className="w-4 h-4 text-white" />}
                 </Link>
               );
             })}
+
+            {isAdmin && (
+              <div className="pt-4 mt-4 border-t border-gray-200">
+                <p className="px-4 text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2">
+                  Admin Area
+                </p>
+                <Link
+                  href="/admin/users/create"
+                  onClick={() => setMobileOpen(false)}
+                  className={`flex items-center justify-between px-4 py-3.5 rounded-xl transition-all group ${
+                    pathname === "/admin/users/create"
+                      ? "bg-blue-50 text-blue-700 font-semibold"
+                      : "text-gray-700 hover:bg-gray-100"
+                  }`}
+                >
+                  <div className="flex items-center gap-3">
+                    <UserPlus className="w-5 h-5 text-blue-600" />
+                    <span className="font-medium">Create User</span>
+                  </div>
+                </Link>
+              </div>
+            )}
 
             {/* Create Order Button - Professional */}
             {canCreateOrder && (
