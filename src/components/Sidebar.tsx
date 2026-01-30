@@ -16,6 +16,7 @@ import {
   Menu,
   X,
   User,
+  ChevronRight,
 } from "lucide-react";
 
 type SidebarProps = {
@@ -29,11 +30,11 @@ type SidebarProps = {
 
 const menuItems = [
   { href: "/dashboard", label: "Dashboard", icon: LayoutDashboard },
-  { href: "/orders", label: "Order", icon: Package },
-  { href: "/inventory/dashboard", label: "Gudang", icon: Warehouse },
+  { href: "/orders", label: "Orders", icon: Package },
+  { href: "/inventory/dashboard", label: "Inventory", icon: Warehouse },
   { href: "/waiting-list", label: "Waiting List", icon: List },
   { href: "/monitoring", label: "Monitoring", icon: Monitor },
-  { href: "/qr/scanner", label: "Scanner", icon: QrCode },
+  { href: "/qr/scanner", label: "QR Scanner", icon: QrCode },
 ];
 
 export default function Sidebar({ user }: SidebarProps) {
@@ -52,16 +53,16 @@ export default function Sidebar({ user }: SidebarProps) {
       {/* Mobile Toggle Button */}
       <button
         onClick={() => setMobileOpen(!mobileOpen)}
-        className="fixed top-4 left-4 z-50 md:hidden bg-white shadow-lg text-gray-900 p-2.5 rounded-xl border border-gray-200"
+        className="fixed top-4 left-4 z-50 md:hidden bg-white shadow-lg text-gray-900 p-3 rounded-xl border-2 border-gray-200 hover:border-blue-300 transition-all"
       >
         {mobileOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
       </button>
 
-      {/* Overlay untuk mobile */}
+      {/* Overlay for mobile */}
       {mobileOpen && (
         <div
           onClick={() => setMobileOpen(false)}
-          className="fixed inset-0 bg-black bg-opacity-50 z-30 md:hidden"
+          className="fixed inset-0 bg-black bg-opacity-50 z-30 md:hidden backdrop-blur-sm"
         />
       )}
 
@@ -72,27 +73,25 @@ export default function Sidebar({ user }: SidebarProps) {
         } md:translate-x-0 md:static md:inset-0`}
       >
         <div className="flex flex-col h-full">
-          {/* Logo Section */}
-          <div className="px-6 py-6 border-b border-gray-200">
+          {/* Logo Section - Professional */}
+          <div className="px-6 py-6 border-b border-gray-200 bg-linear-to-r from-blue-600 to-blue-700">
             <div className="flex items-center gap-3">
-              <div className="bg-blue-600 rounded-xl p-2.5 shadow-lg">
-                <LayoutDashboard className="w-6 h-6 text-white" />
-              </div>
               <div>
-                <h1 className="text-lg font-bold text-gray-900">Production</h1>
-                <p className="text-xs text-gray-500 font-medium">
+                <h1 className="text-lg font-bold text-white">
+                  Production Control
+                </h1>
+                <p className="text-xs text-blue-100 font-medium">
                   Management System
                 </p>
               </div>
             </div>
           </div>
 
-          {/* Navigation Menu */}
-          <nav className="flex-1 px-4 py-6 space-y-1 overflow-y-auto">
+          {/* Navigation Menu - Professional */}
+          <nav className="flex-1 px-4 py-6 space-y-2 overflow-y-auto">
             {menuItems.map((item) => {
               const Icon = item.icon;
               const isActive = pathname === item.href;
-
               const isMonitoring = item.href === "/monitoring";
 
               return (
@@ -102,58 +101,66 @@ export default function Sidebar({ user }: SidebarProps) {
                   target={isMonitoring ? "_blank" : undefined}
                   rel={isMonitoring ? "noopener noreferrer" : undefined}
                   onClick={() => setMobileOpen(false)}
-                  className={`flex items-center justify-between px-4 py-3 rounded-xl transition-all group ${
+                  className={`flex items-center justify-between px-4 py-3.5 rounded-xl transition-all group relative ${
                     isActive
-                      ? "bg-blue-50 text-blue-700 shadow-sm"
-                      : "text-gray-700 hover:bg-gray-50"
+                      ? "bg-linear-to-r from-blue-600 to-blue-700 text-white shadow-lg shadow-blue-200"
+                      : "text-gray-700 hover:bg-gray-100"
                   }`}
                 >
                   <div className="flex items-center gap-3">
                     <Icon
                       className={`w-5 h-5 ${
                         isActive
-                          ? "text-blue-600"
+                          ? "text-white"
                           : "text-gray-500 group-hover:text-gray-700"
                       }`}
                     />
-                    <span className="font-medium">{item.label}</span>
+                    <span className="font-semibold">{item.label}</span>
                   </div>
-                  {isActive}
+                  {isActive && <ChevronRight className="w-4 h-4 text-white" />}
                 </Link>
               );
             })}
 
+            {/* Create Order Button - Professional */}
             {canCreateOrder && (
-              <Link
-                href="/orders/new"
-                onClick={() => setMobileOpen(false)}
-                className="flex items-center gap-3 px-4 py-3 rounded-xl bg-blue-600 text-white font-semibold shadow-lg hover:bg-blue-700 transition-all mt-4"
-              >
-                <Plus className="w-5 h-5" />
-                <span>Buat Order</span>
-              </Link>
+              <div className="pt-4 mt-4 border-t border-gray-200">
+                <Link
+                  href="/orders/new"
+                  onClick={() => setMobileOpen(false)}
+                  className="flex items-center justify-center gap-3 px-4 py-3.5 rounded-xl bg-linear-to-r from-green-600 to-green-700 text-white font-semibold shadow-lg shadow-green-200 hover:shadow-xl transition-all"
+                >
+                  <Plus className="w-5 h-5" />
+                  <span>Create New Order</span>
+                </Link>
+              </div>
             )}
           </nav>
 
-          {/* User Section */}
-          <div className="border-t border-gray-200 p-4">
-            <div className="flex items-center gap-3 px-3 py-3 rounded-xl bg-gray-50">
-              <div className="bg-blue-100 rounded-full p-2">
-                <User className="w-5 h-5 text-blue-600" />
+          {/* User Section - Professional */}
+          <div className="border-t border-gray-200 p-4 bg-gray-50">
+            <div className="flex items-center gap-3 px-3 py-3 rounded-xl bg-white border border-gray-200 shadow-sm">
+              <div className="bg-linear-to-br from-blue-600 to-blue-700 rounded-full p-2.5 shadow-md">
+                <User className="w-5 h-5 text-white" />
               </div>
               <div className="flex-1 min-w-0">
-                <p className="text-sm font-semibold text-gray-900 truncate">
+                <p className="text-sm font-bold text-gray-900 truncate">
                   {user.name}
                 </p>
                 {!user.isAdmin && user.department && (
-                  <p className="text-xs text-gray-500 truncate">
+                  <p className="text-xs text-gray-600 truncate font-medium">
                     {user.department}
+                  </p>
+                )}
+                {user.isAdmin && (
+                  <p className="text-xs text-blue-600 truncate font-semibold">
+                    Administrator
                   </p>
                 )}
               </div>
               <button
                 onClick={handleLogout}
-                className="text-gray-400 hover:text-red-600 p-2 rounded-lg hover:bg-red-50 transition-colors"
+                className="text-gray-400 hover:text-red-600 p-2 rounded-lg hover:bg-red-50 transition-all"
                 title="Logout"
               >
                 <LogOut className="w-5 h-5" />
