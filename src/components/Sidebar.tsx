@@ -80,10 +80,10 @@ export default function Sidebar({ user }: SidebarProps) {
           <div className="px-6 py-6 border-b mx-4 mt-4 rounded-xl border-gray-200 bg-linear-to-r from-blue-600 to-blue-700">
             <div className="flex items-center gap-3">
               <div>
-                <h1 className="text-3xl font-bold text-white">PCMS</h1>
-                {/* <p className="text-xs text-blue-100 font-normal mt-1">
+                <h1 className="text-2xl font-bold text-white">PCMS</h1>
+                <p className="text-xs text-blue-100 font-normal mt-1">
                   Production Control Management System
-                </p> */}
+                </p>
               </div>
             </div>
           </div>
@@ -120,7 +120,7 @@ export default function Sidebar({ user }: SidebarProps) {
             {isAdmin && (
               <div className="pt-4 mt-4 border-t border-gray-200">
                 <p className="px-4 text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2">
-                  Admin Area
+                  Admin Only
                 </p>
                 <Link
                   href="/admin/users/create"
@@ -145,7 +145,7 @@ export default function Sidebar({ user }: SidebarProps) {
                 <Link
                   href="/orders/new"
                   onClick={() => setMobileOpen(false)}
-                  className="flex items-center justify-center gap-3 px-4 py-3.5 rounded-xl bg-linear-to-r from-green-600 to-green-700 text-white font-semibold shadow-lg shadow-green-200 hover:shadow-xl transition-all"
+                  className="flex items-center justify-center gap-2 px-4 py-3.5 rounded-xl bg-linear-to-r from-green-600 to-green-700 text-white font-semibold shadow-lg shadow-green-200 hover:shadow-xl transition-all"
                 >
                   <Plus className="w-5 h-5" />
                   <span>Create New Order</span>

@@ -14,6 +14,7 @@ export async function GET(
       include: {
         buyer: true,
         style: true,
+        // article: true,
         sizeBreakdowns: true,
         processSteps: {
           include: {
@@ -63,7 +64,7 @@ export async function GET(
         },
       },
       style: order.style,
-      article: order.article || undefined,
+      article: order.article,
       orderDate: order.orderDate,
       productionStartedAt: order.productionStartedAt,
       productionDeadline: order.productionDeadline,

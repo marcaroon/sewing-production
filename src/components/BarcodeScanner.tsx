@@ -38,12 +38,17 @@ export const BarcodeScanner: React.FC<BarcodeScannerProps> = ({
 
   useEffect(() => {
     isMountedRef.current = true;
-    addDebugLog("Component mounted");
 
     return () => {
       isMountedRef.current = false;
-      addDebugLog("Component unmounting, cleaning up...");
-      stopScanning();
+      if (scannerRef.current && scannerRef.current.isScanning) {
+        scannerRef.current
+          .stop()
+          .then(() => {
+            scannerRef.current?.clear();
+          })
+          .catch((err) => console.error("Cleanup error", err));
+      }
     };
   }, []);
 

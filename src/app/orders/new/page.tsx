@@ -95,6 +95,7 @@ export default function NewOrderPage() {
     Array<{
       materialId: string;
       quantityRequired: number;
+      notes?: string;
     }>
   >([]);
 
@@ -102,6 +103,7 @@ export default function NewOrderPage() {
     Array<{
       accessoryId: string;
       quantityRequired: number;
+      notes?: string;
     }>
   >([]);
 
@@ -514,6 +516,7 @@ export default function NewOrderPage() {
           ? "custom"
           : formData.processTemplateId,
         customProcessFlow: isCustomizing ? customProcessFlow : undefined,
+        assignedLine: selectedLine,
         selectedMaterials,
         selectedAccessories,
       };

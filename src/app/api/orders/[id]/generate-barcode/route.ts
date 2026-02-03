@@ -31,11 +31,14 @@ export async function POST(
     }
 
     const results = await prisma.$transaction(async (tx: any) => {
+      const articleCode = order.article || "GEN";
       // 1. Generate Order Level Barcode
-      const orderBarcode = generateOrderBarcode(order.orderNumber);
+      const orderBarcode = generateOrderBarcode(order.orderNumber, articleCode);
+
       const orderBarcodeData = createBarcodeData("order", orderBarcode, {
         orderId: order.id,
         orderNumber: order.orderNumber,
+        article: order.article,
         buyer: order.buyer.name,
         style: order.style.name,
         totalQuantity: order.totalQuantity,
@@ -70,6 +73,7 @@ export async function POST(
       for (const bundle of order.bundles) {
         const bundleBarcode = generateBundleBarcode(
           order.orderNumber,
+          articleCode,
           bundle.size,
           parseInt(bundle.bundleNumber.split("-").pop() || "0")
         );
@@ -79,6 +83,7 @@ export async function POST(
           bundleNumber: bundle.bundleNumber,
           orderId: order.id,
           orderNumber: order.orderNumber,
+          article: articleCode,
           size: bundle.size,
           quantity: bundle.quantity,
           style: order.style.name,

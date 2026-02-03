@@ -131,8 +131,8 @@ export async function POST(request: NextRequest) {
           currentState: "waiting",
           materialsIssued: true,
           createdBy,
-          notes: notes || null,
-          assignedLine: assignedLine || null,
+          notes: notes,
+          assignedLine: assignedLine,
           sizeBreakdowns: {
             create: sizeBreakdown.map((sb: any) => ({
               size: sb.size,
@@ -165,7 +165,7 @@ export async function POST(request: NextRequest) {
           quantityCompleted: 0,
           quantityRejected: 0,
           quantityRework: 0,
-          addedToWaitingTime: now, // ✅ Langsung masuk waiting list
+          addedToWaitingTime: now,
           notes: `Order created - Ready for ${firstProcess}`,
         },
       });
@@ -209,7 +209,7 @@ export async function POST(request: NextRequest) {
               orderId: order.id,
               materialId: sm.materialId,
               quantityRequired: sm.quantityRequired,
-              quantityIssued: sm.quantityRequired, // ✅ Already issued
+              quantityIssued: sm.quantityRequired,
               quantityUsed: 0,
               quantityReturned: 0,
               quantityWasted: 0,
@@ -336,6 +336,8 @@ export async function POST(request: NextRequest) {
       processTemplate: templateId,
       processFlow: processFlow,
       totalProcessSteps,
+      assignedLine: result.order.assignedLine,
+      assignedTo: result.order.assignedTo,
       materialsIssued: true,
       totalRejected: 0,
       totalRework: 0,

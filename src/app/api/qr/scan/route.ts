@@ -21,10 +21,13 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    // Normalisasi input QR Code untuk pencarian database
+    const normalizedQrInput = qrCode.trim().toUpperCase();
+
     // Parse barcode to determine type
     let parsedBarcode;
     try {
-      parsedBarcode = parseBarcode(qrCode);
+      parsedBarcode = parseBarcode(normalizedQrInput);
       console.log("✅ Parsed barcode:", parsedBarcode);
     } catch (parseError: any) {
       console.error("❌ Parse error:", parseError.message);
@@ -33,27 +36,29 @@ export async function POST(request: NextRequest) {
           success: false,
           error: `Invalid barcode format: ${qrCode}`,
           details: parseError.message,
-          hint: "Expected formats: ORD-2025-00001 (Order) or ORD-2025-00001-M-001 (Bundle)",
+          hint: "Expected format: ORD-YYYY-NNNNN-[ART] or ORD-YYYY-NNNNN-[ART]-SIZE-NNN",
         },
         { status: 400 }
       );
     }
 
-    // ✅ FIX: Initialize variables properly
+    // Initialize variables
     let qrData: any = null;
-    let qrType: "order" | "bundle" = parsedBarcode.type; // ✅ Get from parsed result
+    let qrType: "order" | "bundle" = parsedBarcode.type;
     let qrId: string | null = null;
 
     // Get data based on barcode type
     if (parsedBarcode.type === "order") {
-      // Find by order number (reconstructed with dashes)
       console.log("🔍 Searching for order:", parsedBarcode.orderNumber);
 
+      // ✅ IMPROVED QUERY: Cek QR Code exact match DULU, baru cek via relasi Order Number
       const orderQR = await prisma.orderQRCode.findFirst({
-        where: { 
-          order: {
-            orderNumber: parsedBarcode.orderNumber
-          }
+        where: {
+          OR: [
+            { qrCode: normalizedQrInput }, // Prioritas 1: Match string barcode persis
+            { qrCode: qrCode }, // Match raw input
+            { order: { orderNumber: parsedBarcode.orderNumber } }, // Prioritas 2: Match via Order Number
+          ],
         },
         include: {
           order: {
@@ -74,12 +79,12 @@ export async function POST(request: NextRequest) {
       });
 
       if (!orderQR) {
-        console.error("❌ Order barcode not found:", parsedBarcode.orderNumber);
+        console.error("❌ Order barcode not found in DB");
         return NextResponse.json(
           {
             success: false,
-            error: `Order not found: ${parsedBarcode.orderNumber}`,
-            details: `Barcode scanned: ${qrCode}. Please ensure barcodes are generated for this order.`,
+            error: `Order barcode not found.`,
+            details: `Code: ${qrCode}. Pastikan barcode sudah digenerate untuk order ${parsedBarcode.orderNumber}`,
           },
           { status: 404 }
         );
@@ -94,19 +99,27 @@ export async function POST(request: NextRequest) {
         order: orderQR.order,
       };
     } else if (parsedBarcode.type === "bundle") {
-      console.log("🔍 Searching for bundle:", parsedBarcode.orderNumber, parsedBarcode.size);
+      console.log(
+        "🔍 Searching for bundle:",
+        parsedBarcode.orderNumber,
+        parsedBarcode.size
+      );
 
+      // ✅ IMPROVED QUERY: Cek QR Code exact match DULU
       const bundleQR = await prisma.bundleQRCode.findFirst({
-        where: { 
-          bundle: {
-            order: {
-              orderNumber: parsedBarcode.orderNumber
+        where: {
+          OR: [
+            { qrCode: normalizedQrInput }, // Prioritas 1: Match string barcode persis
+            { qrCode: qrCode }, // Match raw input
+            {
+              // Prioritas 2: Match via komponen (Order + Size + Bundle Sequence)
+              bundle: {
+                order: { orderNumber: parsedBarcode.orderNumber },
+                size: parsedBarcode.size,
+                bundleNumber: { endsWith: parsedBarcode.bundleNumber || "" },
+              },
             },
-            size: parsedBarcode.size,
-            bundleNumber: {
-              endsWith: parsedBarcode.bundleNumber || ""
-            }
-          }
+          ],
         },
         include: {
           bundle: {
@@ -123,12 +136,12 @@ export async function POST(request: NextRequest) {
       });
 
       if (!bundleQR) {
-        console.error("❌ Bundle barcode not found");
+        console.error("❌ Bundle barcode not found in DB");
         return NextResponse.json(
           {
             success: false,
-            error: `Bundle not found for ${parsedBarcode.orderNumber} - Size ${parsedBarcode.size}`,
-            details: `Barcode scanned: ${qrCode}. Please ensure barcodes are generated.`,
+            error: `Bundle barcode not found.`,
+            details: `Code: ${qrCode}. Pastikan barcode sudah digenerate.`,
           },
           { status: 404 }
         );
@@ -148,7 +161,7 @@ export async function POST(request: NextRequest) {
     // Create scan log
     const scanLog = await prisma.qRScan.create({
       data: {
-        qrCode: qrCode.trim().toUpperCase(),
+        qrCode: normalizedQrInput,
         qrType,
         orderQRId: qrType === "order" ? qrId : undefined,
         bundleQRId: qrType === "bundle" ? qrId : undefined,

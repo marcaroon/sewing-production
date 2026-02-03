@@ -235,7 +235,7 @@ export default function WaitingListPage() {
         {!isAdmin && !isPPIC && allowedProcesses.length > 0 && (
           <div className="mt-4 bg-blue-50 border-2 border-blue-300 rounded-lg p-4">
             <div className="flex items-start gap-3">
-              <User className="w-5 h-5 text-blue-600 mt-0.5" />
+              {/* <User className="w-5 h-5 text-blue-600 mt-0.5" /> */}
               <div className="flex-1">
                 <p className="text-sm font-bold text-blue-900 mb-2">
                   Your Authorized Processes:
@@ -257,7 +257,7 @@ export default function WaitingListPage() {
         )}
 
         {/* Admin/PPIC Info */}
-        {(isAdmin || isPPIC) && (
+        {/* {(isAdmin || isPPIC) && (
           <div className="mt-4 bg-purple-50 border-2 border-purple-300 rounded-lg p-4">
             <div className="flex items-start gap-3">
               <AlertTriangle className="w-5 h-5 text-purple-600 mt-0.5" />
@@ -273,7 +273,7 @@ export default function WaitingListPage() {
               </div>
             </div>
           </div>
-        )}
+        )} */}
       </div>
 
       {/* Waiting List Content */}
@@ -297,7 +297,7 @@ export default function WaitingListPage() {
           {activeFilter === "all" && !isAdmin && !isPPIC && (
             <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-3">
               <p className="text-sm text-yellow-800">
-                <span className="font-bold">ℹ️ Note:</span> You're viewing all
+                <span className="font-bold">Note:</span> You're viewing all
                 processes in the waiting list. However, you can only execute
                 processes from{" "}
                 <span className="font-bold">{user?.department}</span>. Other

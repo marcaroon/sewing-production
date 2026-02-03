@@ -86,7 +86,7 @@ export default function QRScannerPage() {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          code: decodedText,
+          qrCode: decodedText,
           scannedBy: currentUser?.name || "Unknown User",
           location: currentUser?.department || "Production Floor",
           action: "view",
@@ -236,7 +236,7 @@ export default function QRScannerPage() {
             </CardHeader>
             <CardContent className="space-y-4 text-sm">
               <div className="bg-blue-50 border-2 border-blue-200 rounded-lg p-3">
-                <p className="font-bold text-blue-900 mb-2">📦 Order Barcode</p>
+                <p className="font-bold text-blue-900 mb-2">Order Barcode</p>
                 <p className="text-blue-800 mb-1 font-mono text-xs">
                   ORD202400001
                 </p>
@@ -246,9 +246,7 @@ export default function QRScannerPage() {
               </div>
 
               <div className="bg-green-50 border-2 border-green-200 rounded-lg p-3">
-                <p className="font-bold text-green-900 mb-2">
-                  📦 Bundle Barcode
-                </p>
+                <p className="font-bold text-green-900 mb-2">Bundle Barcode</p>
                 <p className="text-green-800 mb-1 font-mono text-xs">
                   ORD202400001M001
                 </p>
@@ -278,37 +276,9 @@ export default function QRScannerPage() {
               </div>
             </CardContent>
           </Card>
-
-          {/* Supported Formats */}
-          <Card>
-            <CardHeader>
-              <CardTitle className="text-base">Supported Formats</CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-3 text-xs">
-              <div className="flex items-center justify-between p-2 bg-gray-50 rounded border border-gray-200">
-                <span className="font-semibold text-gray-700">QR Code</span>
-                <Badge variant="success" size="sm">
-                  ✓
-                </Badge>
-              </div>
-              <div className="flex items-center justify-between p-2 bg-gray-50 rounded border border-gray-200">
-                <span className="font-semibold text-gray-700">Code 128</span>
-                <Badge variant="success" size="sm">
-                  ✓
-                </Badge>
-              </div>
-              <div className="flex items-center justify-between p-2 bg-gray-50 rounded border border-gray-200">
-                <span className="font-semibold text-gray-700">EAN / UPC</span>
-                <Badge variant="success" size="sm">
-                  ✓
-                </Badge>
-              </div>
-            </CardContent>
-          </Card>
         </div>
       </div>
 
-      {/* ✅ IMPROVED: Scanned Data Modal - Better Design */}
       <Modal
         isOpen={isModalOpen}
         onClose={() => setIsModalOpen(false)}

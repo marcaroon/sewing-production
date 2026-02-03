@@ -36,13 +36,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       const result = await response.json();
 
       if (result.success) {
-        // console.log("[AUTH] User loaded:", result.user);
-        // console.log("[AUTH] isAdmin:", result.user.isAdmin);
-        // console.log("[AUTH] department:", result.user.department);
         setUser(result.user);
       }
     } catch (error) {
-      // console.error("Failed to load user:", error);
     } finally {
       setIsLoading(false);
     }
@@ -53,7 +49,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     ...args: unknown[]
   ): boolean => {
     if (!user) {
-      // console.log(`[PERMISSION] No user, permission denied: ${permission}`);
       return false;
     }
 
@@ -65,14 +60,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           ...args,
           user.isAdmin || false
         );
-        // if (!result) {
-        //   console.log(
-        //     `[PERMISSION] DENIED: ${permission} for ${user.department} (isAdmin=${user.isAdmin})`
-        //   );
-        // }
         return result;
       } catch (error) {
-        // console.error("Permission check error:", error);
         return false;
       }
     }

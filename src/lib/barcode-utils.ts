@@ -8,6 +8,11 @@ export interface BarcodeData {
   metadata?: Record<string, any>;
 }
 
+function sanitizeString(str: string): string {
+  if (!str) return "GEN"; // Default jika kosong
+  return str.replace(/[^a-zA-Z0-9]/g, "").toUpperCase();
+}
+
 /**
  * Normalize barcode string - remove dashes and spaces
  */
@@ -15,64 +20,78 @@ function normalizeBarcode(barcodeString: string): string {
   return barcodeString.trim().replace(/[-\s]/g, "").toUpperCase();
 }
 
-// Generate Barcode string untuk Order
-export function generateOrderBarcode(orderNumber: string): string {
-  return normalizeBarcode(orderNumber);
+export function generateOrderBarcode(
+  orderNumber: string,
+  article: string
+): string {
+  const normOrder = normalizeBarcode(orderNumber);
+  const normArticle = sanitizeString(article);
+  return `${normOrder}-${normArticle}`;
 }
 
-// Generate Barcode string untuk Bundle
 export function generateBundleBarcode(
   orderNumber: string,
+  article: string,
   size: string,
   bundleIndex: number
 ): string {
-  const normalized = normalizeBarcode(orderNumber);
+  const normOrder = normalizeBarcode(orderNumber);
+  const normArticle = sanitizeString(article);
   const bundleNum = bundleIndex.toString().padStart(3, "0");
-  return `${normalized}${size}${bundleNum}`;
+  const normSize = sanitizeString(size);
+
+  // Format Bundle: ORD202500001-ARTICLE-SIZE-001
+  return `${normOrder}-${normArticle}-${normSize}-${bundleNum}`;
 }
 
-// Parse Barcode string untuk mendapatkan info
 export function parseBarcode(barcodeString: string): {
   type: "order" | "bundle";
   orderNumber: string;
+  article?: string;
   size?: string;
   bundleNumber?: string;
 } {
   const cleanCode = barcodeString.trim().toUpperCase();
-  
-  // ✅ FIX: Support both formats (with and without dashes)
-  // Order Barcode: ORD-2025-00001 OR ORD202500001
-  const orderPattern = /^ORD[-]?(\d{4})[-]?(\d{5})$/;
-  const orderMatch = cleanCode.match(orderPattern);
-  
-  if (orderMatch) {
-    const year = orderMatch[1];
-    const num = orderMatch[2];
-    return {
-      type: "order",
-      orderNumber: `ORD-${year}-${num}`,
-    };
+
+  const baseOrderRegex = /(ORD[-]?\d{4}[-]?\d{5})/;
+
+  const match = cleanCode.match(baseOrderRegex);
+  if (!match) {
+    throw new Error("Invalid barcode format: Order code not found");
   }
 
-  // Bundle Barcode: ORD-2025-00001-M-001 OR ORD202500001M001
-  const bundlePattern = /^ORD[-]?(\d{4})[-]?(\d{5})[-]?([A-Z]+)[-]?(\d{3})$/;
-  const bundleMatch = cleanCode.match(bundlePattern);
-  
+  const orderPart = match[0];
+  const formattedOrderNumber = orderPart
+    .replace(/(ORD)(\d{4})(\d{5})/, "$1-$2-$3")
+    .replace(/--/g, "-");
+
+  let remainder = cleanCode.replace(orderPart, "");
+
+  if (remainder.startsWith("-")) remainder = remainder.substring(1);
+
+  const bundleSuffixRegex = /[-]([A-Z0-9]+)[-](\d{3})$/;
+  const bundleMatch = cleanCode.match(bundleSuffixRegex);
+
   if (bundleMatch) {
-    const year = bundleMatch[1];
-    const num = bundleMatch[2];
-    const size = bundleMatch[3];
-    const bundleNum = bundleMatch[4];
+    const size = bundleMatch[1];
+    const bundleNum = bundleMatch[2];
+
+    const article = remainder.replace(bundleMatch[0], "").replace(/-$/, "");
 
     return {
       type: "bundle",
-      orderNumber: `ORD-${year}-${num}`,
-      size,
+      orderNumber: formattedOrderNumber,
+      article: article || undefined,
+      size: size,
       bundleNumber: bundleNum,
     };
+  } else {
+    return {
+      type: "order",
+      orderNumber: formattedOrderNumber,
+      article: remainder || undefined,
+    };
   }
-
-  throw new Error(`Invalid barcode format: ${barcodeString}. Expected: ORD-YYYY-NNNNN or ORD-YYYY-NNNNN-S-NNN`);
 }
 
 // Create Barcode Data object untuk simpan di database

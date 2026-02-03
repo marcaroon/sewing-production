@@ -34,11 +34,13 @@ import {
   ShieldCheck,
   CheckCircle,
   ArrowRight,
-  FileText, // Icon Baru
-  Layers, // Icon Baru
-  Calendar, // Icon Baru
+  FileText,
+  Layers,
+  Calendar,
+  History,
 } from "lucide-react";
 import { RejectReworkDetailModal } from "./RejectReworkDetailModal";
+import { TransitionHistoryModal } from "./TransitionHistoryModal";
 
 interface ProcessStepCardProps {
   processStep: ProcessStep;
@@ -75,6 +77,8 @@ export const ProcessStepCard: React.FC<ProcessStepCardProps> = ({
     action: "rework" as RejectAction,
     reportedBy: user?.name || "",
   });
+
+  const [isHistoryModalOpen, setIsHistoryModalOpen] = useState(false);
 
   const isAdmin = user?.isAdmin || false;
   const isPPIC = user?.department === "PPIC";
@@ -201,13 +205,12 @@ export const ProcessStepCard: React.FC<ProcessStepCardProps> = ({
     <>
       <Card>
         <CardHeader>
-          {/* --- BAGIAN BARU: HEADER INFORMASI ORDER --- */}
           {orderInfo && (
             <div className="mb-4 pb-3 border-b border-gray-100 bg-gray-50 -mx-6 -mt-6 px-6 pt-4 rounded-t-lg">
               <div className="flex justify-between items-start mb-2">
                 <div className="flex items-center gap-2">
-                  <FileText className="w-5 h-5 text-blue-700" />
-                  <h3 className="text-lg font-extrabold text-gray-900 tracking-tight">
+                  {/* <FileText className="w-5 h-5 text-blue-700" /> */}
+                  <h3 className="text-lg font-bold text-gray-900 tracking-tight">
                     {orderInfo.orderNumber}
                   </h3>
                 </div>
@@ -245,31 +248,40 @@ export const ProcessStepCard: React.FC<ProcessStepCardProps> = ({
               </div>
             </div>
           )}
-          {/* --- SELESAI HEADER ORDER --- */}
 
           <div className="flex items-start justify-between">
             <div className="flex-1">
               <div className="flex items-center gap-2 mb-1">
-                <CardTitle className="text-xl text-blue-800">
+                <CardTitle className="text-xl font-semibold text-blue-800">
                   {PROCESS_LABELS[processStep.processName] ||
                     processStep.processName}
                 </CardTitle>
+                <button
+                  onClick={() => setIsHistoryModalOpen(true)}
+                  className="p-1.5 text-gray-500 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors tooltip-trigger"
+                  title="Lihat Riwayat & Catatan"
+                >
+                  <History className="w-5 h-5" />
+                </button>
                 {isAdmin && (
                   <div
                     title="Admin Full Access"
                     className="flex items-center gap-1"
                   >
-                    <ShieldCheck className="w-4 h-4 text-green-600" />
+                    <ShieldCheck className="w-5 h-5 text-green-600" />
                   </div>
                 )}
                 {!canExecute && !isAdmin && (
-                  <Lock className="w-4 h-4 text-gray-400" />
+                  <Lock className="w-5 h-5 text-gray-500" />
                 )}
               </div>
               <div className="flex items-center gap-2 mt-1">
-                <p className="text-xs font-bold uppercase tracking-wider text-gray-500 bg-gray-100 px-2 py-0.5 rounded">
+                {/* <p className="text-xs font-bold uppercase tracking-wider text-gray-500 bg-gray-100 px-2 py-0.5 rounded">
                   {processStep.department}
-                </p>
+                </p> */}
+                <Badge variant="purple" size="sm" className="text-[10px]">
+                  {processStep.department}
+                </Badge>
                 {user.department &&
                   user.department !== processStep.department && (
                     <Badge variant="default" size="sm" className="text-[10px]">
@@ -283,6 +295,7 @@ export const ProcessStepCard: React.FC<ProcessStepCardProps> = ({
                 {PHASE_LABELS[processStep.processPhase as ProductionPhase]}
               </Badge>
               <Badge
+                size="sm"
                 variant={
                   processStep.status === "completed"
                     ? "success"
@@ -458,13 +471,13 @@ export const ProcessStepCard: React.FC<ProcessStepCardProps> = ({
               <div className="flex items-center gap-2 text-sm text-gray-500">
                 <Lock className="w-4 h-4" />
                 <div>
-                  <span className="font-bold">View Only Mode</span>
-                  <p className="text-xs">
+                  <span className="font-bold">View Only</span>
+                  {/* <p className="text-xs">
                     Proses ini ditangani oleh dept:{" "}
                     <span className="font-bold text-gray-700">
                       {processStep.department}
                     </span>
-                  </p>
+                  </p> */}
                 </div>
               </div>
             </div>
@@ -742,10 +755,18 @@ export const ProcessStepCard: React.FC<ProcessStepCardProps> = ({
         </form>
       </Modal>
 
-      {/* Detail Modal untuk Histori Reject/Rework */}
       <RejectReworkDetailModal
         isOpen={isRejectDetailModalOpen}
         onClose={() => setIsRejectDetailModalOpen(false)}
+        processStepId={processStep.id}
+        processName={
+          PROCESS_LABELS[processStep.processName] || processStep.processName
+        }
+      />
+
+      <TransitionHistoryModal
+        isOpen={isHistoryModalOpen}
+        onClose={() => setIsHistoryModalOpen(false)}
         processStepId={processStep.id}
         processName={
           PROCESS_LABELS[processStep.processName] || processStep.processName

@@ -801,7 +801,7 @@ export default function OrderDetailPage() {
                 {order.hasLeftover ? (
                   <Badge variant="info">Ya</Badge>
                 ) : (
-                  <Badge variant="default">Tida</Badge>
+                  <Badge variant="default">Tidak</Badge>
                 )}
               </div>
             </CardContent>
