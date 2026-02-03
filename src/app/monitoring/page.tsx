@@ -54,11 +54,13 @@ function MonitoringOrderCard({ order }: { order: Order }) {
   const isDelayed = new Date() > new Date(order.productionDeadline);
 
   return (
-    <div className="bg-gray-800 rounded-xl border-2 border-gray-700 p-6 shadow-2xl hover:border-blue-500 transition-all">
+    <div className="bg-card rounded-xl border-2 border-border p-6 shadow-2xl hover:border-blue-500 transition-all">
       {/* Header */}
-      <div className="mb-4 pb-4 border-b-2 border-gray-700">
+      <div className="mb-4 pb-4 border-b-2 border-border">
         <div className="flex items-center justify-between mb-2">
-          <h3 className="text-xl font-bold text-white">{order.orderNumber}</h3>
+          <h3 className="text-xl font-bold text-foreground">
+            {order.orderNumber}
+          </h3>
           <div
             className={`px-3 py-1 rounded-full text-xs font-bold ${
               order.currentPhase === "production"
@@ -69,21 +71,21 @@ function MonitoringOrderCard({ order }: { order: Order }) {
             {PHASE_LABELS[order.currentPhase]}
           </div>
         </div>
-        <p className="text-gray-300 text-sm font-semibold">
+        <p className="text-muted-foreground text-sm font-semibold">
           {order.buyer.name}
         </p>
-        <p className="text-gray-400 text-xs">{order.style.name}</p>
+        <p className="text-muted-foreground text-xs">{order.style.name}</p>
       </div>
 
       {/* Current Process */}
-      <div className="mb-4 bg-gray-900 rounded-lg p-3 border border-blue-500">
+      <div className="mb-4 bg-muted rounded-lg p-3 border border-blue-500/70">
         <div className="flex items-center gap-2 mb-1">
           <div className="w-2 h-2 bg-blue-500 rounded-full animate-pulse" />
           <p className="text-xs font-bold text-blue-400 uppercase">
             Current Process
           </p>
         </div>
-        <p className="text-lg font-bold text-white">
+        <p className="text-lg font-bold text-foreground">
           {PROCESS_LABELS[order.currentProcess]}
         </p>
       </div>
@@ -92,12 +94,12 @@ function MonitoringOrderCard({ order }: { order: Order }) {
       <div className="mb-4">
         <div className="flex items-center gap-2 mb-2">
           <TrendingUp className="w-4 h-4 text-blue-400" />
-          <p className="text-xs font-bold text-gray-300 uppercase">
+          <p className="text-xs font-bold text-muted-foreground uppercase">
             Process Steps
           </p>
         </div>
 
-        <div className="flex justify-between text-xs text-gray-400 mb-2">
+        <div className="flex justify-between text-xs text-muted-foreground mb-2">
           <span>
             {processProgress.completed} / {processProgress.total} Steps
           </span>
@@ -106,7 +108,7 @@ function MonitoringOrderCard({ order }: { order: Order }) {
           </span>
         </div>
 
-        <div className="w-full bg-gray-700 rounded-full h-3 overflow-hidden mb-2">
+        <div className="w-full bg-muted rounded-full h-3 overflow-hidden mb-2">
           <div
             className="bg-linear-to-r from-blue-500 to-purple-600 h-3 rounded-full transition-all duration-500"
             style={{ width: `${processProgress.percentage}%` }}
@@ -122,12 +124,12 @@ function MonitoringOrderCard({ order }: { order: Order }) {
       <div className="mb-4">
         <div className="flex items-center gap-2 mb-2">
           <Package className="w-4 h-4 text-green-400" />
-          <p className="text-xs font-bold text-gray-300 uppercase">
+          <p className="text-xs font-bold text-muted-foreground uppercase">
             Production Output
           </p>
         </div>
 
-        <div className="flex justify-between text-xs text-gray-400 mb-2">
+        <div className="flex justify-between text-xs text-muted-foreground mb-2">
           <span>
             {quantityProgress.completed.toLocaleString()} /{" "}
             {quantityProgress.total.toLocaleString()} pcs
@@ -137,7 +139,7 @@ function MonitoringOrderCard({ order }: { order: Order }) {
           </span>
         </div>
 
-        <div className="w-full bg-gray-700 rounded-full h-3 overflow-hidden">
+        <div className="w-full bg-muted rounded-full h-3 overflow-hidden">
           <div
             className="bg-linear-to-r from-green-500 to-green-600 h-3 rounded-full transition-all duration-500"
             style={{ width: `${quantityProgress.percentage}%` }}
@@ -151,19 +153,19 @@ function MonitoringOrderCard({ order }: { order: Order }) {
         <div
           className={`rounded p-2 border ${
             isDelayed
-              ? "bg-red-900/30 border-red-700"
-              : "bg-gray-900 border-gray-700"
+              ? "bg-destructive/15 border-destructive/40"
+              : "bg-muted border-border"
           }`}
         >
           <div className="flex items-center gap-1 mb-1">
             <Clock
               className={`w-3 h-3 ${
-                isDelayed ? "text-red-400" : "text-gray-400"
+                isDelayed ? "text-destructive" : "text-muted-foreground"
               }`}
             />
             <p
               className={`text-xs font-bold ${
-                isDelayed ? "text-red-300" : "text-gray-400"
+                isDelayed ? "text-destructive" : "text-muted-foreground"
               }`}
             >
               Deadline
@@ -171,7 +173,7 @@ function MonitoringOrderCard({ order }: { order: Order }) {
           </div>
           <p
             className={`text-xs font-bold ${
-              isDelayed ? "text-red-400" : "text-gray-300"
+              isDelayed ? "text-destructive" : "text-muted-foreground"
             }`}
           >
             {new Date(order.productionDeadline).toLocaleDateString()}
@@ -180,22 +182,22 @@ function MonitoringOrderCard({ order }: { order: Order }) {
 
         {/* Reject */}
         {order.totalRejected > 0 ? (
-          <div className="bg-red-900/30 border border-red-700 rounded p-2">
+          <div className="bg-destructive/15 border border-destructive/40 rounded p-2">
             <div className="flex items-center gap-1 mb-1">
-              <AlertTriangle className="w-3 h-3 text-red-400" />
-              <p className="text-xs font-bold text-red-300">Rejected</p>
+              <AlertTriangle className="w-3 h-3 text-destructive" />
+              <p className="text-xs font-bold text-destructive">Rejected</p>
             </div>
-            <p className="text-xs font-bold text-red-400">
+            <p className="text-xs font-bold text-destructive">
               {order.totalRejected} pcs
             </p>
           </div>
         ) : (
-          <div className="bg-green-900/30 border border-green-700 rounded p-2">
+          <div className="bg-success/15 border border-success/40 rounded p-2">
             <div className="flex items-center gap-1 mb-1">
-              <CheckCircle2 className="w-3 h-3 text-green-400" />
-              <p className="text-xs font-bold text-green-300">Quality</p>
+              <CheckCircle2 className="w-3 h-3 text-success" />
+              <p className="text-xs font-bold text-success">Quality</p>
             </div>
-            <p className="text-xs font-bold text-green-400">No Rejects</p>
+            <p className="text-xs font-bold text-success">No Rejects</p>
           </div>
         )}
       </div>
@@ -241,46 +243,50 @@ export default function MonitoringDashboard() {
 
   if (isLoading && orders.length === 0) {
     return (
-      <div className="min-h-screen bg-linear-to-br from-gray-900 to-gray-800 flex items-center justify-center">
+      <div className="min-h-screen bg-linear-to-br from-background via-muted to-background flex items-center justify-center">
         <div className="text-center">
           <div className="animate-spin rounded-full h-16 w-16 border-b-4 border-blue-500 mx-auto mb-4"></div>
-          <p className="text-white text-xl font-bold">Loading Dashboard...</p>
+          <p className="text-foreground text-xl font-bold">
+            Loading Dashboard...
+          </p>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-linear-to-br from-gray-900 to-gray-800 p-8">
+    <div className="min-h-screen bg-linear-to-br from-background via-muted to-background p-8">
       {/* Header */}
       <div className="mb-8">
         <div className="flex items-center justify-between">
           <div>
-            <h1 className="text-4xl font-bold text-white mb-2 flex items-center gap-3">
+            <h1 className="text-4xl font-bold text-foreground mb-2 flex items-center gap-3">
               <span className="bg-blue-600 rounded-lg p-2">
                 <Package className="w-8 h-8 text-white" />
               </span>
               Production Monitoring Dashboard
             </h1>
-            <p className="text-gray-300 text-lg">
+            <p className="text-muted-foreground text-lg">
               Real-time Order Progress Tracking
             </p>
           </div>
 
           {/* Stats Summary */}
           <div className="flex gap-4">
-            <div className="bg-gray-800 rounded-lg border-2 border-blue-500 p-4 text-center">
+            <div className="bg-card rounded-lg border-2 border-blue-500/50 p-4 text-center">
               <p className="text-blue-400 text-sm font-bold uppercase mb-1">
                 Active Orders
               </p>
-              <p className="text-4xl font-bold text-white">{orders.length}</p>
+              <p className="text-4xl font-bold text-foreground">
+                {orders.length}
+              </p>
             </div>
 
-            <div className="bg-gray-800 rounded-lg border-2 border-green-500 p-4 text-center">
+            <div className="bg-card rounded-lg border-2 border-success/60 p-4 text-center">
               <p className="text-green-400 text-sm font-bold uppercase mb-1">
                 Total WIP
               </p>
-              <p className="text-4xl font-bold text-white">
+              <p className="text-4xl font-bold text-foreground">
                 {orders
                   .reduce(
                     (sum, o) => sum + (o.totalQuantity - o.totalCompleted),
@@ -290,11 +296,11 @@ export default function MonitoringDashboard() {
               </p>
             </div>
 
-            <div className="bg-gray-800 rounded-lg border-2 border-red-500 p-4 text-center">
+            <div className="bg-card rounded-lg border-2 border-destructive/60 p-4 text-center">
               <p className="text-red-400 text-sm font-bold uppercase mb-1">
                 Delayed
               </p>
-              <p className="text-4xl font-bold text-white">
+              <p className="text-4xl font-bold text-foreground">
                 {
                   orders.filter(
                     (o) => new Date() > new Date(o.productionDeadline)
@@ -307,7 +313,7 @@ export default function MonitoringDashboard() {
 
         {/* Last Update */}
         <div className="mt-4 flex items-center justify-between">
-          <p className="text-gray-400 text-sm">
+          <p className="text-muted-foreground text-sm">
             Last Updated: {lastUpdate.toLocaleTimeString()}
           </p>
           <button
@@ -334,17 +340,19 @@ export default function MonitoringDashboard() {
 
       {/* Error Display */}
       {error && (
-        <div className="mb-6 bg-red-900/50 border-2 border-red-500 rounded-lg p-4">
-          <p className="text-red-300 font-semibold">{error}</p>
+        <div className="mb-6 bg-destructive/10 border-2 border-destructive/50 rounded-lg p-4">
+          <p className="text-destructive font-semibold">{error}</p>
         </div>
       )}
 
       {/* Orders Grid */}
       {orders.length === 0 ? (
-        <div className="bg-gray-800 rounded-xl border-2 border-gray-700 p-12 text-center">
-          <Package className="w-16 h-16 text-gray-600 mx-auto mb-4" />
-          <p className="text-xl font-bold text-gray-400">No Active Orders</p>
-          <p className="text-gray-500 mt-2">
+        <div className="bg-card rounded-xl border-2 border-border p-12 text-center">
+          <Package className="w-16 h-16 text-muted-foreground mx-auto mb-4" />
+          <p className="text-xl font-bold text-muted-foreground">
+            No Active Orders
+          </p>
+          <p className="text-muted-foreground mt-2">
             All orders have been completed or no orders in production
           </p>
         </div>

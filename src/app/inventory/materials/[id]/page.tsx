@@ -73,11 +73,11 @@ export default function MaterialDetailPage() {
   if (!material) {
     return (
       <div className="max-w-7xl mx-auto px-4 py-8">
-        <div className="bg-red-50 border border-red-200 rounded-lg p-6">
-          <p className="text-red-800">Bahan tidak ditemukan</p>
+        <div className="bg-red-500/10 border border-red-500/30 rounded-lg p-6">
+          <p className="text-red-600">Bahan tidak ditemukan</p>
           <button
             onClick={() => router.push("/inventory/materials")}
-            className="mt-3 text-sm text-red-800 underline"
+            className="mt-3 text-sm text-red-600 underline"
           >
             Kembali ke bahan
           </button>
@@ -93,15 +93,17 @@ export default function MaterialDetailPage() {
         <div className="flex items-center gap-3 mb-4">
           <button
             onClick={() => router.push("/inventory/materials")}
-            className="text-gray-600 hover:text-gray-900"
+            className="text-muted-foreground hover:text-foreground"
           >
             <ArrowLeft className="w-6 h-6" />
           </button>
           <div className="flex-1">
-            <h1 className="text-3xl font-bold text-gray-900">
+            <h1 className="text-3xl font-bold text-foreground">
               {material.name}
             </h1>
-            <p className="text-gray-600 mt-1">{material.materialCode}</p>
+            <p className="text-muted-foreground mt-1">
+              {material.materialCode}
+            </p>
           </div>
           <div className="flex items-center gap-3">
             <Button
@@ -131,13 +133,13 @@ export default function MaterialDetailPage() {
             <div className="flex items-center gap-3">
               <Package className="w-8 h-8 text-blue-600" />
               <div>
-                <p className="text-xs font-semibold text-gray-600 uppercase">
+                <p className="text-xs font-semibold text-muted-foreground uppercase">
                   Stok Sekarang
                 </p>
-                <p className="text-2xl font-bold text-blue-900">
+                <p className="text-2xl font-bold text-blue-600">
                   {formatNumber(material.currentStock || 0)}
                 </p>
-                <p className="text-xs text-gray-600">{material.unit}</p>
+                <p className="text-xs text-muted-foreground">{material.unit}</p>
               </div>
             </div>
           </CardContent>
@@ -151,13 +153,13 @@ export default function MaterialDetailPage() {
             <div className="flex items-center gap-3">
               <AlertTriangle className="w-8 h-8 text-orange-600" />
               <div>
-                <p className="text-xs font-semibold text-gray-600 uppercase">
+                <p className="text-xs font-semibold text-muted-foreground uppercase">
                   Stok Minimum
                 </p>
-                <p className="text-2xl font-bold text-orange-900">
+                <p className="text-2xl font-bold text-orange-600">
                   {material.minimumStock}
                 </p>
-                <p className="text-xs text-gray-600">{material.unit}</p>
+                <p className="text-xs text-muted-foreground">{material.unit}</p>
               </div>
             </div>
           </CardContent>
@@ -168,13 +170,13 @@ export default function MaterialDetailPage() {
             <div className="flex items-center gap-3">
               <TrendingUp className="w-8 h-8 text-green-600" />
               <div>
-                <p className="text-xs font-semibold text-gray-600 uppercase">
+                <p className="text-xs font-semibold text-muted-foreground uppercase">
                   Reorder Point
                 </p>
-                <p className="text-2xl font-bold text-green-900">
+                <p className="text-2xl font-bold text-green-600">
                   {material.reorderPoint}
                 </p>
-                <p className="text-xs text-gray-600">{material.unit}</p>
+                <p className="text-xs text-muted-foreground">{material.unit}</p>
               </div>
             </div>
           </CardContent>
@@ -185,13 +187,13 @@ export default function MaterialDetailPage() {
             <div className="flex items-center gap-3">
               <History className="w-8 h-8 text-purple-600" />
               <div>
-                <p className="text-xs font-semibold text-gray-600 uppercase">
+                <p className="text-xs font-semibold text-muted-foreground uppercase">
                   Transaksi
                 </p>
-                <p className="text-2xl font-bold text-purple-900">
+                <p className="text-2xl font-bold text-purple-600">
                   {transactions.length}
                 </p>
-                <p className="text-xs text-gray-600">total</p>
+                <p className="text-xs text-muted-foreground">total</p>
               </div>
             </div>
           </CardContent>
@@ -206,33 +208,35 @@ export default function MaterialDetailPage() {
           </CardHeader>
           <CardContent className="space-y-3">
             <div>
-              <p className="text-sm text-gray-600">Kategori</p>
+              <p className="text-sm text-muted-foreground">Kategori</p>
               <Badge variant="info" size="sm">
                 {material.category}
               </Badge>
             </div>
             <div>
-              <p className="text-sm text-gray-600">Unit</p>
-              <p className="font-semibold text-gray-900">{material.unit}</p>
+              <p className="text-sm text-muted-foreground">Unit</p>
+              <p className="font-semibold text-foreground">{material.unit}</p>
             </div>
             {material.color && (
               <div>
-                <p className="text-sm text-gray-600">Warna</p>
-                <p className="font-semibold text-gray-900">{material.color}</p>
+                <p className="text-sm text-muted-foreground">Warna</p>
+                <p className="font-semibold text-foreground">
+                  {material.color}
+                </p>
               </div>
             )}
             {material.supplier && (
               <div>
-                <p className="text-sm text-gray-600">Supplier</p>
-                <p className="font-semibold text-gray-900">
+                <p className="text-sm text-muted-foreground">Supplier</p>
+                <p className="font-semibold text-foreground">
                   {material.supplier}
                 </p>
               </div>
             )}
             {material.unitPrice && (
               <div>
-                <p className="text-sm text-gray-600">Harga Satuan</p>
-                <p className="font-semibold text-gray-900">
+                <p className="text-sm text-muted-foreground">Harga Satuan</p>
+                <p className="font-semibold text-foreground">
                   Rp {formatNumber(material.unitPrice)}
                 </p>
               </div>
@@ -247,20 +251,20 @@ export default function MaterialDetailPage() {
           </CardHeader>
           <CardContent>
             <div className="space-y-4">
-              <div className="flex justify-between items-center p-3 bg-blue-50 rounded-lg">
-                <span className="text-sm font-semibold text-blue-700">
+              <div className="flex justify-between items-center p-3 bg-blue-500/10 rounded-lg">
+                <span className="text-sm font-semibold text-blue-600">
                   Tersedia
                 </span>
-                <span className="text-lg font-bold text-blue-900">
+                <span className="text-lg font-bold text-blue-600">
                   {formatNumber(material.currentStock || 0)} {material.unit}
                 </span>
               </div>
               {material.isLowStock && (
-                <div className="bg-red-50 border border-red-200 rounded-lg p-3">
-                  <p className="text-sm font-semibold text-red-800">
+                <div className="bg-red-500/10 border border-red-500/30 rounded-lg p-3">
+                  <p className="text-sm font-semibold text-red-600">
                     ⚠️ Low Stock Alert
                   </p>
-                  <p className="text-xs text-red-700 mt-1">
+                  <p className="text-xs text-red-600 mt-1">
                     Dibawah stok minimum
                   </p>
                 </div>
@@ -275,7 +279,7 @@ export default function MaterialDetailPage() {
             <CardTitle>Statistik Penggunaan</CardTitle>
           </CardHeader>
           <CardContent>
-            <p className="text-sm text-gray-600">
+            <p className="text-sm text-muted-foreground">
               Track material usage in production orders
             </p>
             {/* TODO: Add usage stats */}
@@ -290,35 +294,35 @@ export default function MaterialDetailPage() {
         </CardHeader>
         <CardContent>
           {transactions.length === 0 ? (
-            <p className="text-center py-8 text-gray-500">
+            <p className="text-center py-8 text-muted-foreground">
               Belum ada transaksi
             </p>
           ) : (
             <div className="overflow-x-auto">
               <table className="min-w-full">
                 <thead>
-                  <tr className="border-b border-gray-200">
-                    <th className="text-left py-3 px-4 text-sm font-semibold text-gray-700">
+                  <tr className="border-b border-border">
+                    <th className="text-left py-3 px-4 text-sm font-semibold text-foreground">
                       Tanggal
                     </th>
-                    <th className="text-left py-3 px-4 text-sm font-semibold text-gray-700">
+                    <th className="text-left py-3 px-4 text-sm font-semibold text-foreground">
                       Tipe
                     </th>
-                    <th className="text-right py-3 px-4 text-sm font-semibold text-gray-700">
+                    <th className="text-right py-3 px-4 text-sm font-semibold text-foreground">
                       Jumlah
                     </th>
-                    <th className="text-left py-3 px-4 text-sm font-semibold text-gray-700">
+                    <th className="text-left py-3 px-4 text-sm font-semibold text-foreground">
                       Reference
                     </th>
-                    <th className="text-left py-3 px-4 text-sm font-semibold text-gray-700">
+                    <th className="text-left py-3 px-4 text-sm font-semibold text-foreground">
                       By
                     </th>
                   </tr>
                 </thead>
                 <tbody>
                   {transactions.map((tx) => (
-                    <tr key={tx.id} className="border-b border-gray-100">
-                      <td className="py-3 px-4 text-sm text-gray-900">
+                    <tr key={tx.id} className="border-b border-border">
+                      <td className="py-3 px-4 text-sm text-foreground">
                         {formatDateTime(tx.transactionDate)}
                       </td>
                       <td className="py-3 px-4">
@@ -343,7 +347,7 @@ export default function MaterialDetailPage() {
                         {tx.quantity > 0 ? "+" : ""}
                         {formatNumber(tx.quantity)} {tx.unit}
                       </td>
-                      <td className="py-3 px-4 text-sm text-gray-700">
+                      <td className="py-3 px-4 text-sm text-foreground">
                         {tx.referenceType && (
                           <span>
                             {tx.referenceType}
@@ -351,7 +355,7 @@ export default function MaterialDetailPage() {
                           </span>
                         )}
                       </td>
-                      <td className="py-3 px-4 text-sm text-gray-700">
+                      <td className="py-3 px-4 text-sm text-foreground">
                         {tx.performedBy}
                       </td>
                     </tr>

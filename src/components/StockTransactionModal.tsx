@@ -108,23 +108,23 @@ export const StockTransactionModal: React.FC<StockTransactionModalProps> = ({
       <form onSubmit={handleSubmit}>
         <div className="space-y-4">
           {error && (
-            <div className="bg-red-50 border border-red-200 rounded p-3 text-sm text-red-800">
+            <div className="bg-red-500/10 border border-red-500/30 rounded p-3 text-sm text-red-600">
               {error}
             </div>
           )}
 
           {/* Item Info */}
-          <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+          <div className="bg-blue-500/10 border border-blue-500/30 rounded-lg p-4">
             <div className="flex items-start justify-between mb-2">
               <div>
-                <p className="font-semibold text-gray-900">{item.name}</p>
-                <p className="text-sm text-gray-600">{item.code}</p>
+                <p className="font-semibold text-foreground">{item.name}</p>
+                <p className="text-sm text-muted-foreground">{item.code}</p>
               </div>
               <Badge variant="info">{type}</Badge>
             </div>
             {item.currentStock !== undefined && (
-              <div className="mt-2 pt-2 border-t border-blue-300">
-                <p className="text-sm text-gray-700">
+              <div className="mt-2 pt-2 border-t border-blue-500/40">
+                <p className="text-sm text-foreground">
                   Stok Sekarang:{" "}
                   <span className="font-bold">
                     {item.currentStock} {item.unit}
@@ -136,7 +136,7 @@ export const StockTransactionModal: React.FC<StockTransactionModalProps> = ({
 
           {/* Transaction Type */}
           <div>
-            <label className="block text-sm font-medium text-gray-900 mb-2">
+            <label className="block text-sm font-medium text-foreground mb-2">
               Tipe Transaksi *
             </label>
             <select
@@ -144,7 +144,7 @@ export const StockTransactionModal: React.FC<StockTransactionModalProps> = ({
               onChange={(e) =>
                 setFormData({ ...formData, transactionType: e.target.value })
               }
-              className="w-full px-4 py-2 text-gray-400 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+              className="w-full px-4 py-2 text-muted-foreground border border-border rounded-lg focus:ring-2 focus:ring-blue-500"
               required
               disabled={isSubmitting}
             >
@@ -158,7 +158,7 @@ export const StockTransactionModal: React.FC<StockTransactionModalProps> = ({
 
           {/* Quantity */}
           <div>
-            <label className="block text-sm font-medium text-gray-900 mb-2">
+            <label className="block text-sm font-medium text-foreground mb-2">
               Jumlah *
             </label>
             <div className="flex gap-2">
@@ -174,13 +174,13 @@ export const StockTransactionModal: React.FC<StockTransactionModalProps> = ({
                         : parseInt(e.target.value) || 0,
                   })
                 }
-                className="flex-1 px-4 py-2 text-gray-400 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                className="flex-1 px-4 py-2 text-muted-foreground border border-border rounded-lg focus:ring-2 focus:ring-blue-500"
                 step={type === "material" ? "0.01" : "1"}
                 min="0"
                 required
                 disabled={isSubmitting}
               />
-              <div className="px-4 py-2 bg-gray-100 border border-gray-300 rounded-lg text-gray-700 font-semibold">
+              <div className="px-4 py-2 bg-muted border border-border rounded-lg text-foreground font-semibold">
                 {item.unit}
               </div>
             </div>
@@ -189,7 +189,7 @@ export const StockTransactionModal: React.FC<StockTransactionModalProps> = ({
           {/* Reference */}
           <div className="grid grid-cols-2 gap-4">
             <div>
-              <label className="block text-sm font-medium text-gray-900 mb-2">
+              <label className="block text-sm font-medium text-foreground mb-2">
                 Reference Type
               </label>
               <input
@@ -198,13 +198,13 @@ export const StockTransactionModal: React.FC<StockTransactionModalProps> = ({
                 onChange={(e) =>
                   setFormData({ ...formData, referenceType: e.target.value })
                 }
-                className="w-full px-4 py-2 text-gray-400 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                className="w-full px-4 py-2 text-muted-foreground border border-border rounded-lg focus:ring-2 focus:ring-blue-500"
                 placeholder="Purchase, Order, etc"
                 disabled={isSubmitting}
               />
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-900 mb-2">
+              <label className="block text-sm font-medium text-foreground mb-2">
                 Reference ID
               </label>
               <input
@@ -213,7 +213,7 @@ export const StockTransactionModal: React.FC<StockTransactionModalProps> = ({
                 onChange={(e) =>
                   setFormData({ ...formData, referenceId: e.target.value })
                 }
-                className="w-full px-4 py-2 text-gray-400 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                className="w-full px-4 py-2 text-muted-foreground border border-border rounded-lg focus:ring-2 focus:ring-blue-500"
                 placeholder="PO#, Order#, etc"
                 disabled={isSubmitting}
               />
@@ -222,7 +222,7 @@ export const StockTransactionModal: React.FC<StockTransactionModalProps> = ({
 
           {/* Remarks */}
           <div>
-            <label className="block text-sm font-medium text-gray-900 mb-2">
+            <label className="block text-sm font-medium text-foreground mb-2">
               Remarks
             </label>
             <textarea
@@ -230,7 +230,7 @@ export const StockTransactionModal: React.FC<StockTransactionModalProps> = ({
               onChange={(e) =>
                 setFormData({ ...formData, remarks: e.target.value })
               }
-              className="w-full px-4 py-2 text-gray-400 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+              className="w-full px-4 py-2 text-muted-foreground border border-border rounded-lg focus:ring-2 focus:ring-blue-500"
               rows={3}
               placeholder="Additional notes..."
               disabled={isSubmitting}
@@ -242,21 +242,21 @@ export const StockTransactionModal: React.FC<StockTransactionModalProps> = ({
             <div
               className={`border-2 rounded-lg p-4 ${
                 formData.transactionType === "in"
-                  ? "bg-green-50 border-green-300"
+                  ? "bg-green-500/10 border-green-500/40"
                   : formData.transactionType === "out"
-                  ? "bg-red-50 border-red-300"
-                  : "bg-yellow-50 border-yellow-300"
+                  ? "bg-red-500/10 border-red-500/40"
+                  : "bg-yellow-500/10 border-yellow-500/40"
               }`}
             >
-              <p className="font-semibold text-gray-900 mb-2">Kesimpulan:</p>
-              <p className="text-sm text-gray-800">
+              <p className="font-semibold text-foreground mb-2">Kesimpulan:</p>
+              <p className="text-sm text-foreground">
                 <span className="font-bold">{selectedType?.label}</span> of{" "}
                 <span className="font-bold">
                   {formData.quantity} {item.unit}
                 </span>
               </p>
               {item.currentStock !== undefined && (
-                <p className="text-sm text-gray-800 mt-1">
+                <p className="text-sm text-foreground mt-1">
                   New stock will be:{" "}
                   <span className="font-bold">
                     {formData.transactionType === "in"

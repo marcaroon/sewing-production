@@ -214,10 +214,10 @@ export const BarcodeScanner: React.FC<BarcodeScannerProps> = ({
       <CardContent className="space-y-4">
         {/* Error */}
         {cameraError && (
-          <div className="bg-red-50 border border-red-300 rounded p-3 flex gap-2">
+          <div className="bg-red-500/10 border border-red-500/40 rounded p-3 flex gap-2">
             <AlertTriangle className="w-4 h-4 text-red-600 shrink-0 mt-0.5" />
             <div className="flex-1">
-              <p className="text-sm text-red-700 font-semibold">Camera Error</p>
+              <p className="text-sm text-red-600 font-semibold">Camera Error</p>
               <p className="text-sm text-red-600 mt-1">{cameraError}</p>
             </div>
           </div>
@@ -225,13 +225,16 @@ export const BarcodeScanner: React.FC<BarcodeScannerProps> = ({
 
         {/* Debug Info */}
         {debugInfo.length > 0 && (
-          <div className="bg-gray-50 border border-gray-300 rounded p-3">
-            <p className="text-xs font-semibold text-gray-700 mb-2">
+          <div className="bg-muted border border-border rounded p-3">
+            <p className="text-xs font-semibold text-foreground mb-2">
               Debug Log:
             </p>
             <div className="space-y-1">
               {debugInfo.map((log, idx) => (
-                <p key={idx} className="text-xs text-gray-600 font-mono">
+                <p
+                  key={idx}
+                  className="text-xs text-muted-foreground font-mono"
+                >
                   {log}
                 </p>
               ))}
@@ -242,12 +245,12 @@ export const BarcodeScanner: React.FC<BarcodeScannerProps> = ({
         {/* Scanner Container - SIMPLIFIED */}
         <div className="w-full">
           {!isScanning && (
-            <div className="w-full h-100 flex flex-col items-center justify-center bg-gray-100 rounded-lg border-2 border-gray-300">
-              <Camera className="w-16 h-16 text-gray-400 mb-3" />
-              <p className="font-semibold text-gray-700 text-lg">
+            <div className="w-full h-100 flex flex-col items-center justify-center bg-muted rounded-lg border-2 border-border">
+              <Camera className="w-16 h-16 text-muted-foreground mb-3" />
+              <p className="font-semibold text-foreground text-lg">
                 Ready to Scan
               </p>
-              <p className="text-sm text-gray-500 mt-2">
+              <p className="text-sm text-muted-foreground mt-2">
                 Click "Start Scanning" below
               </p>
             </div>
@@ -281,7 +284,7 @@ export const BarcodeScanner: React.FC<BarcodeScannerProps> = ({
 
         {/* Manual Input */}
         <div className="pt-4 border-t">
-          <p className="text-sm font-semibold text-gray-700 mb-2">
+          <p className="text-sm font-semibold text-foreground mb-2">
             Manual Entry (for testing):
           </p>
           <form onSubmit={handleManualSubmit} className="flex gap-2">
@@ -299,12 +302,12 @@ export const BarcodeScanner: React.FC<BarcodeScannerProps> = ({
 
         {/* Last Scan */}
         {lastScan && (
-          <div className="bg-green-50 border-2 border-green-400 rounded p-4">
+          <div className="bg-green-500/10 border-2 border-green-400 rounded p-4">
             <div className="flex items-center gap-2 mb-2">
               <CheckCircle className="w-5 h-5 text-green-600" />
-              <p className="font-bold text-green-800">Last Scanned Code:</p>
+              <p className="font-bold text-green-600">Last Scanned Code:</p>
             </div>
-            <p className="font-mono text-lg text-green-900 bg-white rounded px-3 py-2 border border-green-300">
+            <p className="font-mono text-lg text-green-600 bg-card rounded px-3 py-2 border border-green-500/40">
               {lastScan}
             </p>
           </div>

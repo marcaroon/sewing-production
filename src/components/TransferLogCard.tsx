@@ -97,7 +97,9 @@ export const TransferLogCard: React.FC<TransferLogCardProps> = ({
     <>
       <Card
         className={`${
-          transferLog.status === "disputed" ? "border-red-400 border-2" : ""
+          transferLog.status === "disputed"
+            ? "border-destructive/40 border-2"
+            : ""
         }`}
         hover
       >
@@ -110,8 +112,8 @@ export const TransferLogCard: React.FC<TransferLogCardProps> = ({
                   {transferLog.transferNumber}
                 </CardTitle>
                 <div className="flex items-center gap-2 mt-1">
-                  <Calendar className="w-3 h-3 text-gray-600" />
-                  <p className="text-xs font-semibold text-gray-700">
+                  <Calendar className="w-3 h-3 text-muted-foreground" />
+                  <p className="text-xs font-semibold text-foreground">
                     {formatDateTime(transferLog.transferDate)}
                   </p>
                 </div>
@@ -138,15 +140,15 @@ export const TransferLogCard: React.FC<TransferLogCardProps> = ({
 
         <CardContent className="space-y-4">
           {/* Transfer Route */}
-          <div className="flex items-center justify-between bg-linear-to-r from-blue-50 to-purple-50 border-2 border-blue-200 rounded-lg p-4">
+          <div className="flex items-center justify-between bg-linear-to-r from-muted to-purple-500/10 border-2 border-blue-500/30 rounded-lg p-4">
             <div className="flex-1">
-              <p className="text-xs font-bold text-blue-700 uppercase mb-1">
+              <p className="text-xs font-bold text-blue-600 uppercase mb-1">
                 Dari
               </p>
-              <p className="font-bold text-sm text-gray-900">
+              <p className="font-bold text-sm text-foreground">
                 {getProcessLabel(transferLog.fromProcess)}
               </p>
-              <p className="text-xs font-semibold text-gray-700 mt-0.5">
+              <p className="text-xs font-semibold text-foreground mt-0.5">
                 {transferLog.fromDepartment}
               </p>
             </div>
@@ -154,13 +156,13 @@ export const TransferLogCard: React.FC<TransferLogCardProps> = ({
               <ArrowRight className="w-6 h-6 text-blue-600" />
             </div>
             <div className="flex-1">
-              <p className="text-xs font-bold text-purple-700 uppercase mb-1">
+              <p className="text-xs font-bold text-purple-600 uppercase mb-1">
                 Ke
               </p>
-              <p className="font-bold text-sm text-gray-900">
+              <p className="font-bold text-sm text-foreground">
                 {getProcessLabel(transferLog.toProcess)}
               </p>
-              <p className="text-xs font-semibold text-gray-700 mt-0.5">
+              <p className="text-xs font-semibold text-foreground mt-0.5">
                 {transferLog.toDepartment}
               </p>
             </div>
@@ -168,41 +170,41 @@ export const TransferLogCard: React.FC<TransferLogCardProps> = ({
 
           {/* Quantities */}
           <div className="grid grid-cols-2 gap-2.5 text-sm">
-            <div className="flex items-center gap-2 bg-blue-50 border border-blue-200 rounded-lg p-2.5">
+            <div className="flex items-center gap-2 bg-blue-500/10 border border-blue-500/30 rounded-lg p-2.5">
               <Package className="w-4 h-4 text-blue-600" />
               <div>
-                <p className="text-xs font-bold text-blue-700">Dipindahkan</p>
-                <p className="font-bold text-blue-900">
+                <p className="text-xs font-bold text-blue-600">Dipindahkan</p>
+                <p className="font-bold text-blue-600">
                   {formatNumber(transferLog.quantityTransferred)} pcs
                 </p>
               </div>
             </div>
-            <div className="flex items-center gap-2 bg-green-50 border border-green-200 rounded-lg p-2.5">
+            <div className="flex items-center gap-2 bg-green-500/10 border border-green-500/30 rounded-lg p-2.5">
               <CheckCircle2 className="w-4 h-4 text-green-600" />
               <div>
-                <p className="text-xs font-bold text-green-700">Selesai</p>
-                <p className="font-bold text-green-900">
+                <p className="text-xs font-bold text-green-600">Selesai</p>
+                <p className="font-bold text-green-600">
                   {formatNumber(transferLog.quantityCompleted)} pcs
                 </p>
               </div>
             </div>
             {transferLog.quantityRejected > 0 && (
-              <div className="flex items-center gap-2 bg-red-50 border border-red-200 rounded-lg p-2.5">
-                <XCircle className="w-4 h-4 text-red-600" />
+              <div className="flex items-center gap-2 bg-destructive/10 border border-destructive/40 rounded-lg p-2.5">
+                <XCircle className="w-4 h-4 text-destructive" />
                 <div>
-                  <p className="text-xs font-bold text-red-700">Rejected</p>
-                  <p className="font-bold text-red-900">
+                  <p className="text-xs font-bold text-destructive">Rejected</p>
+                  <p className="font-bold text-destructive">
                     {formatNumber(transferLog.quantityRejected)} pcs
                   </p>
                 </div>
               </div>
             )}
             {transferLog.quantityRework > 0 && (
-              <div className="flex items-center gap-2 bg-yellow-50 border border-yellow-200 rounded-lg p-2.5">
+              <div className="flex items-center gap-2 bg-yellow-500/10 border border-yellow-500/30 rounded-lg p-2.5">
                 <RotateCcw className="w-4 h-4 text-yellow-600" />
                 <div>
-                  <p className="text-xs font-bold text-yellow-700">Rework</p>
-                  <p className="font-bold text-yellow-900">
+                  <p className="text-xs font-bold text-yellow-600">Rework</p>
+                  <p className="font-bold text-yellow-600">
                     {formatNumber(transferLog.quantityRework)} pcs
                   </p>
                 </div>
@@ -211,22 +213,24 @@ export const TransferLogCard: React.FC<TransferLogCardProps> = ({
           </div>
 
           {/* People */}
-          <div className="grid grid-cols-2 gap-3 text-sm bg-gray-50 border border-gray-200 rounded-lg p-3">
+          <div className="grid grid-cols-2 gap-3 text-sm bg-muted border border-border rounded-lg p-3">
             <div>
               <div className="flex items-center gap-1.5 mb-1">
-                <User className="w-3 h-3 text-gray-600" />
-                <p className="text-xs font-bold text-gray-700">Handed Over</p>
+                <User className="w-3 h-3 text-muted-foreground" />
+                <p className="text-xs font-bold text-foreground">Handed Over</p>
               </div>
-              <p className="font-bold text-gray-900">
+              <p className="font-bold text-foreground">
                 {transferLog.handedOverBy}
               </p>
             </div>
             <div>
               <div className="flex items-center gap-1.5 mb-1">
-                <User className="w-3 h-3 text-gray-600" />
-                <p className="text-xs font-bold text-gray-700">Diterima oleh</p>
+                <User className="w-3 h-3 text-muted-foreground" />
+                <p className="text-xs font-bold text-foreground">
+                  Diterima oleh
+                </p>
               </div>
-              <p className="font-bold text-gray-900">
+              <p className="font-bold text-foreground">
                 {transferLog.receivedBy || "-"}
               </p>
             </div>
@@ -236,22 +240,22 @@ export const TransferLogCard: React.FC<TransferLogCardProps> = ({
           {(transferLog.processingDuration || transferLog.waitingDuration) && (
             <div className="grid grid-cols-2 gap-2 text-xs">
               {transferLog.processingDuration && (
-                <div className="flex items-center gap-2 bg-blue-50 border border-blue-200 rounded px-2.5 py-2">
+                <div className="flex items-center gap-2 bg-blue-500/10 border border-blue-500/30 rounded px-2.5 py-2">
                   <Clock className="w-3 h-3 text-blue-600" />
                   <div>
-                    <p className="font-semibold text-blue-700">Memproses</p>
-                    <p className="font-bold text-blue-900">
+                    <p className="font-semibold text-blue-600">Memproses</p>
+                    <p className="font-bold text-blue-600">
                       {transferLog.processingDuration} min
                     </p>
                   </div>
                 </div>
               )}
               {transferLog.waitingDuration && (
-                <div className="flex items-center gap-2 bg-yellow-50 border border-yellow-200 rounded px-2.5 py-2">
+                <div className="flex items-center gap-2 bg-yellow-500/10 border border-yellow-500/30 rounded px-2.5 py-2">
                   <Clock className="w-3 h-3 text-yellow-600" />
                   <div>
-                    <p className="font-semibold text-yellow-700">Menunggu</p>
-                    <p className="font-bold text-yellow-900">
+                    <p className="font-semibold text-yellow-600">Menunggu</p>
+                    <p className="font-bold text-yellow-600">
                       {transferLog.waitingDuration} min
                     </p>
                   </div>
@@ -261,7 +265,7 @@ export const TransferLogCard: React.FC<TransferLogCardProps> = ({
           )}
 
           {/* Actions */}
-          <div className="flex gap-2 pt-2 border-t-2 border-gray-200">
+          <div className="flex gap-2 pt-2 border-t-2 border-border">
             <Button
               onClick={() => setIsDetailModalOpen(true)}
               variant="outline"
@@ -285,7 +289,7 @@ export const TransferLogCard: React.FC<TransferLogCardProps> = ({
               </Button>
             )}
             {!transferLog.isReceived && !canReceive && !isAdmin && (
-              <div className="text-xs text-gray-600 flex items-center gap-1 px-2">
+              <div className="text-xs text-muted-foreground flex items-center gap-1 px-2">
                 <svg
                   className="w-3 h-3"
                   fill="currentColor"
@@ -314,27 +318,27 @@ export const TransferLogCard: React.FC<TransferLogCardProps> = ({
         size="lg"
       >
         <div className="space-y-4">
-          <div className="bg-linear-to-r from-blue-50 to-purple-50 border-2 border-blue-300 rounded-lg p-4">
-            <h4 className="font-bold text-gray-900 mb-3 flex items-center gap-2">
+          <div className="bg-linear-to-r from-muted to-purple-500/10 border-2 border-blue-500/40 rounded-lg p-4">
+            <h4 className="font-bold text-foreground mb-3 flex items-center gap-2">
               <FileText className="w-5 h-5 text-blue-600" />
               Informasi Perpindahan
             </h4>
             <div className="grid grid-cols-2 gap-4 text-sm">
               <div>
-                <p className="text-gray-700 font-semibold">Dari Proses</p>
-                <p className="font-bold text-gray-900">
+                <p className="text-foreground font-semibold">Dari Proses</p>
+                <p className="font-bold text-foreground">
                   {getProcessLabel(transferLog.fromProcess)}
                 </p>
-                <p className="text-xs font-semibold text-gray-600">
+                <p className="text-xs font-semibold text-muted-foreground">
                   {transferLog.fromDepartment}
                 </p>
               </div>
               <div>
-                <p className="text-gray-700 font-semibold">Ke Proses</p>
-                <p className="font-bold text-gray-900">
+                <p className="text-foreground font-semibold">Ke Proses</p>
+                <p className="font-bold text-foreground">
                   {getProcessLabel(transferLog.toProcess)}
                 </p>
-                <p className="text-xs font-semibold text-gray-600">
+                <p className="text-xs font-semibold text-muted-foreground">
                   {transferLog.toDepartment}
                 </p>
               </div>
@@ -342,19 +346,19 @@ export const TransferLogCard: React.FC<TransferLogCardProps> = ({
           </div>
 
           {rejects.length > 0 && (
-            <div className="bg-red-50 border-2 border-red-300 rounded-lg p-4">
-              <h4 className="font-bold text-red-900 mb-3 flex items-center gap-2">
-                <AlertTriangle className="w-5 h-5 text-red-600" />
+            <div className="bg-destructive/10 border-2 border-destructive/40 rounded-lg p-4">
+              <h4 className="font-bold text-destructive mb-3 flex items-center gap-2">
+                <AlertTriangle className="w-5 h-5 text-destructive" />
                 Detail Reject/Rework
               </h4>
               <div className="space-y-2">
                 {rejects.map((reject: any, idx: number) => (
                   <div
                     key={idx}
-                    className="bg-white border border-red-200 rounded-lg p-3 text-sm"
+                    className="bg-card border border-destructive/40 rounded-lg p-3 text-sm"
                   >
                     <div className="flex justify-between mb-2">
-                      <span className="font-bold text-gray-900">
+                      <span className="font-bold text-foreground">
                         {reject.type}
                       </span>
                       <Badge
@@ -366,10 +370,10 @@ export const TransferLogCard: React.FC<TransferLogCardProps> = ({
                         {reject.category}
                       </Badge>
                     </div>
-                    <p className="text-gray-800 font-medium">
+                    <p className="text-foreground font-medium">
                       {reject.description}
                     </p>
-                    <p className="text-gray-700 text-xs mt-2">
+                    <p className="text-foreground text-xs mt-2">
                       Qty:{" "}
                       <span className="font-bold">{reject.quantity} pcs</span> •
                       Action: <span className="font-bold">{reject.action}</span>
@@ -381,24 +385,24 @@ export const TransferLogCard: React.FC<TransferLogCardProps> = ({
           )}
 
           {transferLog.notes && (
-            <div className="bg-yellow-50 border-2 border-yellow-300 rounded-lg p-4">
-              <p className="font-bold text-yellow-900 mb-2 flex items-center gap-2">
+            <div className="bg-warning/10 border-2 border-warning/40 rounded-lg p-4">
+              <p className="font-bold text-warning mb-2 flex items-center gap-2">
                 <FileText className="w-4 h-4" />
                 Catatan
               </p>
-              <p className="text-sm font-medium text-yellow-800">
+              <p className="text-sm font-medium text-warning-foreground">
                 {transferLog.notes}
               </p>
             </div>
           )}
 
           {transferLog.issues && (
-            <div className="bg-red-50 border-2 border-red-300 rounded-lg p-4">
-              <p className="font-bold text-red-900 mb-2 flex items-center gap-2">
+            <div className="bg-destructive/10 border-2 border-destructive/40 rounded-lg p-4">
+              <p className="font-bold text-destructive mb-2 flex items-center gap-2">
                 <AlertTriangle className="w-4 h-4" />
                 Issues
               </p>
-              <p className="text-sm font-medium text-red-800">
+              <p className="text-sm font-medium text-destructive">
                 {transferLog.issues}
               </p>
             </div>
@@ -416,22 +420,22 @@ export const TransferLogCard: React.FC<TransferLogCardProps> = ({
         <form onSubmit={handleReceive}>
           <div className="space-y-4">
             {error && (
-              <div className="bg-red-50 border-2 border-red-300 rounded-lg p-3 text-sm font-semibold text-red-800 flex items-center gap-2">
+              <div className="bg-destructive/10 border-2 border-destructive/40 rounded-lg p-3 text-sm font-semibold text-destructive flex items-center gap-2">
                 <AlertTriangle className="w-4 h-4" />
                 {error}
               </div>
             )}
 
-            <div className="bg-blue-50 border-2 border-blue-300 rounded-lg p-4 text-sm">
-              <p className="font-bold text-blue-900 mb-2">Akan diterima:</p>
-              <p className="text-gray-900 font-semibold">
+            <div className="bg-blue-500/10 border-2 border-blue-500/40 rounded-lg p-4 text-sm">
+              <p className="font-bold text-blue-600 mb-2">Akan diterima:</p>
+              <p className="text-foreground font-semibold">
                 {transferLog.quantityTransferred} pcs from{" "}
                 {getProcessLabel(transferLog.fromProcess)}
               </p>
             </div>
 
             <div>
-              <label className="block text-sm font-bold text-gray-900 mb-2">
+              <label className="block text-sm font-bold text-foreground mb-2">
                 Nama Penerima *
               </label>
               <input
@@ -440,14 +444,14 @@ export const TransferLogCard: React.FC<TransferLogCardProps> = ({
                 onChange={(e) =>
                   setReceiveData({ ...receiveData, receivedBy: e.target.value })
                 }
-                className="w-full px-4 py-2.5 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 font-medium text-gray-900"
+                className="w-full px-4 py-2.5 border-2 border-border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 font-medium text-foreground"
                 required
                 disabled={isSubmitting}
               />
             </div>
 
             <div>
-              <label className="block text-sm font-bold text-gray-900 mb-2">
+              <label className="block text-sm font-bold text-foreground mb-2">
                 Issues? (Opsional)
               </label>
               <textarea
@@ -455,7 +459,7 @@ export const TransferLogCard: React.FC<TransferLogCardProps> = ({
                 onChange={(e) =>
                   setReceiveData({ ...receiveData, issues: e.target.value })
                 }
-                className="w-full px-4 py-2.5 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 font-medium text-gray-900"
+                className="w-full px-4 py-2.5 border-2 border-border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 font-medium text-foreground"
                 rows={3}
                 placeholder="Any damage, shortage, or problems..."
                 disabled={isSubmitting}
@@ -463,7 +467,7 @@ export const TransferLogCard: React.FC<TransferLogCardProps> = ({
             </div>
 
             <div>
-              <label className="block text-sm font-bold text-gray-900 mb-2">
+              <label className="block text-sm font-bold text-foreground mb-2">
                 Catatan Tambahan (Oprional)
               </label>
               <textarea
@@ -471,7 +475,7 @@ export const TransferLogCard: React.FC<TransferLogCardProps> = ({
                 onChange={(e) =>
                   setReceiveData({ ...receiveData, notes: e.target.value })
                 }
-                className="w-full px-4 py-2.5 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 font-medium text-gray-900"
+                className="w-full px-4 py-2.5 border-2 border-border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 font-medium text-foreground"
                 rows={2}
                 disabled={isSubmitting}
               />

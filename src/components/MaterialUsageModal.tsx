@@ -196,14 +196,16 @@ export const MaterialUsageModal: React.FC<MaterialUsageModalProps> = ({
       <form onSubmit={handleSubmit}>
         <div className="space-y-6">
           {error && (
-            <div className="bg-red-50 border border-red-200 rounded p-3 text-sm text-red-800">
+            <div className="bg-red-500/10 border border-red-500/30 rounded p-3 text-sm text-red-600">
               {error}
             </div>
           )}
 
           {/* Materials Section */}
           <div>
-            <h4 className="font-semibold text-gray-900 mb-3">Materials Used</h4>
+            <h4 className="font-semibold text-foreground mb-3">
+              Materials Used
+            </h4>
 
             {/* Selected Materials */}
             <div className="space-y-3 mb-4">
@@ -214,20 +216,20 @@ export const MaterialUsageModal: React.FC<MaterialUsageModalProps> = ({
                 return (
                   <div
                     key={um.materialId}
-                    className="flex items-center gap-3 p-3 bg-blue-50 border border-blue-200 rounded-lg"
+                    className="flex items-center gap-3 p-3 bg-blue-500/10 border border-blue-500/30 rounded-lg"
                   >
                     <div className="flex-1">
-                      <p className="font-semibold text-gray-900">
+                      <p className="font-semibold text-foreground">
                         {material.name}
                       </p>
-                      <p className="text-sm text-gray-600">
+                      <p className="text-sm text-muted-foreground">
                         {material.materialCode} • Stock: {material.currentStock}{" "}
                         {material.unit}
                       </p>
                     </div>
                     <div className="flex items-center gap-2">
                       <div>
-                        <label className="text-xs text-gray-700 font-semibold">
+                        <label className="text-xs text-foreground font-semibold">
                           Used
                         </label>
                         <input
@@ -241,12 +243,12 @@ export const MaterialUsageModal: React.FC<MaterialUsageModalProps> = ({
                             )
                           }
                           placeholder="0"
-                          className="w-20 px-2 py-1 border border-gray-300 rounded text-sm"
+                          className="w-20 px-2 py-1 border border-border rounded text-sm"
                           step="0.01"
                         />
                       </div>
                       <div>
-                        <label className="text-xs text-gray-700 font-semibold">
+                        <label className="text-xs text-foreground font-semibold">
                           Wasted
                         </label>
                         <input
@@ -260,11 +262,11 @@ export const MaterialUsageModal: React.FC<MaterialUsageModalProps> = ({
                             )
                           }
                           placeholder="0"
-                          className="w-20 px-2 py-1 border border-gray-300 rounded text-sm"
+                          className="w-20 px-2 py-1 border border-border rounded text-sm"
                           step="0.01"
                         />
                       </div>
-                      <span className="text-sm text-gray-600">
+                      <span className="text-sm text-muted-foreground">
                         {material.unit}
                       </span>
                     </div>
@@ -289,7 +291,7 @@ export const MaterialUsageModal: React.FC<MaterialUsageModalProps> = ({
                   e.target.value = "";
                 }
               }}
-              className="w-full px-4 py-2 border border-gray-300 rounded-lg"
+              className="w-full px-4 py-2 border border-border rounded-lg"
             >
               <option value="">+ Add Material</option>
               {materials
@@ -308,7 +310,7 @@ export const MaterialUsageModal: React.FC<MaterialUsageModalProps> = ({
 
           {/* Accessories Section */}
           <div>
-            <h4 className="font-semibold text-gray-900 mb-3">
+            <h4 className="font-semibold text-foreground mb-3">
               Accessories Used
             </h4>
 
@@ -323,20 +325,20 @@ export const MaterialUsageModal: React.FC<MaterialUsageModalProps> = ({
                 return (
                   <div
                     key={ua.accessoryId}
-                    className="flex items-center gap-3 p-3 bg-green-50 border border-green-200 rounded-lg"
+                    className="flex items-center gap-3 p-3 bg-green-500/10 border border-green-500/30 rounded-lg"
                   >
                     <div className="flex-1">
-                      <p className="font-semibold text-gray-900">
+                      <p className="font-semibold text-foreground">
                         {accessory.name}
                       </p>
-                      <p className="text-sm text-gray-600">
+                      <p className="text-sm text-muted-foreground">
                         {accessory.accessoryCode} • Stock:{" "}
                         {accessory.currentStock} {accessory.unit}
                       </p>
                     </div>
                     <div className="flex items-center gap-2">
                       <div>
-                        <label className="text-xs text-gray-700 font-semibold">
+                        <label className="text-xs text-foreground font-semibold">
                           Used
                         </label>
                         <input
@@ -350,11 +352,11 @@ export const MaterialUsageModal: React.FC<MaterialUsageModalProps> = ({
                             )
                           }
                           placeholder="0"
-                          className="w-20 px-2 py-1 border border-gray-300 rounded text-sm"
+                          className="w-20 px-2 py-1 border border-border rounded text-sm"
                         />
                       </div>
                       <div>
-                        <label className="text-xs text-gray-700 font-semibold">
+                        <label className="text-xs text-foreground font-semibold">
                           Wasted
                         </label>
                         <input
@@ -368,10 +370,10 @@ export const MaterialUsageModal: React.FC<MaterialUsageModalProps> = ({
                             )
                           }
                           placeholder="0"
-                          className="w-20 px-2 py-1 border border-gray-300 rounded text-sm"
+                          className="w-20 px-2 py-1 border border-border rounded text-sm"
                         />
                       </div>
-                      <span className="text-sm text-gray-600">
+                      <span className="text-sm text-muted-foreground">
                         {accessory.unit}
                       </span>
                     </div>
@@ -396,7 +398,7 @@ export const MaterialUsageModal: React.FC<MaterialUsageModalProps> = ({
                   e.target.value = "";
                 }
               }}
-              className="w-full px-4 py-2 border border-gray-300 rounded-lg"
+              className="w-full px-4 py-2 border border-border rounded-lg"
             >
               <option value="">+ Add Accessory</option>
               {accessories
@@ -415,7 +417,7 @@ export const MaterialUsageModal: React.FC<MaterialUsageModalProps> = ({
 
           {/* Used By */}
           <div>
-            <label className="block text-sm font-medium text-gray-900 mb-2">
+            <label className="block text-sm font-medium text-foreground mb-2">
               Recorded By *
             </label>
             <input
@@ -424,7 +426,7 @@ export const MaterialUsageModal: React.FC<MaterialUsageModalProps> = ({
               onChange={(e) =>
                 setUsageData({ ...usageData, usedBy: e.target.value })
               }
-              className="w-full px-4 py-2 border border-gray-300 rounded-lg"
+              className="w-full px-4 py-2 border border-border rounded-lg"
               placeholder="Your name"
               required
             />
@@ -432,7 +434,7 @@ export const MaterialUsageModal: React.FC<MaterialUsageModalProps> = ({
 
           {/* Notes */}
           <div>
-            <label className="block text-sm font-medium text-gray-900 mb-2">
+            <label className="block text-sm font-medium text-foreground mb-2">
               Notes (Optional)
             </label>
             <textarea
@@ -440,7 +442,7 @@ export const MaterialUsageModal: React.FC<MaterialUsageModalProps> = ({
               onChange={(e) =>
                 setUsageData({ ...usageData, notes: e.target.value })
               }
-              className="w-full px-4 py-2 border border-gray-300 rounded-lg"
+              className="w-full px-4 py-2 border border-border rounded-lg"
               rows={3}
               placeholder="Any additional notes..."
             />

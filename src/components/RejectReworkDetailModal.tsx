@@ -104,51 +104,51 @@ export const RejectReworkDetailModal: React.FC<
       {isLoading ? (
         <div className="text-center py-8">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
-          <p className="text-gray-600">Memuat data...</p>
+          <p className="text-muted-foreground">Memuat data...</p>
         </div>
       ) : error ? (
-        <div className="bg-red-50 border-2 border-red-200 rounded-lg p-4">
-          <p className="text-red-800">{error}</p>
+        <div className="bg-red-500/10 border-2 border-red-500/30 rounded-lg p-4">
+          <p className="text-red-600">{error}</p>
         </div>
       ) : (
         <div className="space-y-6">
           {/* Summary Statistics */}
           <div className="grid grid-cols-4 gap-4">
-            <div className="bg-red-50 border-2 border-red-200 rounded-lg p-4">
-              <p className="text-xs font-semibold text-red-700 uppercase mb-1">
+            <div className="bg-red-500/10 border-2 border-red-500/30 rounded-lg p-4">
+              <p className="text-xs font-semibold text-red-600 uppercase mb-1">
                 Total Rejected
               </p>
-              <p className="text-3xl font-bold text-red-900">
+              <p className="text-3xl font-bold text-red-600">
                 {getTotalRejects()}
               </p>
               <p className="text-xs text-red-600 mt-1">pieces</p>
             </div>
 
-            <div className="bg-yellow-50 border-2 border-yellow-200 rounded-lg p-4">
-              <p className="text-xs font-semibold text-yellow-700 uppercase mb-1">
+            <div className="bg-yellow-500/10 border-2 border-yellow-500/30 rounded-lg p-4">
+              <p className="text-xs font-semibold text-yellow-600 uppercase mb-1">
                 Total Rework
               </p>
-              <p className="text-3xl font-bold text-yellow-900">
+              <p className="text-3xl font-bold text-yellow-600">
                 {getTotalReworks()}
               </p>
               <p className="text-xs text-yellow-600 mt-1">pieces</p>
             </div>
 
-            <div className="bg-green-50 border-2 border-green-200 rounded-lg p-4">
-              <p className="text-xs font-semibold text-green-700 uppercase mb-1">
+            <div className="bg-green-500/10 border-2 border-green-500/30 rounded-lg p-4">
+              <p className="text-xs font-semibold text-green-600 uppercase mb-1">
                 Rework Selesai
               </p>
-              <p className="text-3xl font-bold text-green-900">
+              <p className="text-3xl font-bold text-green-600">
                 {getCompletedReworks()}
               </p>
               <p className="text-xs text-green-600 mt-1">items</p>
             </div>
 
-            <div className="bg-orange-50 border-2 border-orange-200 rounded-lg p-4">
-              <p className="text-xs font-semibold text-orange-700 uppercase mb-1">
+            <div className="bg-orange-500/10 border-2 border-orange-500/30 rounded-lg p-4">
+              <p className="text-xs font-semibold text-orange-600 uppercase mb-1">
                 Rework Pending
               </p>
-              <p className="text-3xl font-bold text-orange-900">
+              <p className="text-3xl font-bold text-orange-600">
                 {getPendingReworks()}
               </p>
               <p className="text-xs text-orange-600 mt-1">items</p>
@@ -157,7 +157,7 @@ export const RejectReworkDetailModal: React.FC<
 
           {/* Reject Logs List */}
           <div>
-            <h3 className="text-lg font-bold text-gray-900 mb-4">
+            <h3 className="text-lg font-bold text-foreground mb-4">
               Riwayat Reject & Rework ({rejectLogs.length} items)
             </h3>
 
@@ -167,8 +167,8 @@ export const RejectReworkDetailModal: React.FC<
                   key={log.id}
                   className={`border-2 rounded-xl p-5 ${
                     log.rejectCategory === "reject"
-                      ? "bg-red-50 border-red-300"
-                      : "bg-yellow-50 border-yellow-300"
+                      ? "bg-red-500/10 border-red-500/40"
+                      : "bg-yellow-500/10 border-yellow-500/40"
                   }`}
                 >
                   {/* Header */}
@@ -180,10 +180,10 @@ export const RejectReworkDetailModal: React.FC<
                         <RotateCcw className="w-6 h-6 text-yellow-600" />
                       )}
                       <div>
-                        <h4 className="font-bold text-gray-900">
+                        <h4 className="font-bold text-foreground">
                           {REJECT_TYPE_LABELS[log.rejectType]}
                         </h4>
-                        <p className="text-sm text-gray-600">
+                        <p className="text-sm text-muted-foreground">
                           {log.bundleNumber && `${log.bundleNumber} • `}
                           {log.size && `Size ${log.size}`}
                         </p>
@@ -209,16 +209,16 @@ export const RejectReworkDetailModal: React.FC<
                   {/* Details Grid */}
                   <div className="grid grid-cols-2 gap-4 mb-4">
                     <div>
-                      <p className="text-xs font-semibold text-gray-700 mb-1">
+                      <p className="text-xs font-semibold text-foreground mb-1">
                         Quantity
                       </p>
-                      <p className="text-lg font-bold text-gray-900">
+                      <p className="text-lg font-bold text-foreground">
                         {log.quantity} pieces
                       </p>
                     </div>
 
                     <div>
-                      <p className="text-xs font-semibold text-gray-700 mb-1">
+                      <p className="text-xs font-semibold text-foreground mb-1">
                         Action
                       </p>
                       <Badge
@@ -236,49 +236,51 @@ export const RejectReworkDetailModal: React.FC<
                   </div>
 
                   {/* Description */}
-                  <div className="bg-white border-2 border-gray-200 rounded-lg p-4 mb-4">
-                    <p className="text-xs font-semibold text-gray-700 mb-2">
+                  <div className="bg-card border-2 border-border rounded-lg p-4 mb-4">
+                    <p className="text-xs font-semibold text-foreground mb-2">
                       Deskripsi:
                     </p>
-                    <p className="text-sm text-gray-900 font-medium">
+                    <p className="text-sm text-foreground font-medium">
                       {log.description}
                     </p>
                   </div>
 
                   {/* Root Cause */}
                   {log.rootCause && (
-                    <div className="bg-orange-50 border-2 border-orange-200 rounded-lg p-4 mb-4">
-                      <p className="text-xs font-semibold text-orange-700 mb-2 flex items-center gap-1">
+                    <div className="bg-orange-500/10 border-2 border-orange-500/30 rounded-lg p-4 mb-4">
+                      <p className="text-xs font-semibold text-orange-600 mb-2 flex items-center gap-1">
                         <AlertTriangle className="w-4 h-4" />
                         Root Cause:
                       </p>
-                      <p className="text-sm text-gray-900 font-medium">
+                      <p className="text-sm text-foreground font-medium">
                         {log.rootCause}
                       </p>
                     </div>
                   )}
 
                   {/* Timeline */}
-                  <div className="border-t-2 border-gray-300 pt-4 space-y-3">
+                  <div className="border-t-2 border-border pt-4 space-y-3">
                     <div className="flex items-center gap-3 text-sm">
-                      <Calendar className="w-4 h-4 text-gray-600" />
+                      <Calendar className="w-4 h-4 text-muted-foreground" />
                       <div>
-                        <span className="font-semibold text-gray-700">
+                        <span className="font-semibold text-foreground">
                           Terdeteksi:{" "}
                         </span>
-                        <span className="text-gray-900">
+                        <span className="text-foreground">
                           {formatDateTime(log.detectedTime)}
                         </span>
                       </div>
                     </div>
 
                     <div className="flex items-center gap-3 text-sm">
-                      <User className="w-4 h-4 text-gray-600" />
+                      <User className="w-4 h-4 text-muted-foreground" />
                       <div>
-                        <span className="font-semibold text-gray-700">
+                        <span className="font-semibold text-foreground">
                           Dilaporkan oleh:{" "}
                         </span>
-                        <span className="text-gray-900">{log.reportedBy}</span>
+                        <span className="text-foreground">
+                          {log.reportedBy}
+                        </span>
                       </div>
                     </div>
 
@@ -287,10 +289,10 @@ export const RejectReworkDetailModal: React.FC<
                         <div className="flex items-center gap-3 text-sm">
                           <CheckCircle className="w-4 h-4 text-green-600" />
                           <div>
-                            <span className="font-semibold text-gray-700">
+                            <span className="font-semibold text-foreground">
                               Rework Selesai:{" "}
                             </span>
-                            <span className="text-gray-900">
+                            <span className="text-foreground">
                               {log.reworkCompletedTime &&
                                 formatDateTime(log.reworkCompletedTime)}
                             </span>
@@ -299,12 +301,12 @@ export const RejectReworkDetailModal: React.FC<
 
                         {log.actionTakenBy && (
                           <div className="flex items-center gap-3 text-sm">
-                            <User className="w-4 h-4 text-gray-600" />
+                            <User className="w-4 h-4 text-muted-foreground" />
                             <div>
-                              <span className="font-semibold text-gray-700">
+                              <span className="font-semibold text-foreground">
                                 Dikerjakan oleh:{" "}
                               </span>
-                              <span className="text-gray-900">
+                              <span className="text-foreground">
                                 {log.actionTakenBy}
                               </span>
                             </div>
@@ -312,8 +314,8 @@ export const RejectReworkDetailModal: React.FC<
                         )}
 
                         {log.finalDisposition && (
-                          <div className="bg-green-100 border-2 border-green-300 rounded-lg p-3 mt-3">
-                            <p className="text-sm font-bold text-green-900">
+                          <div className="bg-green-500/15 border-2 border-green-500/40 rounded-lg p-3 mt-3">
+                            <p className="text-sm font-bold text-green-600">
                               Final Status:{" "}
                               {log.finalDisposition === "passed"
                                 ? "✓ Passed"
@@ -331,8 +333,8 @@ export const RejectReworkDetailModal: React.FC<
 
           {rejectLogs.length === 0 && (
             <div className="text-center py-12">
-              <AlertTriangle className="w-16 h-16 text-gray-400 mx-auto mb-4" />
-              <p className="text-gray-600">
+              <AlertTriangle className="w-16 h-16 text-muted-foreground mx-auto mb-4" />
+              <p className="text-muted-foreground">
                 Tidak ada reject/rework yang tercatat
               </p>
             </div>

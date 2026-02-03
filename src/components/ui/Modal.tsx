@@ -66,21 +66,21 @@ export const Modal: React.FC<ModalProps> = ({
       <div className="flex min-h-full items-center justify-center p-4">
         <div
           className={cn(
-            "relative bg-white rounded-xl shadow-2xl w-full border border-gray-200",
+            "relative bg-card rounded-xl shadow-2xl w-full border border-border text-foreground",
             sizeStyles[size]
           )}
           onClick={(e) => e.stopPropagation()}
         >
           {/* Header */}
           {(title || showCloseButton) && (
-            <div className="flex items-center justify-between px-6 py-5 border-b-2 border-gray-200 bg-gray-50">
+            <div className="flex items-center justify-between px-6 py-5 border-b-2 border-border bg-muted">
               {title && (
-                <h3 className="text-xl font-bold text-gray-900">{title}</h3>
+                <h3 className="text-xl font-bold text-foreground">{title}</h3>
               )}
               {showCloseButton && (
                 <button
                   onClick={onClose}
-                  className="text-gray-400 hover:text-gray-600 transition-colors p-1 hover:bg-gray-200 rounded-lg"
+                  className="text-muted-foreground hover:text-foreground transition-colors p-1 hover:bg-accent rounded-lg"
                 >
                   <X className="w-6 h-6" />
                 </button>
@@ -110,7 +110,7 @@ export const ModalFooter: React.FC<ModalFooterProps> = ({
   return (
     <div
       className={cn(
-        "flex items-center justify-end gap-3 px-6 py-4 border-t-2 border-gray-200 bg-gray-50",
+        "flex items-center justify-end gap-3 px-6 py-4 border-t-2 border-border bg-muted",
         className
       )}
     >

@@ -102,7 +102,7 @@ export default function WaitingListPage() {
         <div className="flex items-center justify-center min-h-[60vh]">
           <div className="text-center">
             <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
-            <p className="text-gray-600">
+            <p className="text-muted-foreground">
               Memuat data pengguna dan waiting list...
             </p>
           </div>
@@ -114,15 +114,15 @@ export default function WaitingListPage() {
   if (error) {
     return (
       <div className="max-w-7xl mx-auto px-4 py-8">
-        <div className="bg-red-50 border-2 border-red-300 rounded-lg p-6">
+        <div className="bg-destructive/10 border-2 border-destructive/40 rounded-lg p-6">
           <div className="flex items-start gap-3">
-            <AlertTriangle className="w-6 h-6 text-red-600 mt-0.5" />
+            <AlertTriangle className="w-6 h-6 text-destructive mt-0.5" />
             <div>
-              <p className="text-sm font-bold text-red-900">Error</p>
-              <p className="text-sm text-red-700 mt-1">{error}</p>
+              <p className="text-sm font-bold text-destructive">Error</p>
+              <p className="text-sm text-destructive/80 mt-1">{error}</p>
               <button
                 onClick={loadWaitingList}
-                className="mt-3 text-sm text-red-800 font-semibold underline hover:text-red-900"
+                className="mt-3 text-sm text-destructive font-semibold underline hover:text-destructive/80"
               >
                 Try Again
               </button>
@@ -143,10 +143,10 @@ export default function WaitingListPage() {
       <div className="mb-8">
         <div className="flex items-center justify-between mb-4">
           <div>
-            <h1 className="text-3xl font-bold text-gray-900 mb-2">
+            <h1 className="text-3xl font-bold text-foreground mb-2">
               Waiting List
             </h1>
-            <p className="text-gray-600">
+            <p className="text-muted-foreground">
               Process steps waiting to be assigned and started
             </p>
           </div>
@@ -159,10 +159,10 @@ export default function WaitingListPage() {
               <div className="flex items-center gap-3">
                 <List className="w-8 h-8 text-blue-600" />
                 <div>
-                  <p className="text-xs font-semibold text-gray-600 uppercase">
+                  <p className="text-xs font-semibold text-muted-foreground uppercase">
                     Total Waiting
                   </p>
-                  <p className="text-2xl font-bold text-gray-900">
+                  <p className="text-2xl font-bold text-foreground">
                     {waitingItems.length}
                   </p>
                 </div>
@@ -176,7 +176,7 @@ export default function WaitingListPage() {
                 <div className="flex items-center gap-3">
                   <Package className="w-8 h-8 text-green-600" />
                   <div>
-                    <p className="text-xs font-semibold text-gray-600 uppercase">
+                    <p className="text-xs font-semibold text-muted-foreground uppercase">
                       My Processes
                     </p>
                     <p className="text-2xl font-bold text-green-600">
@@ -193,7 +193,7 @@ export default function WaitingListPage() {
               <div className="flex items-center gap-3">
                 <Clock className="w-8 h-8 text-orange-600" />
                 <div>
-                  <p className="text-xs font-semibold text-gray-600 uppercase">
+                  <p className="text-xs font-semibold text-muted-foreground uppercase">
                     Filtered View
                   </p>
                   <p className="text-2xl font-bold text-orange-600">
@@ -206,13 +206,13 @@ export default function WaitingListPage() {
         </div>
 
         {/* Filter Tabs */}
-        <div className="flex items-center gap-2 bg-gray-100 rounded-lg p-1">
+        <div className="flex items-center gap-2 bg-muted rounded-lg p-1">
           <button
             onClick={() => setActiveFilter("all")}
             className={`flex-1 px-4 py-2.5 rounded-lg font-semibold text-sm transition-colors ${
               activeFilter === "all"
-                ? "bg-white text-blue-600 shadow-sm"
-                : "text-gray-600 hover:text-gray-900"
+                ? "bg-card text-primary shadow-sm"
+                : "text-muted-foreground hover:text-foreground"
             }`}
           >
             All Processes ({waitingItems.length})
@@ -222,8 +222,8 @@ export default function WaitingListPage() {
               onClick={() => setActiveFilter("my-processes")}
               className={`flex-1 px-4 py-2.5 rounded-lg font-semibold text-sm transition-colors ${
                 activeFilter === "my-processes"
-                  ? "bg-white text-blue-600 shadow-sm"
-                  : "text-gray-600 hover:text-gray-900"
+                  ? "bg-card text-primary shadow-sm"
+                  : "text-muted-foreground hover:text-foreground"
               }`}
             >
               My Processes Only ({myProcessCount})
@@ -233,11 +233,11 @@ export default function WaitingListPage() {
 
         {/* Role Info Banner */}
         {!isAdmin && !isPPIC && allowedProcesses.length > 0 && (
-          <div className="mt-4 bg-blue-50 border-2 border-blue-300 rounded-lg p-4">
+          <div className="mt-4 bg-info/10 border-2 border-info/30 rounded-lg p-4">
             <div className="flex items-start gap-3">
               {/* <User className="w-5 h-5 text-blue-600 mt-0.5" /> */}
               <div className="flex-1">
-                <p className="text-sm font-bold text-blue-900 mb-2">
+                <p className="text-sm font-bold text-info mb-2">
                   Your Authorized Processes:
                 </p>
                 <div className="flex flex-wrap gap-2">
@@ -247,7 +247,7 @@ export default function WaitingListPage() {
                     </Badge>
                   ))}
                 </div>
-                <p className="text-xs text-blue-700 mt-2">
+                <p className="text-xs text-info/80 mt-2">
                   You can view and execute only these processes. Other processes
                   will be hidden unless you select "All Processes".
                 </p>
@@ -258,14 +258,14 @@ export default function WaitingListPage() {
 
         {/* Admin/PPIC Info */}
         {/* {(isAdmin || isPPIC) && (
-          <div className="mt-4 bg-purple-50 border-2 border-purple-300 rounded-lg p-4">
+          <div className="mt-4 bg-purple-500/10 border-2 border-purple-500/40 rounded-lg p-4">
             <div className="flex items-start gap-3">
               <AlertTriangle className="w-5 h-5 text-purple-600 mt-0.5" />
               <div>
-                <p className="text-sm font-bold text-purple-900 mb-1">
+                <p className="text-sm font-bold text-purple-600 mb-1">
                   {isAdmin ? "Admin Access" : "PPIC Access"}
                 </p>
-                <p className="text-xs text-purple-700">
+                <p className="text-xs text-purple-600">
                   {isAdmin
                     ? "You can view all processes in the waiting list as an admin."
                     : "You can view all processes for monitoring and assignment purposes. However, you cannot execute the processes directly."}
@@ -280,11 +280,11 @@ export default function WaitingListPage() {
       {filteredItems.length === 0 ? (
         <Card>
           <CardContent className="py-12 text-center">
-            <Clock className="w-16 h-16 mx-auto mb-4 text-gray-400" />
-            <p className="text-lg font-semibold text-gray-900 mb-2">
+            <Clock className="w-16 h-16 mx-auto mb-4 text-muted-foreground" />
+            <p className="text-lg font-semibold text-foreground mb-2">
               No items in waiting list
             </p>
-            <p className="text-sm text-gray-600">
+            <p className="text-sm text-muted-foreground">
               {activeFilter === "my-processes" && !isAdmin && !isPPIC
                 ? "No processes assigned to your department are currently waiting"
                 : "All processes are either completed or in progress"}
@@ -295,8 +295,8 @@ export default function WaitingListPage() {
         <div className="space-y-4">
           {/* Info about filtered view */}
           {activeFilter === "all" && !isAdmin && !isPPIC && (
-            <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-3">
-              <p className="text-sm text-yellow-800">
+            <div className="bg-warning/10 border border-warning/30 rounded-lg p-3">
+              <p className="text-sm text-warning-foreground">
                 <span className="font-bold">Note:</span> You're viewing all
                 processes in the waiting list. However, you can only execute
                 processes from{" "}
@@ -335,12 +335,14 @@ export default function WaitingListPage() {
                 .map(([dept, count]) => (
                   <div
                     key={dept}
-                    className="bg-gray-50 border border-gray-200 rounded-lg p-3"
+                    className="bg-muted border border-border rounded-lg p-3"
                   >
-                    <p className="text-xs font-semibold text-gray-600 uppercase mb-1">
+                    <p className="text-xs font-semibold text-muted-foreground uppercase mb-1">
                       {dept}
                     </p>
-                    <p className="text-2xl font-bold text-gray-900">{count}</p>
+                    <p className="text-2xl font-bold text-foreground">
+                      {count}
+                    </p>
                   </div>
                 ))}
             </div>

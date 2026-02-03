@@ -154,15 +154,15 @@ export default function QRScannerPage() {
       <div className="mb-8">
         <div className="flex items-center gap-3 mb-4">
           <div>
-            <h1 className="text-3xl font-bold text-gray-900 flex items-center gap-3">
-              <Camera className="w-8 h-8 text-blue-600" />
+            <h1 className="text-3xl font-bold text-foreground flex items-center gap-3">
+              <Camera className="w-8 h-8 text-info" />
               Barcode Scanner
             </h1>
-            <p className="text-gray-600 mt-1">
+            <p className="text-muted-foreground mt-1">
               Scan barcodes untuk tracking orders dan bundles
             </p>
             {currentUser && (
-              <p className="text-sm text-gray-500 mt-1">
+              <p className="text-sm text-muted-foreground mt-1">
                 Logged in as:{" "}
                 <span className="font-semibold">{currentUser.name}</span> (
                 {currentUser.department})
@@ -183,21 +183,21 @@ export default function QRScannerPage() {
 
           {/* Error Display */}
           {error && (
-            <div className="mt-6 bg-red-50 border-2 border-red-300 rounded-xl p-6 shadow-lg">
+            <div className="mt-6 bg-destructive/10 border-2 border-destructive/40 rounded-xl p-6 shadow-lg">
               <div className="flex items-start gap-4">
-                <div className="bg-red-100 rounded-full p-3">
-                  <AlertTriangle className="w-6 h-6 text-red-600" />
+                <div className="bg-destructive/15 rounded-full p-3">
+                  <AlertTriangle className="w-6 h-6 text-destructive" />
                 </div>
                 <div className="flex-1">
-                  <h3 className="text-lg font-bold text-red-900 mb-2">
+                  <h3 className="text-lg font-bold text-destructive mb-2">
                     Scan Error
                   </h3>
-                  <pre className="text-sm text-red-800 whitespace-pre-wrap font-medium">
+                  <pre className="text-sm text-destructive/80 whitespace-pre-wrap font-medium">
                     {error}
                   </pre>
                   <button
                     onClick={() => setError("")}
-                    className="mt-4 text-sm text-red-800 font-bold underline hover:text-red-900"
+                    className="mt-4 text-sm text-destructive font-bold underline hover:text-destructive/80"
                   >
                     Dismiss
                   </button>
@@ -208,14 +208,12 @@ export default function QRScannerPage() {
 
           {/* Loading Indicator */}
           {isLoading && (
-            <div className="mt-6 bg-blue-50 border-2 border-blue-300 rounded-xl p-6">
+            <div className="mt-6 bg-info/10 border-2 border-info/40 rounded-xl p-6">
               <div className="flex items-center gap-4">
-                <div className="animate-spin rounded-full h-8 w-8 border-b-3 border-blue-600"></div>
+                <div className="animate-spin rounded-full h-8 w-8 border-b-3 border-info"></div>
                 <div>
-                  <p className="font-bold text-blue-900">
-                    Processing Barcode...
-                  </p>
-                  <p className="text-sm text-blue-700 mt-1">
+                  <p className="font-bold text-info">Processing Barcode...</p>
+                  <p className="text-sm text-info/80 mt-1">
                     Fetching data from database
                   </p>
                 </div>
@@ -230,46 +228,44 @@ export default function QRScannerPage() {
           <Card>
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
-                <FileText className="w-5 h-5 text-blue-600" />
+                <FileText className="w-5 h-5 text-info" />
                 Quick Guide
               </CardTitle>
             </CardHeader>
             <CardContent className="space-y-4 text-sm">
-              <div className="bg-blue-50 border-2 border-blue-200 rounded-lg p-3">
-                <p className="font-bold text-blue-900 mb-2">Order Barcode</p>
-                <p className="text-blue-800 mb-1 font-mono text-xs">
-                  ORD202400001
-                </p>
-                <p className="text-blue-700 text-xs">
+              <div className="bg-info/10 border-2 border-info/30 rounded-lg p-3">
+                <p className="font-bold text-info mb-2">Order Barcode</p>
+                <p className="text-info mb-1 font-mono text-xs">ORD202400001</p>
+                <p className="text-info/80 text-xs">
                   Shows complete order information
                 </p>
               </div>
 
-              <div className="bg-green-50 border-2 border-green-200 rounded-lg p-3">
-                <p className="font-bold text-green-900 mb-2">Bundle Barcode</p>
-                <p className="text-green-800 mb-1 font-mono text-xs">
+              <div className="bg-success/10 border-2 border-success/30 rounded-lg p-3">
+                <p className="font-bold text-success mb-2">Bundle Barcode</p>
+                <p className="text-success mb-1 font-mono text-xs">
                   ORD202400001M001
                 </p>
-                <p className="text-green-700 text-xs">
+                <p className="text-success/80 text-xs">
                   Shows bundle details and tracking
                 </p>
               </div>
 
-              <div className="pt-4 border-t-2 border-gray-200">
-                <p className="font-bold text-gray-900 mb-2">
+              <div className="pt-4 border-t-2 border-border">
+                <p className="font-bold text-foreground mb-2">
                   Available Actions:
                 </p>
-                <ul className="space-y-2 text-gray-700">
+                <ul className="space-y-2 text-foreground">
                   <li className="flex items-center gap-2">
-                    <CheckCircle className="w-4 h-4 text-green-600" />
+                    <CheckCircle className="w-4 h-4 text-success" />
                     View full details
                   </li>
                   <li className="flex items-center gap-2">
-                    <TrendingUp className="w-4 h-4 text-blue-600" />
+                    <TrendingUp className="w-4 h-4 text-info" />
                     Track progress
                   </li>
                   <li className="flex items-center gap-2">
-                    <Layers className="w-4 h-4 text-purple-600" />
+                    <Layers className="w-4 h-4 text-purple" />
                     See process steps
                   </li>
                 </ul>
@@ -288,15 +284,15 @@ export default function QRScannerPage() {
         {scannedData && (
           <div className="space-y-6">
             {/* Header dengan Type Badge */}
-            <div className="flex items-center justify-between pb-4 border-b-2 border-gray-200">
+            <div className="flex items-center justify-between pb-4 border-b-2 border-border">
               <div className="flex items-center gap-3">
                 {scannedData.type === "order" ? (
-                  <div className="bg-blue-100 rounded-full p-3">
-                    <FileText className="w-6 h-6 text-blue-600" />
+                  <div className="bg-blue-500/15 rounded-full p-3">
+                    <FileText className="w-6 h-6 text-info" />
                   </div>
                 ) : (
-                  <div className="bg-green-100 rounded-full p-3">
-                    <Package className="w-6 h-6 text-green-600" />
+                  <div className="bg-green-500/15 rounded-full p-3">
+                    <Package className="w-6 h-6 text-success" />
                   </div>
                 )}
                 <div>
@@ -306,69 +302,65 @@ export default function QRScannerPage() {
                   >
                     {scannedData.type === "order" ? "📋 Order" : "📦 Bundle"}
                   </Badge>
-                  <p className="font-mono text-xs text-gray-600 mt-1">
+                  <p className="font-mono text-xs text-muted-foreground mt-1">
                     {scannedData.qrCode}
                   </p>
                 </div>
               </div>
-              <CheckCircle className="w-8 h-8 text-green-600" />
+              <CheckCircle className="w-8 h-8 text-success" />
             </div>
 
             {/* Order Info */}
             {scannedData.order && (
-              <div className="bg-linear-to-br from-blue-50 to-indigo-50 border-2 border-blue-300 rounded-xl p-5">
-                <h4 className="font-bold text-blue-900 mb-4 flex items-center gap-2">
+              <div className="bg-info/10 border-2 border-info/40 rounded-xl p-5">
+                <h4 className="font-bold text-info mb-4 flex items-center gap-2">
                   <FileText className="w-5 h-5" />
                   Order Information
                 </h4>
                 <div className="grid grid-cols-2 gap-4 text-sm">
-                  <div className="bg-white rounded-lg p-3 border border-blue-200">
-                    <p className="text-blue-700 font-semibold mb-1">
-                      Order Number
-                    </p>
-                    <p className="font-bold text-blue-900 text-lg">
+                  <div className="bg-card rounded-lg p-3 border border-info/30">
+                    <p className="text-info font-semibold mb-1">Order Number</p>
+                    <p className="font-bold text-info text-lg">
                       {scannedData.order.orderNumber}
                     </p>
                   </div>
-                  <div className="bg-white rounded-lg p-3 border border-blue-200">
-                    <p className="text-blue-700 font-semibold mb-1">Status</p>
+                  <div className="bg-card rounded-lg p-3 border border-info/30">
+                    <p className="text-info font-semibold mb-1">Status</p>
                     <Badge variant="info" size="sm">
                       {scannedData.order.currentProcess}
                     </Badge>
                   </div>
-                  <div className="bg-white rounded-lg p-3 border border-blue-200">
-                    <p className="text-blue-700 font-semibold mb-1">Buyer</p>
-                    <p className="font-bold text-blue-900">
+                  <div className="bg-card rounded-lg p-3 border border-info/30">
+                    <p className="text-info font-semibold mb-1">Buyer</p>
+                    <p className="font-bold text-info">
                       {scannedData.order.buyer.name}
                     </p>
                   </div>
-                  <div className="bg-white rounded-lg p-3 border border-blue-200">
-                    <p className="text-blue-700 font-semibold mb-1">Style</p>
-                    <p className="font-bold text-blue-900">
+                  <div className="bg-card rounded-lg p-3 border border-info/30">
+                    <p className="text-info font-semibold mb-1">Style</p>
+                    <p className="font-bold text-info">
                       {scannedData.order.style.name}
                     </p>
                   </div>
-                  <div className="bg-white rounded-lg p-3 border border-blue-200">
-                    <p className="text-blue-700 font-semibold mb-1">
+                  <div className="bg-card rounded-lg p-3 border border-info/30">
+                    <p className="text-info font-semibold mb-1">
                       Total Quantity
                     </p>
-                    <p className="font-bold text-blue-900 text-lg">
+                    <p className="font-bold text-info text-lg">
                       {scannedData.order.totalQuantity} pcs
                     </p>
                   </div>
-                  <div className="bg-white rounded-lg p-3 border border-blue-200">
-                    <p className="text-blue-700 font-semibold mb-1">
-                      Completed
-                    </p>
-                    <p className="font-bold text-green-600 text-lg">
+                  <div className="bg-card rounded-lg p-3 border border-info/30">
+                    <p className="text-info font-semibold mb-1">Completed</p>
+                    <p className="font-bold text-success text-lg">
                       {scannedData.order.totalCompleted} pcs
                     </p>
                   </div>
-                  <div className="col-span-2 bg-white rounded-lg p-3 border border-blue-200">
-                    <p className="text-blue-700 font-semibold mb-2">Deadline</p>
+                  <div className="col-span-2 bg-card rounded-lg p-3 border border-info/30">
+                    <p className="text-info font-semibold mb-2">Deadline</p>
                     <div className="flex items-center gap-2">
-                      <Calendar className="w-4 h-4 text-blue-600" />
-                      <p className="font-bold text-blue-900">
+                      <Calendar className="w-4 h-4 text-info" />
+                      <p className="font-bold text-info">
                         {formatDate(scannedData.order.productionDeadline)}
                       </p>
                     </div>
@@ -379,47 +371,45 @@ export default function QRScannerPage() {
 
             {/* Bundle Info */}
             {scannedData.bundle && (
-              <div className="bg-linear-to-br from-green-50 to-emerald-50 border-2 border-green-300 rounded-xl p-5">
-                <h4 className="font-bold text-green-900 mb-4 flex items-center gap-2">
+              <div className="bg-success/10 border-2 border-success/40 rounded-xl p-5">
+                <h4 className="font-bold text-success mb-4 flex items-center gap-2">
                   <Package className="w-5 h-5" />
                   Bundle Information
                 </h4>
                 <div className="grid grid-cols-2 gap-4 text-sm">
-                  <div className="bg-white rounded-lg p-3 border border-green-200">
-                    <p className="text-green-700 font-semibold mb-1">
+                  <div className="bg-card rounded-lg p-3 border border-success/30">
+                    <p className="text-success font-semibold mb-1">
                       Bundle Number
                     </p>
-                    <p className="font-bold text-green-900 text-lg">
+                    <p className="font-bold text-success text-lg">
                       {scannedData.bundle.bundleNumber}
                     </p>
                   </div>
-                  <div className="bg-white rounded-lg p-3 border border-green-200">
-                    <p className="text-green-700 font-semibold mb-1">Size</p>
+                  <div className="bg-card rounded-lg p-3 border border-success/30">
+                    <p className="text-success font-semibold mb-1">Size</p>
                     <Badge variant="success" size="sm" className="text-base">
                       {scannedData.bundle.size}
                     </Badge>
                   </div>
-                  <div className="bg-white rounded-lg p-3 border border-green-200">
-                    <p className="text-green-700 font-semibold mb-1">
-                      Quantity
-                    </p>
-                    <p className="font-bold text-green-900 text-lg">
+                  <div className="bg-card rounded-lg p-3 border border-success/30">
+                    <p className="text-success font-semibold mb-1">Quantity</p>
+                    <p className="font-bold text-success text-lg">
                       {scannedData.bundle.quantity} pcs
                     </p>
                   </div>
-                  <div className="bg-white rounded-lg p-3 border border-green-200">
-                    <p className="text-green-700 font-semibold mb-1">Status</p>
+                  <div className="bg-card rounded-lg p-3 border border-success/30">
+                    <p className="text-success font-semibold mb-1">Status</p>
                     <Badge variant="success" size="sm">
                       {scannedData.bundle.currentStatus}
                     </Badge>
                   </div>
-                  <div className="col-span-2 bg-white rounded-lg p-3 border border-green-200">
-                    <p className="text-green-700 font-semibold mb-2">
+                  <div className="col-span-2 bg-card rounded-lg p-3 border border-success/30">
+                    <p className="text-success font-semibold mb-2">
                       Current Location
                     </p>
                     <div className="flex items-center gap-2">
-                      <Layers className="w-4 h-4 text-green-600" />
-                      <p className="font-bold text-green-900">
+                      <Layers className="w-4 h-4 text-success" />
+                      <p className="font-bold text-success">
                         {scannedData.bundle.currentLocation}
                       </p>
                     </div>
@@ -429,7 +419,7 @@ export default function QRScannerPage() {
             )}
 
             {/* Actions */}
-            <div className="flex gap-3 pt-4 border-t-2 border-gray-200">
+            <div className="flex gap-3 pt-4 border-t-2 border-border">
               <Button
                 variant="outline"
                 onClick={() => setIsModalOpen(false)}

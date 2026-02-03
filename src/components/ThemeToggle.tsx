@@ -7,7 +7,7 @@ import { useTheme } from "next-themes";
 import { Button } from "@/components/ui/Button";
 
 export function ThemeToggle() {
-  const { theme, setTheme } = useTheme();
+  const { resolvedTheme, setTheme } = useTheme();
 
   // Mencegah hydration mismatch (opsional tapi disarankan)
   const [mounted, setMounted] = React.useState(false);
@@ -21,11 +21,11 @@ export function ThemeToggle() {
     <Button
       variant="ghost"
       size="sm"
-      onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
+      onClick={() => setTheme(resolvedTheme === "dark" ? "light" : "dark")}
       className="w-9 h-9 px-0 rounded-full hover:bg-accent hover:text-accent-foreground transition-colors"
       title="Ganti Tema"
     >
-      {theme === "dark" ? (
+      {resolvedTheme === "dark" ? (
         <Moon className="h-5 w-5 transition-all" />
       ) : (
         <Sun className="h-5 w-5 transition-all" />

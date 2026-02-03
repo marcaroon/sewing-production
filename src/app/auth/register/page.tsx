@@ -110,16 +110,16 @@ export default function RegisterPage() {
 
   if (success) {
     return (
-      <div className="min-h-screen bg-linear-to-br from-blue-50 via-white to-purple-50 flex items-center justify-center px-4">
-        <Card className="max-w-md w-full shadow-2xl border-2 border-green-300">
+      <div className="min-h-screen bg-linear-to-br from-background via-muted to-background flex items-center justify-center px-4">
+        <Card className="max-w-md w-full shadow-2xl border-2 border-success/40">
           <CardContent className="py-12 text-center">
-            <div className="bg-green-100 rounded-full p-6 w-24 h-24 mx-auto mb-6 flex items-center justify-center">
-              <UserPlus className="w-12 h-12 text-green-600" />
+            <div className="bg-success/15 rounded-full p-6 w-24 h-24 mx-auto mb-6 flex items-center justify-center">
+              <UserPlus className="w-12 h-12 text-success" />
             </div>
-            <h2 className="text-2xl font-bold text-gray-900 mb-2">
+            <h2 className="text-2xl font-bold text-foreground mb-2">
               Registrasi Berhasil!
             </h2>
-            <p className="text-gray-600 mb-6">
+            <p className="text-muted-foreground mb-6">
               Akun anda telah dibuat. Mengarahkan ke login...
             </p>
             <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto"></div>
@@ -130,32 +130,34 @@ export default function RegisterPage() {
   }
 
   return (
-    <div className="min-h-screen bg-linear-to-br from-blue-50 via-white to-purple-50 flex items-center justify-center px-4 py-12">
+    <div className="min-h-screen bg-linear-to-br from-background via-muted to-background flex items-center justify-center px-4 py-12">
       <div className="w-full max-w-2xl">
         {/* Logo & Title */}
         <div className="text-center mb-8">
           <div className="inline-flex items-center justify-center bg-blue-600 rounded-full p-4 mb-4 shadow-xl">
             <Factory className="w-12 h-12 text-white" />
           </div>
-          <h1 className="text-3xl font-bold text-gray-900 mb-2">Buat Akun</h1>
-          <p className="text-gray-600">Gabung Production Management System</p>
+          <h1 className="text-3xl font-bold text-foreground mb-2">Buat Akun</h1>
+          <p className="text-muted-foreground">
+            Gabung Production Management System
+          </p>
         </div>
 
         {/* Register Card */}
-        <Card className="shadow-2xl border-2 border-gray-200">
+        <Card className="shadow-2xl border-2 border-border">
           <CardHeader>
             <CardTitle className="text-center">Buat Akun Baru</CardTitle>
           </CardHeader>
           <CardContent>
             <form onSubmit={handleSubmit} className="space-y-6">
               {error && (
-                <div className="bg-red-50 border-2 border-red-300 rounded-lg p-4 flex items-start gap-3">
-                  <AlertCircle className="w-5 h-5 text-red-600 mt-0.5" />
+                <div className="bg-destructive/10 border-2 border-destructive/40 rounded-lg p-4 flex items-start gap-3">
+                  <AlertCircle className="w-5 h-5 text-destructive mt-0.5" />
                   <div>
-                    <p className="text-sm font-bold text-red-900">
+                    <p className="text-sm font-bold text-destructive">
                       Registrasi Gagal
                     </p>
-                    <p className="text-sm text-red-800 mt-1">{error}</p>
+                    <p className="text-sm text-destructive/80 mt-1">{error}</p>
                   </div>
                 </div>
               )}
@@ -163,18 +165,18 @@ export default function RegisterPage() {
               {/* Name & Email */}
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-sm font-bold text-gray-900 mb-2">
+                  <label className="block text-sm font-bold text-foreground mb-2">
                     Nama Lengkap *
                   </label>
                   <div className="relative">
-                    <User className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-600" />
+                    <User className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
                     <input
                       type="text"
                       value={formData.name}
                       onChange={(e) =>
                         setFormData({ ...formData, name: e.target.value })
                       }
-                      className="w-full pl-12 pr-4 py-3 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-gray-600 font-medium"
+                      className="w-full pl-12 pr-4 py-3 border-2 border-border rounded-lg bg-background text-foreground placeholder:text-muted-foreground focus:ring-2 focus:ring-primary focus:border-primary font-medium"
                       placeholder="John Doe"
                       required
                       disabled={isSubmitting}
@@ -183,18 +185,18 @@ export default function RegisterPage() {
                 </div>
 
                 <div>
-                  <label className="block text-sm font-bold text-gray-900 mb-2">
+                  <label className="block text-sm font-bold text-foreground mb-2">
                     Email *
                   </label>
                   <div className="relative">
-                    <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-600" />
+                    <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
                     <input
                       type="email"
                       value={formData.email}
                       onChange={(e) =>
                         setFormData({ ...formData, email: e.target.value })
                       }
-                      className="w-full pl-12 pr-4 py-3 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-gray-600 font-medium"
+                      className="w-full pl-12 pr-4 py-3 border-2 border-border rounded-lg bg-background text-foreground placeholder:text-muted-foreground focus:ring-2 focus:ring-primary focus:border-primary font-medium"
                       placeholder="john@company.com"
                       required
                       disabled={isSubmitting}
@@ -206,18 +208,18 @@ export default function RegisterPage() {
               {/* Password & Confirm */}
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-sm font-bold text-gray-900 mb-2">
+                  <label className="block text-sm font-bold text-foreground mb-2">
                     Password *
                   </label>
                   <div className="relative">
-                    <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-600" />
+                    <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
                     <input
                       type="password"
                       value={formData.password}
                       onChange={(e) =>
                         setFormData({ ...formData, password: e.target.value })
                       }
-                      className="w-full pl-12 pr-4 py-3 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-gray-600 font-medium"
+                      className="w-full pl-12 pr-4 py-3 border-2 border-border rounded-lg bg-background text-foreground placeholder:text-muted-foreground focus:ring-2 focus:ring-primary focus:border-primary font-medium"
                       placeholder="••••••••"
                       required
                       disabled={isSubmitting}
@@ -227,11 +229,11 @@ export default function RegisterPage() {
                 </div>
 
                 <div>
-                  <label className="block text-sm font-bold text-gray-900 mb-2">
+                  <label className="block text-sm font-bold text-foreground mb-2">
                     Konfirmasi Password *
                   </label>
                   <div className="relative">
-                    <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-600" />
+                    <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
                     <input
                       type="password"
                       value={formData.confirmPassword}
@@ -241,7 +243,7 @@ export default function RegisterPage() {
                           confirmPassword: e.target.value,
                         })
                       }
-                      className="w-full pl-12 pr-4 py-3 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-gray-600 font-medium"
+                      className="w-full pl-12 pr-4 py-3 border-2 border-border rounded-lg bg-background text-foreground placeholder:text-muted-foreground focus:ring-2 focus:ring-primary focus:border-primary font-medium"
                       placeholder="••••••••"
                       required
                       disabled={isSubmitting}
@@ -253,21 +255,21 @@ export default function RegisterPage() {
               {/* Department & Role */}
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-sm font-bold text-gray-900 mb-2">
+                  <label className="block text-sm font-bold text-foreground mb-2">
                     Departemen *
                   </label>
                   <div className="relative">
-                    <Building className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-600" />
+                    <Building className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
                     <select
                       value={formData.department}
                       onChange={(e) =>
                         setFormData({ ...formData, department: e.target.value })
                       }
-                      className="w-full pl-12 pr-4 py-3 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-gray-600 font-medium"
+                      className="w-full pl-12 pr-4 py-3 border-2 border-border rounded-lg bg-background text-foreground placeholder:text-muted-foreground focus:ring-2 focus:ring-primary focus:border-primary font-medium"
                       required
                       disabled={isSubmitting}
                     >
-                      y<option value="">Pilih Departemen</option>
+                      <option value="">Pilih Departemen</option>
                       {DEPARTMENTS.map((dept) => (
                         <option key={dept} value={dept}>
                           {dept}
@@ -278,7 +280,7 @@ export default function RegisterPage() {
                 </div>
 
                 <div>
-                  <label className="block text-sm font-bold text-gray-900 mb-2">
+                  <label className="block text-sm font-bold text-foreground mb-2">
                     Role *
                   </label>
                   <select
@@ -286,7 +288,7 @@ export default function RegisterPage() {
                     onChange={(e) =>
                       setFormData({ ...formData, role: e.target.value })
                     }
-                    className="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-gray-600 font-medium"
+                    className="w-full px-4 py-3 border-2 border-border rounded-lg bg-background text-foreground placeholder:text-muted-foreground focus:ring-2 focus:ring-primary focus:border-primary font-medium"
                     required
                     disabled={isSubmitting}
                   >
@@ -302,7 +304,7 @@ export default function RegisterPage() {
 
               {/* Phone (Optional) */}
               <div>
-                <label className="block text-sm font-bold text-gray-900 mb-2">
+                <label className="block text-sm font-bold text-foreground mb-2">
                   Nomor Telepon (Opsional)
                 </label>
                 <input
@@ -311,7 +313,7 @@ export default function RegisterPage() {
                   onChange={(e) =>
                     setFormData({ ...formData, phone: e.target.value })
                   }
-                  className="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-gray-600 font-medium"
+                  className="w-full px-4 py-3 border-2 border-border rounded-lg bg-background text-foreground placeholder:text-muted-foreground focus:ring-2 focus:ring-primary focus:border-primary font-medium"
                   placeholder="+62 xxx xxx xxx"
                   disabled={isSubmitting}
                 />
@@ -322,15 +324,15 @@ export default function RegisterPage() {
                 <input
                   type="checkbox"
                   required
-                  className="w-4 h-4 mt-1 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                  className="w-4 h-4 mt-1 rounded border-border text-primary focus:ring-primary"
                 />
-                <p className="text-sm text-gray-600">
+                <p className="text-sm text-muted-foreground">
                   Saya setuju dengan{" "}
-                  <Link href="/terms" className="text-blue-600 font-semibold">
+                  <Link href="/terms" className="text-primary font-semibold">
                     Ketentuan Layanan
                   </Link>{" "}
                   dan{" "}
-                  <Link href="/privacy" className="text-blue-600 font-semibold">
+                  <Link href="/privacy" className="text-primary font-semibold">
                     Kebijakan Privasi
                   </Link>
                 </p>
@@ -358,13 +360,10 @@ export default function RegisterPage() {
               </Button>
 
               {/* Login Link */}
-              <div className="text-center pt-4 border-t-2 border-gray-200">
-                <p className="text-gray-600">
+              <div className="text-center pt-4 border-t-2 border-border">
+                <p className="text-muted-foreground">
                   Sudah punya akun?{" "}
-                  <Link
-                    href="/auth/login"
-                    className="text-blue-600 hover:text-blue-700 font-bold"
-                  >
+                  <Link href="/auth/login" className="text-primary font-bold">
                     Login disini
                   </Link>
                 </p>
@@ -377,7 +376,7 @@ export default function RegisterPage() {
         <div className="text-center mt-6">
           <Link
             href="/"
-            className="text-gray-600 hover:text-gray-900 font-semibold text-sm"
+            className="text-muted-foreground hover:text-foreground font-semibold text-sm"
           >
             ← Kembali Home
           </Link>

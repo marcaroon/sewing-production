@@ -135,7 +135,7 @@ export const AccessoryForm: React.FC<AccessoryFormProps> = ({
       <form onSubmit={handleSubmit}>
         <div className="space-y-4">
           {error && (
-            <div className="bg-red-50 border border-red-200 rounded p-3 text-sm text-red-800">
+            <div className="bg-red-500/10 border border-red-500/30 rounded p-3 text-sm text-red-600">
               {error}
             </div>
           )}
@@ -143,7 +143,7 @@ export const AccessoryForm: React.FC<AccessoryFormProps> = ({
           {/* Code & Name */}
           <div className="grid grid-cols-2 gap-4">
             <div>
-              <label className="block text-sm font-medium text-gray-900 mb-2">
+              <label className="block text-sm font-medium text-foreground mb-2">
                 Kode Aksesoris *
               </label>
               <input
@@ -152,14 +152,14 @@ export const AccessoryForm: React.FC<AccessoryFormProps> = ({
                 onChange={(e) =>
                   setFormData({ ...formData, accessoryCode: e.target.value })
                 }
-                className="w-full px-4 py-2 text-gray-400 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                className="w-full px-4 py-2 text-muted-foreground border border-border rounded-lg focus:ring-2 focus:ring-blue-500"
                 placeholder="ACC-001"
                 required
                 disabled={isEdit || isSubmitting}
               />
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-900 mb-2">
+              <label className="block text-sm font-medium text-foreground mb-2">
                 Nama Aksesoris *
               </label>
               <input
@@ -168,7 +168,7 @@ export const AccessoryForm: React.FC<AccessoryFormProps> = ({
                 onChange={(e) =>
                   setFormData({ ...formData, name: e.target.value })
                 }
-                className="w-full px-4 py-2 text-gray-400 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                className="w-full px-4 py-2 text-muted-foreground border border-border rounded-lg focus:ring-2 focus:ring-blue-500"
                 placeholder="Plastic Button"
                 required
                 disabled={isSubmitting}
@@ -179,7 +179,7 @@ export const AccessoryForm: React.FC<AccessoryFormProps> = ({
           {/* Category & Unit */}
           <div className="grid grid-cols-2 gap-4">
             <div>
-              <label className="block text-sm font-medium text-gray-900 mb-2">
+              <label className="block text-sm font-medium text-foreground mb-2">
                 Kategori *
               </label>
               <select
@@ -187,7 +187,7 @@ export const AccessoryForm: React.FC<AccessoryFormProps> = ({
                 onChange={(e) =>
                   setFormData({ ...formData, category: e.target.value })
                 }
-                className="w-full px-4 py-2 text-gray-400 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                className="w-full px-4 py-2 text-muted-foreground border border-border rounded-lg focus:ring-2 focus:ring-blue-500"
                 required
                 disabled={isSubmitting}
               >
@@ -199,7 +199,7 @@ export const AccessoryForm: React.FC<AccessoryFormProps> = ({
               </select>
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-900 mb-2">
+              <label className="block text-sm font-medium text-foreground mb-2">
                 Unit *
               </label>
               <select
@@ -207,7 +207,7 @@ export const AccessoryForm: React.FC<AccessoryFormProps> = ({
                 onChange={(e) =>
                   setFormData({ ...formData, unit: e.target.value })
                 }
-                className="w-full px-4 py-2 text-gray-400 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                className="w-full px-4 py-2 text-muted-foreground border border-border rounded-lg focus:ring-2 focus:ring-blue-500"
                 required
                 disabled={isSubmitting}
               >
@@ -223,7 +223,7 @@ export const AccessoryForm: React.FC<AccessoryFormProps> = ({
           {/* Color & Size */}
           <div className="grid grid-cols-2 gap-4">
             <div>
-              <label className="block text-sm font-medium text-gray-900 mb-2">
+              <label className="block text-sm font-medium text-foreground mb-2">
                 Warna (Opsional)
               </label>
               <input
@@ -232,13 +232,13 @@ export const AccessoryForm: React.FC<AccessoryFormProps> = ({
                 onChange={(e) =>
                   setFormData({ ...formData, color: e.target.value })
                 }
-                className="w-full px-4 py-2 text-gray-400 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                className="w-full px-4 py-2 text-muted-foreground border border-border rounded-lg focus:ring-2 focus:ring-blue-500"
                 placeholder="Black, White, etc"
                 disabled={isSubmitting}
               />
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-900 mb-2">
+              <label className="block text-sm font-medium text-foreground mb-2">
                 Ukuran (Opsional)
               </label>
               <input
@@ -247,7 +247,7 @@ export const AccessoryForm: React.FC<AccessoryFormProps> = ({
                 onChange={(e) =>
                   setFormData({ ...formData, size: e.target.value })
                 }
-                className="w-full px-4 py-2 text-gray-400 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                className="w-full px-4 py-2 text-muted-foreground border border-border rounded-lg focus:ring-2 focus:ring-blue-500"
                 placeholder="10mm, 15mm, etc"
                 disabled={isSubmitting}
               />
@@ -256,7 +256,7 @@ export const AccessoryForm: React.FC<AccessoryFormProps> = ({
 
           {/* Supplier */}
           <div>
-            <label className="block text-sm font-medium text-gray-900 mb-2">
+            <label className="block text-sm font-medium text-foreground mb-2">
               Supplier (Opsional)
             </label>
             <input
@@ -265,7 +265,7 @@ export const AccessoryForm: React.FC<AccessoryFormProps> = ({
               onChange={(e) =>
                 setFormData({ ...formData, supplier: e.target.value })
               }
-              className="w-full px-4 py-2 text-gray-400 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+              className="w-full px-4 py-2 text-muted-foreground border border-border rounded-lg focus:ring-2 focus:ring-blue-500"
               placeholder="Supplier name"
               disabled={isSubmitting}
             />
@@ -274,7 +274,7 @@ export const AccessoryForm: React.FC<AccessoryFormProps> = ({
           {/* Stock Settings */}
           <div className="grid grid-cols-2 gap-4">
             <div>
-              <label className="block text-sm font-medium text-gray-900 mb-2">
+              <label className="block text-sm font-medium text-foreground mb-2">
                 Stok Minimum *
               </label>
               <input
@@ -286,14 +286,14 @@ export const AccessoryForm: React.FC<AccessoryFormProps> = ({
                     minimumStock: parseInt(e.target.value) || 0,
                   })
                 }
-                className="w-full px-4 py-2 text-gray-400 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                className="w-full px-4 py-2 text-muted-foreground border border-border rounded-lg focus:ring-2 focus:ring-blue-500"
                 min="0"
                 required
                 disabled={isSubmitting}
               />
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-900 mb-2">
+              <label className="block text-sm font-medium text-foreground mb-2">
                 Reorder Point *
               </label>
               <input
@@ -305,7 +305,7 @@ export const AccessoryForm: React.FC<AccessoryFormProps> = ({
                     reorderPoint: parseInt(e.target.value) || 0,
                   })
                 }
-                className="w-full px-4 py-2 text-gray-400 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                className="w-full px-4 py-2 text-muted-foreground border border-border rounded-lg focus:ring-2 focus:ring-blue-500"
                 min="0"
                 required
                 disabled={isSubmitting}
@@ -316,7 +316,7 @@ export const AccessoryForm: React.FC<AccessoryFormProps> = ({
           {/* Price & Initial Stock */}
           <div className="grid grid-cols-2 gap-4">
             <div>
-              <label className="block text-sm font-medium text-gray-900 mb-2">
+              <label className="block text-sm font-medium text-foreground mb-2">
                 Harga Satuan (Rp)
               </label>
               <input
@@ -328,7 +328,7 @@ export const AccessoryForm: React.FC<AccessoryFormProps> = ({
                     unitPrice: parseFloat(e.target.value) || 0,
                   })
                 }
-                className="w-full px-4 py-2 text-gray-400 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                className="w-full px-4 py-2 text-muted-foreground border border-border rounded-lg focus:ring-2 focus:ring-blue-500"
                 step="0.01"
                 min="0"
                 disabled={isSubmitting}
@@ -336,7 +336,7 @@ export const AccessoryForm: React.FC<AccessoryFormProps> = ({
             </div>
             {!isEdit && (
               <div>
-                <label className="block text-sm font-medium text-gray-900 mb-2">
+                <label className="block text-sm font-medium text-foreground mb-2">
                   Initial Stok
                 </label>
                 <input
@@ -348,7 +348,7 @@ export const AccessoryForm: React.FC<AccessoryFormProps> = ({
                       initialStock: parseInt(e.target.value) || 0,
                     })
                   }
-                  className="w-full px-4 py-2 text-gray-400 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                  className="w-full px-4 py-2 text-muted-foreground border border-border rounded-lg focus:ring-2 focus:ring-blue-500"
                   min="0"
                   disabled={isSubmitting}
                 />

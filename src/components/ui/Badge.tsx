@@ -17,12 +17,12 @@ export const Badge: React.FC<BadgeProps> = ({
   size = "md",
 }) => {
   const variantStyles = {
-    default: "bg-gray-200 text-gray-900 border border-gray-300",
-    success: "bg-green-100 text-green-800 border border-green-200",
-    warning: "bg-yellow-100 text-yellow-800 border border-yellow-200",
-    danger: "bg-red-100 text-red-800 border border-red-200",
-    info: "bg-blue-100 text-blue-800 border border-blue-200",
-    purple: "bg-purple-100 text-purple-800 border border-purple-200",
+    default: "bg-muted text-foreground border border-border",
+    success: "bg-success/15 text-success border border-success/30",
+    warning: "bg-warning/15 text-warning border border-warning/30",
+    danger: "bg-destructive/15 text-destructive border border-destructive/30",
+    info: "bg-info/15 text-info border border-info/30",
+    purple: "bg-purple/15 text-purple border border-purple/30",
   };
 
   const sizeStyles = {

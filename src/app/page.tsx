@@ -16,9 +16,9 @@ import {
 
 export default function LandingPage() {
   return (
-    <div className="min-h-screen bg-linear-to-b from-gray-50 to-white">
+    <div className="min-h-screen bg-linear-to-b from-background via-muted to-background">
       {/* Navbar - Professional */}
-      <nav className="fixed top-0 w-full bg-white/95 backdrop-blur-md border-b border-gray-200 z-50 shadow-sm">
+      <nav className="fixed top-0 w-full bg-card/95 backdrop-blur-md border-b border-border z-50 shadow-sm">
         <div className="max-w-7xl mx-auto px-6 lg:px-8">
           <div className="flex items-center justify-between h-16">
             <div className="flex items-center gap-3">
@@ -26,8 +26,8 @@ export default function LandingPage() {
                 <Factory className="w-5 h-5 text-white" />
               </div>
               <div>
-                <span className="text-xl font-bold text-gray-900">PCMS</span>
-                <p className="text-xs text-gray-500 font-medium">
+                <span className="text-xl font-bold text-foreground">PCMS</span>
+                <p className="text-xs text-muted-foreground font-medium">
                   Production Control Management System
                 </p>
               </div>
@@ -35,7 +35,7 @@ export default function LandingPage() {
             <div className="flex items-center gap-3">
               <a
                 href="/auth/login"
-                className="text-gray-700 hover:text-gray-900 font-semibold px-5 py-2.5 rounded-lg hover:bg-gray-50 transition-all"
+                className="text-foreground hover:text-foreground font-semibold px-5 py-2.5 rounded-lg hover:bg-accent transition-all"
               >
                 Login
               </a>
@@ -49,12 +49,12 @@ export default function LandingPage() {
         <div className="max-w-7xl mx-auto">
           <div className="grid lg:grid-cols-2 gap-12 items-center">
             <div className="max-w-2xl">
-              {/* <div className="inline-flex items-center gap-2 bg-blue-50 border border-blue-200 text-blue-700 px-4 py-2 rounded-full text-sm font-semibold mb-6">
+              {/* <div className="inline-flex items-center gap-2 bg-blue-500/10 border border-blue-500/30 text-blue-600 px-4 py-2 rounded-full text-sm font-semibold mb-6">
                 <Zap className="w-4 h-4" />
                 Complete Production Solution
               </div> */}
 
-              <h1 className="text-5xl lg:text-6xl font-bold text-gray-900 mb-6 leading-tight">
+              <h1 className="text-5xl lg:text-6xl font-bold text-foreground mb-6 leading-tight">
                 Transform Your
                 <br />
                 <span className="bg-linear-to-r from-blue-600 to-blue-700 bg-clip-text text-transparent">
@@ -62,14 +62,14 @@ export default function LandingPage() {
                 </span>
               </h1>
 
-              <p className="text-xl text-gray-600 mb-8 leading-relaxed">
+              <p className="text-xl text-muted-foreground mb-8 leading-relaxed">
                 Comprehensive production management system designed specifically
                 for garment manufacturing. Track orders, monitor progress, and
                 optimize your entire workflow.
               </p>
 
               {/* Stats Grid */}
-              {/* <div className="grid grid-cols-3 gap-6 pt-6 border-t border-gray-200">
+              {/* <div className="grid grid-cols-3 gap-6 pt-6 border-t border-border">
                 {[
                   {
                     icon: <Clock className="w-5 h-5 text-blue-600" />,
@@ -89,10 +89,10 @@ export default function LandingPage() {
                 ].map((stat, i) => (
                   <div key={i} className="text-center">
                     <div className="flex justify-center mb-2">{stat.icon}</div>
-                    <div className="text-2xl font-bold text-gray-900">
+                    <div className="text-2xl font-bold text-foreground">
                       {stat.value}
                     </div>
-                    <div className="text-sm text-gray-600">{stat.label}</div>
+                    <div className="text-sm text-muted-foreground">{stat.label}</div>
                   </div>
                 ))}
               </div> */}
@@ -102,10 +102,10 @@ export default function LandingPage() {
             <div className="hidden lg:block">
               <div className="relative">
                 <div className="absolute inset-0 bg-linear-to-r from-blue-600 to-purple-600 rounded-2xl blur-3xl opacity-20"></div>
-                <div className="relative bg-white rounded-2xl shadow-2xl border border-gray-200 p-6">
+                <div className="relative bg-card rounded-2xl shadow-2xl border border-border p-6">
                   <div className="space-y-4">
-                    <div className="flex items-center justify-between pb-4 border-b border-gray-200">
-                      <h3 className="font-bold text-gray-900">
+                    <div className="flex items-center justify-between pb-4 border-b border-border">
+                      <h3 className="font-bold text-foreground">
                         Production Overview
                       </h3>
                       <Activity className="w-5 h-5 text-blue-600" />
@@ -123,9 +123,9 @@ export default function LandingPage() {
                       ].map((item, i) => (
                         <div
                           key={i}
-                          className="bg-gray-50 rounded-lg p-4 border border-gray-200"
+                          className="bg-muted rounded-lg p-4 border border-border"
                         >
-                          <div className="text-sm text-gray-600 mb-1">
+                          <div className="text-sm text-muted-foreground mb-1">
                             {item.label}
                           </div>
                           <div
@@ -145,13 +145,13 @@ export default function LandingPage() {
       </section>
 
       {/* Features Section - Professional Grid */}
-      <section className="py-24 px-6 lg:px-8 bg-white">
+      <section className="py-24 px-6 lg:px-8 bg-card">
         <div className="max-w-7xl mx-auto">
           <div className="text-center max-w-3xl mx-auto mb-16">
-            <h2 className="text-4xl lg:text-5xl font-bold text-gray-900 mb-4">
+            <h2 className="text-4xl lg:text-5xl font-bold text-foreground mb-4">
               Complete Production Management
             </h2>
-            <p className="text-xl text-gray-600">
+            <p className="text-xl text-muted-foreground">
               Powerful features designed specifically for garment manufacturing
               workflows
             </p>
@@ -204,19 +204,19 @@ export default function LandingPage() {
             ].map((feature, i) => (
               <div
                 key={i}
-                className="group bg-white p-8 rounded-2xl border-2 border-gray-200 hover:border-blue-300 hover:shadow-xl transition-all"
+                className="group bg-card p-8 rounded-2xl border-2 border-border hover:border-blue-500/40 hover:shadow-xl transition-all"
               >
                 <div
-                  className={`inline-flex items-center justify-center w-12 h-12 bg-${feature.color}-100 rounded-xl mb-4 group-hover:scale-110 transition-transform`}
+                  className={`inline-flex items-center justify-center w-12 h-12 bg-${feature.color}-500/15 rounded-xl mb-4 group-hover:scale-110 transition-transform`}
                 >
                   <div className={`text-${feature.color}-600`}>
                     {feature.icon}
                   </div>
                 </div>
-                <h3 className="text-xl font-bold text-gray-900 mb-3">
+                <h3 className="text-xl font-bold text-foreground mb-3">
                   {feature.title}
                 </h3>
-                <p className="text-gray-600 leading-relaxed">
+                <p className="text-muted-foreground leading-relaxed">
                   {feature.description}
                 </p>
               </div>
@@ -230,10 +230,10 @@ export default function LandingPage() {
         <div className="max-w-7xl mx-auto">
           <div className="grid lg:grid-cols-2 gap-12 items-center">
             <div>
-              <h2 className="text-4xl font-bold text-gray-900 mb-6">
+              <h2 className="text-4xl font-bold text-foreground mb-6">
                 Why Production MS?
               </h2>
-              <p className="text-lg text-gray-600 mb-8">
+              <p className="text-lg text-muted-foreground mb-8">
                 Built by production experts for production teams. Every feature
                 is designed to solve real manufacturing challenges.
               </p>
@@ -256,21 +256,21 @@ export default function LandingPage() {
                   },
                 ].map((benefit, i) => (
                   <div key={i} className="flex items-start gap-4">
-                    <div className="bg-blue-100 rounded-lg p-3 text-blue-600">
+                    <div className="bg-blue-500/15 rounded-lg p-3 text-blue-600">
                       {benefit.icon}
                     </div>
                     <div>
-                      <h4 className="font-bold text-gray-900 mb-1">
+                      <h4 className="font-bold text-foreground mb-1">
                         {benefit.title}
                       </h4>
-                      <p className="text-gray-600">{benefit.desc}</p>
+                      <p className="text-muted-foreground">{benefit.desc}</p>
                     </div>
                   </div>
                 ))}
               </div>
             </div>
-            <div className="bg-white rounded-2xl shadow-2xl border border-gray-200 p-8">
-              <h3 className="text-2xl font-bold text-gray-900 mb-6">
+            <div className="bg-card rounded-2xl shadow-2xl border border-border p-8">
+              <h3 className="text-2xl font-bold text-foreground mb-6">
                 Key Metrics
               </h3>
               <div className="space-y-6">
@@ -282,7 +282,7 @@ export default function LandingPage() {
                 ].map((metric, i) => (
                   <div key={i}>
                     <div className="flex justify-between mb-2">
-                      <span className="text-sm font-semibold text-gray-700">
+                      <span className="text-sm font-semibold text-foreground">
                         {metric.label}
                       </span>
                       <span
@@ -291,7 +291,7 @@ export default function LandingPage() {
                         {metric.value}%
                       </span>
                     </div>
-                    <div className="w-full bg-gray-200 rounded-full h-2.5">
+                    <div className="w-full bg-muted rounded-full h-2.5">
                       <div
                         className={`bg-${metric.color}-600 h-2.5 rounded-full transition-all`}
                         style={{ width: `${metric.value}%` }}
@@ -318,7 +318,7 @@ export default function LandingPage() {
           <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
             <a
               href="/auth/register"
-              className="inline-flex items-center gap-2 bg-white text-blue-700 px-8 py-4 rounded-xl hover:bg-gray-100 transition-all font-semibold shadow-lg"
+              className="inline-flex items-center gap-2 bg-card text-blue-600 px-8 py-4 rounded-xl hover:bg-muted transition-all font-semibold shadow-lg"
             >
               Get Started Now
               <ArrowRight className="w-5 h-5" />
@@ -334,7 +334,7 @@ export default function LandingPage() {
       </section> */}
 
       {/* Footer - Professional */}
-      <footer className="bg-gray-900 border-t border-gray-800 py-12 px-6 lg:px-8">
+      <footer className="bg-card border-t border-border py-12 px-6 lg:px-8">
         <div className="max-w-7xl mx-auto">
           <div className="grid md:grid-cols-4 gap-8 mb-8">
             <div className="md:col-span-2">
@@ -342,45 +342,54 @@ export default function LandingPage() {
                 <div className="bg-linear-to-br from-blue-600 to-blue-700 rounded-xl p-2">
                   <Factory className="w-5 h-5 text-white" />
                 </div>
-                <span className="text-lg font-bold text-white">
+                <span className="text-lg font-bold text-foreground">
                   Production MS
                 </span>
               </div>
-              <p className="text-gray-400 text-sm leading-relaxed mb-4">
+              <p className="text-muted-foreground text-sm leading-relaxed mb-4">
                 Complete production management system for garment manufacturing.
                 Built to optimize your workflow and increase efficiency.
               </p>
-              <p className="text-gray-500 text-xs">
+              <p className="text-muted-foreground text-xs">
                 © 2025 Total Quality Indonesia. All rights reserved.
               </p>
             </div>
             <div>
-              <h4 className="text-white font-semibold mb-4">Product</h4>
-              <ul className="space-y-2 text-sm text-gray-400">
+              <h4 className="text-foreground font-semibold mb-4">Product</h4>
+              <ul className="space-y-2 text-sm text-muted-foreground">
                 <li>
-                  <a href="#" className="hover:text-white transition-colors">
+                  <a
+                    href="#"
+                    className="hover:text-foreground transition-colors"
+                  >
                     Features
                   </a>
                 </li>
                 <li>
-                  <a href="#" className="hover:text-white transition-colors">
+                  <a
+                    href="#"
+                    className="hover:text-foreground transition-colors"
+                  >
                     Pricing
                   </a>
                 </li>
                 <li>
-                  <a href="#" className="hover:text-white transition-colors">
+                  <a
+                    href="#"
+                    className="hover:text-foreground transition-colors"
+                  >
                     Documentation
                   </a>
                 </li>
               </ul>
             </div>
             <div>
-              <h4 className="text-white font-semibold mb-4">Legal</h4>
-              <ul className="space-y-2 text-sm text-gray-400">
+              <h4 className="text-foreground font-semibold mb-4">Legal</h4>
+              <ul className="space-y-2 text-sm text-muted-foreground">
                 <li>
                   <a
                     href="/terms"
-                    className="hover:text-white transition-colors"
+                    className="hover:text-foreground transition-colors"
                   >
                     Terms of Service
                   </a>
@@ -388,7 +397,7 @@ export default function LandingPage() {
                 <li>
                   <a
                     href="/privacy"
-                    className="hover:text-white transition-colors"
+                    className="hover:text-foreground transition-colors"
                   >
                     Privacy Policy
                   </a>

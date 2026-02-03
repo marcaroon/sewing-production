@@ -56,7 +56,7 @@ export default function Sidebar({ user }: SidebarProps) {
       {/* Mobile Toggle Button */}
       <button
         onClick={() => setMobileOpen(!mobileOpen)}
-        className="fixed top-4 left-4 z-50 md:hidden bg-white shadow-lg text-gray-900 p-3 rounded-xl border-2 border-gray-200 hover:border-blue-300 transition-all"
+        className="fixed top-4 left-4 z-50 md:hidden bg-card shadow-lg text-foreground p-3 rounded-xl border-2 border-border hover:border-blue-500/40 transition-all"
       >
         {mobileOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
       </button>
@@ -71,13 +71,13 @@ export default function Sidebar({ user }: SidebarProps) {
 
       {/* Sidebar */}
       <aside
-        className={`fixed inset-y-0 left-0 z-40 w-72 bg-white border-r border-gray-200 shadow-xl transform transition-transform duration-300 ease-in-out ${
+        className={`fixed inset-y-0 left-0 z-40 w-72 bg-card border-r border-border shadow-xl transform transition-transform duration-300 ease-in-out ${
           mobileOpen ? "translate-x-0" : "-translate-x-full"
         } md:translate-x-0 md:static md:inset-0`}
       >
         <div className="flex flex-col h-full">
           {/* Logo Section - Professional */}
-          <div className="px-6 py-6 border-b mx-4 mt-4 rounded-xl border-gray-200 bg-linear-to-r from-blue-600 to-blue-700">
+          <div className="px-6 py-6 border-b mx-4 mt-4 rounded-xl border-border bg-linear-to-r from-blue-600 to-blue-700">
             <div className="flex items-center gap-3">
               <div>
                 <h1 className="text-2xl font-bold text-white">PCMS</h1>
@@ -104,8 +104,8 @@ export default function Sidebar({ user }: SidebarProps) {
                   onClick={() => setMobileOpen(false)}
                   className={`flex items-center justify-between px-4 py-3.5 rounded-xl transition-all group ${
                     isActive
-                      ? "bg-blue-50 text-blue-700 font-semibold"
-                      : "text-gray-700 hover:bg-gray-100"
+                      ? "bg-blue-500/10 text-blue-600 font-semibold"
+                      : "text-foreground hover:bg-muted"
                   }`}
                 >
                   <div className="flex items-center gap-3">
@@ -118,8 +118,8 @@ export default function Sidebar({ user }: SidebarProps) {
             })}
 
             {isAdmin && (
-              <div className="pt-4 mt-4 border-t border-gray-200">
-                <p className="px-4 text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2">
+              <div className="pt-4 mt-4 border-t border-border">
+                <p className="px-4 text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-2">
                   Admin Only
                 </p>
                 <Link
@@ -127,8 +127,8 @@ export default function Sidebar({ user }: SidebarProps) {
                   onClick={() => setMobileOpen(false)}
                   className={`flex items-center justify-between px-4 py-3.5 rounded-xl transition-all group ${
                     pathname === "/admin/users/create"
-                      ? "bg-blue-50 text-blue-700 font-semibold"
-                      : "text-gray-700 hover:bg-gray-100"
+                      ? "bg-blue-500/10 text-blue-600 font-semibold"
+                      : "text-foreground hover:bg-muted"
                   }`}
                 >
                   <div className="flex items-center gap-3">
@@ -141,7 +141,7 @@ export default function Sidebar({ user }: SidebarProps) {
 
             {/* Create Order Button - Professional */}
             {canCreateOrder && (
-              <div className="pt-4 mt-4 border-t border-gray-200">
+              <div className="pt-4 mt-4 border-t border-border">
                 <Link
                   href="/orders/new"
                   onClick={() => setMobileOpen(false)}
@@ -155,17 +155,17 @@ export default function Sidebar({ user }: SidebarProps) {
           </nav>
 
           {/* User Section - Professional */}
-          <div className="border-t border-gray-200 p-4 bg-gray-50">
-            <div className="flex items-center gap-3 px-3 py-3 rounded-xl bg-white border border-gray-200 shadow-sm">
+          <div className="border-t border-border p-4 bg-muted">
+            <div className="flex items-center gap-3 px-3 py-3 rounded-xl bg-card border border-border shadow-sm">
               <div className="bg-linear-to-br from-blue-600 to-blue-700 rounded-full p-2.5 shadow-md">
                 <User className="w-5 h-5 text-white" />
               </div>
               <div className="flex-1 min-w-0">
-                <p className="text-sm font-bold text-gray-900 truncate">
+                <p className="text-sm font-bold text-foreground truncate">
                   {user.name}
                 </p>
                 {!user.isAdmin && user.department && (
-                  <p className="text-xs text-gray-600 truncate font-medium">
+                  <p className="text-xs text-muted-foreground truncate font-medium">
                     {user.department}
                   </p>
                 )}
@@ -177,7 +177,7 @@ export default function Sidebar({ user }: SidebarProps) {
               </div>
               <button
                 onClick={handleLogout}
-                className="text-gray-400 hover:text-red-600 p-2 rounded-lg hover:bg-red-50 transition-all"
+                className="text-muted-foreground hover:text-red-600 p-2 rounded-lg hover:bg-red-500/10 transition-all"
                 title="Logout"
               >
                 <LogOut className="w-5 h-5" />

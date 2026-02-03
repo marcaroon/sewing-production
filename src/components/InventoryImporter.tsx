@@ -169,11 +169,11 @@ export const InventoryImporter = () => {
         </Button>
 
         {isMenuOpen && (
-          <div className="absolute right-0 mt-2 w-56 bg-white rounded-lg shadow-xl border border-gray-200 z-50 overflow-hidden">
+          <div className="absolute right-0 mt-2 w-56 bg-card rounded-lg shadow-xl border border-border z-50 overflow-hidden">
             <div className="py-1">
               <Link
                 href="/inventory/materials"
-                className="flex items-center gap-3 px-4 py-3 text-sm text-gray-700 hover:bg-gray-50 transition-colors border-b border-gray-100"
+                className="flex items-center gap-3 px-4 py-3 text-sm text-foreground hover:bg-muted transition-colors border-b border-border"
                 onClick={() => setIsMenuOpen(false)}
               >
                 <Package className="w-4 h-4 text-blue-600" />
@@ -182,7 +182,7 @@ export const InventoryImporter = () => {
 
               <Link
                 href="/inventory/accessories"
-                className="flex items-center gap-3 px-4 py-3 text-sm text-gray-700 hover:bg-gray-50 transition-colors border-b border-gray-100"
+                className="flex items-center gap-3 px-4 py-3 text-sm text-foreground hover:bg-muted transition-colors border-b border-border"
                 onClick={() => setIsMenuOpen(false)}
               >
                 <ShoppingCart className="w-4 h-4 text-green-600" />
@@ -194,7 +194,7 @@ export const InventoryImporter = () => {
                   setIsModalOpen(true);
                   setIsMenuOpen(false);
                 }}
-                className="w-full flex items-center gap-3 px-4 py-3 text-sm text-gray-700 hover:bg-gray-50 transition-colors text-left"
+                className="w-full flex items-center gap-3 px-4 py-3 text-sm text-foreground hover:bg-muted transition-colors text-left"
               >
                 <FileSpreadsheet className="w-4 h-4 text-emerald-600" />
                 Import Excel
@@ -202,7 +202,7 @@ export const InventoryImporter = () => {
 
               <button
                 onClick={handleDownloadTemplate}
-                className="w-full flex items-center gap-3 px-4 py-3 text-sm text-gray-700 hover:bg-gray-50 transition-colors text-left"
+                className="w-full flex items-center gap-3 px-4 py-3 text-sm text-foreground hover:bg-muted transition-colors text-left"
               >
                 <Download className="w-4 h-4 text-orange-600" />
                 Download Template
@@ -218,7 +218,7 @@ export const InventoryImporter = () => {
         title="Import Data Inventory"
       >
         <div className="space-y-6">
-          <div className="bg-blue-50 p-4 rounded-lg border border-blue-100 text-sm text-blue-800">
+          <div className="bg-blue-500/10 p-4 rounded-lg border border-blue-500/30 text-sm text-blue-600">
             <p className="font-semibold mb-2">Panduan Import:</p>
             <ul className="list-disc pl-5 space-y-1">
               <li>
@@ -237,7 +237,7 @@ export const InventoryImporter = () => {
           </div>
 
           <div
-            className="border-2 border-dashed border-gray-300 rounded-lg p-8 text-center hover:bg-gray-50 transition-colors cursor-pointer"
+            className="border-2 border-dashed border-border rounded-lg p-8 text-center hover:bg-muted transition-colors cursor-pointer"
             onClick={() => fileInputRef.current?.click()}
           >
             <input
@@ -252,15 +252,17 @@ export const InventoryImporter = () => {
             {isUploading ? (
               <div className="flex flex-col items-center">
                 <Loader2 className="w-10 h-10 text-blue-500 animate-spin mb-2" />
-                <p className="text-gray-500">Sedang memproses data...</p>
+                <p className="text-muted-foreground">
+                  Sedang memproses data...
+                </p>
               </div>
             ) : (
               <div className="flex flex-col items-center">
-                <Upload className="w-10 h-10 text-gray-400 mb-2" />
-                <p className="font-medium text-gray-700">
+                <Upload className="w-10 h-10 text-muted-foreground mb-2" />
+                <p className="font-medium text-foreground">
                   Klik untuk upload file Excel
                 </p>
-                <p className="text-xs text-gray-500 mt-1">
+                <p className="text-xs text-muted-foreground mt-1">
                   Format: .xlsx atau .xls
                 </p>
               </div>
@@ -271,8 +273,8 @@ export const InventoryImporter = () => {
             <div
               className={`p-3 rounded-lg text-sm font-medium ${
                 uploadResult.includes("Error")
-                  ? "bg-red-50 text-red-700 border border-red-200"
-                  : "bg-green-50 text-green-700 border border-green-200"
+                  ? "bg-red-500/10 text-red-600 border border-red-500/30"
+                  : "bg-green-500/10 text-green-600 border border-green-500/30"
               }`}
             >
               {uploadResult}

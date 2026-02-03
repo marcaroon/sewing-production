@@ -85,11 +85,13 @@ export default function DashboardPage() {
       <div className="min-h-screen flex items-center justify-center">
         <div className="text-center">
           <div className="relative">
-            <div className="w-16 h-16 border-4 border-blue-200 border-t-blue-600 rounded-full animate-spin mx-auto mb-4"></div>
+            <div className="w-16 h-16 border-4 border-blue-500/30 border-t-blue-600 rounded-full animate-spin mx-auto mb-4"></div>
             <Activity className="w-6 h-6 text-blue-600 absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2" />
           </div>
-          <p className="text-gray-700 font-semibold">Loading dashboard...</p>
-          <p className="text-sm text-gray-500 mt-1">Please wait a moment</p>
+          <p className="text-foreground font-semibold">Loading dashboard...</p>
+          <p className="text-sm text-muted-foreground mt-1">
+            Please wait a moment
+          </p>
         </div>
       </div>
     );
@@ -98,19 +100,19 @@ export default function DashboardPage() {
   if (error) {
     return (
       <div className="min-h-screen flex items-center justify-center p-6">
-        <div className="max-w-md w-full bg-red-50 border-2 border-red-200 rounded-2xl p-8">
+        <div className="max-w-md w-full bg-destructive/10 border-2 border-destructive/40 rounded-2xl p-8">
           <div className="flex items-start gap-4">
-            <div className="bg-red-100 rounded-full p-3">
-              <AlertTriangle className="w-6 h-6 text-red-600" />
+            <div className="bg-destructive/15 rounded-full p-3">
+              <AlertTriangle className="w-6 h-6 text-destructive" />
             </div>
             <div className="flex-1">
-              <h3 className="text-lg font-bold text-red-900 mb-2">
+              <h3 className="text-lg font-bold text-destructive mb-2">
                 Error Loading Dashboard
               </h3>
-              <p className="text-sm text-red-700 mb-4">{error}</p>
+              <p className="text-sm text-destructive/80 mb-4">{error}</p>
               <button
                 onClick={loadData}
-                className="bg-red-600 text-white px-6 py-2.5 rounded-lg hover:bg-red-700 transition-all font-semibold text-sm"
+                className="bg-destructive text-destructive-foreground px-6 py-2.5 rounded-lg hover:bg-destructive/90 transition-all font-semibold text-sm"
               >
                 Try Again
               </button>
@@ -134,7 +136,7 @@ export default function DashboardPage() {
               Real-time overview production system
             </p>
           </div>
-          <div className="bg-white/20 backdrop-blur-sm rounded-xl p-4">
+          <div className="bg-card/20 backdrop-blur-sm rounded-xl p-4">
             <Activity className="w-8 h-8 text-white" />
           </div>
         </div>
@@ -143,33 +145,35 @@ export default function DashboardPage() {
       {/* Stats Grid - Professional Cards */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
         {/* Total Orders */}
-        <Card className="border-2 border-gray-200 hover:border-blue-300 hover:shadow-xl transition-all">
+        <Card className="border-2 border-border hover:border-blue-500/40 hover:shadow-xl transition-all">
           <CardContent className="pt-6">
             <div className="flex items-start justify-between mb-4">
-              <div className="bg-blue-100 rounded-xl p-3">
+              <div className="bg-blue-500/15 rounded-xl p-3">
                 <Package className="w-6 h-6 text-blue-600" />
               </div>
-              <span className="text-xs font-semibold text-gray-500 uppercase tracking-wide">
+              <span className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">
                 Total Orders
               </span>
             </div>
             <div className="space-y-1">
-              <p className="text-3xl font-bold text-gray-900">
+              <p className="text-3xl font-bold text-foreground">
                 {stats.totalOrders}
               </p>
-              <p className="text-sm text-gray-600">All production orders</p>
+              <p className="text-sm text-muted-foreground">
+                All production orders
+              </p>
             </div>
           </CardContent>
         </Card>
 
         {/* In Production */}
-        <Card className="border-2 border-gray-200 hover:border-orange-300 hover:shadow-xl transition-all">
+        <Card className="border-2 border-border hover:border-orange-500/40 hover:shadow-xl transition-all">
           <CardContent className="pt-6">
             <div className="flex items-start justify-between mb-4">
-              <div className="bg-orange-100 rounded-xl p-3">
+              <div className="bg-orange-500/15 rounded-xl p-3">
                 <Factory className="w-6 h-6 text-orange-600" />
               </div>
-              <span className="text-xs font-semibold text-gray-500 uppercase tracking-wide">
+              <span className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">
                 In Production
               </span>
             </div>
@@ -177,19 +181,21 @@ export default function DashboardPage() {
               <p className="text-3xl font-bold text-orange-600">
                 {stats.ordersInProduction}
               </p>
-              <p className="text-sm text-gray-600">Currently manufacturing</p>
+              <p className="text-sm text-muted-foreground">
+                Currently manufacturing
+              </p>
             </div>
           </CardContent>
         </Card>
 
         {/* In Delivery */}
-        <Card className="border-2 border-gray-200 hover:border-indigo-300 hover:shadow-xl transition-all">
+        <Card className="border-2 border-border hover:border-indigo-500/40 hover:shadow-xl transition-all">
           <CardContent className="pt-6">
             <div className="flex items-start justify-between mb-4">
-              <div className="bg-indigo-100 rounded-xl p-3">
+              <div className="bg-indigo-500/15 rounded-xl p-3">
                 <Truck className="w-6 h-6 text-indigo-600" />
               </div>
-              <span className="text-xs font-semibold text-gray-500 uppercase tracking-wide">
+              <span className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">
                 In Delivery
               </span>
             </div>
@@ -197,19 +203,19 @@ export default function DashboardPage() {
               <p className="text-3xl font-bold text-indigo-600">
                 {stats.ordersInDelivery}
               </p>
-              <p className="text-sm text-gray-600">Being delivered</p>
+              <p className="text-sm text-muted-foreground">Being delivered</p>
             </div>
           </CardContent>
         </Card>
 
         {/* Completed */}
-        <Card className="border-2 border-gray-200 hover:border-green-300 hover:shadow-xl transition-all">
+        <Card className="border-2 border-border hover:border-green-500/40 hover:shadow-xl transition-all">
           <CardContent className="pt-6">
             <div className="flex items-start justify-between mb-4">
-              <div className="bg-green-100 rounded-xl p-3">
+              <div className="bg-green-500/15 rounded-xl p-3">
                 <CheckCircle2 className="w-6 h-6 text-green-600" />
               </div>
-              <span className="text-xs font-semibold text-gray-500 uppercase tracking-wide">
+              <span className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">
                 Completed
               </span>
             </div>
@@ -217,7 +223,9 @@ export default function DashboardPage() {
               <p className="text-3xl font-bold text-green-600">
                 {stats.ordersCompleted}
               </p>
-              <p className="text-sm text-gray-600">Successfully finished</p>
+              <p className="text-sm text-muted-foreground">
+                Successfully finished
+              </p>
             </div>
           </CardContent>
         </Card>
@@ -226,11 +234,11 @@ export default function DashboardPage() {
       {/* Performance Metrics & WIP - Side by Side */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {/* Performance Metrics Card */}
-        <Card className="border-2 border-gray-200">
+        <Card className="border-2 border-border">
           <CardHeader>
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-3">
-                <div className="bg-purple-100 rounded-lg p-2">
+                <div className="bg-purple-500/15 rounded-lg p-2">
                   <BarChart3 className="w-5 h-5 text-purple-600" />
                 </div>
                 <CardTitle className="text-lg">Performance Metrics</CardTitle>
@@ -241,19 +249,19 @@ export default function DashboardPage() {
           <CardContent>
             <div className="space-y-4">
               {/* Average Production Time */}
-              <div className="bg-linear-to-r from-blue-50 to-blue-100 rounded-xl p-4 border border-blue-200">
+              <div className="bg-blue-500/10 rounded-xl p-4 border border-blue-500/30">
                 <div className="flex items-center justify-between mb-2">
                   <div className="flex items-center gap-2">
                     <Clock className="w-4 h-4 text-blue-600" />
-                    <span className="text-sm font-semibold text-blue-900">
+                    <span className="text-sm font-semibold text-blue-600">
                       Avg. Production Time
                     </span>
                   </div>
-                  <span className="text-2xl font-bold text-blue-700">
+                  <span className="text-2xl font-bold text-blue-600">
                     {stats.avgProductionTime}
                   </span>
                 </div>
-                <div className="flex items-center gap-1 text-xs text-blue-700">
+                <div className="flex items-center gap-1 text-xs text-blue-600">
                   <span>days per order</span>
                 </div>
               </div>
@@ -262,8 +270,8 @@ export default function DashboardPage() {
               <div
                 className={`rounded-xl p-4 border ${
                   stats.totalRejectRate > 5
-                    ? "bg-linear-to-r from-red-50 to-red-100 border-red-200"
-                    : "bg-linear-to-r from-green-50 to-green-100 border-green-200"
+                    ? "bg-destructive/10 border-destructive/40"
+                    : "bg-success/10 border-success/40"
                 }`}
               >
                 <div className="flex items-center justify-between mb-2">
@@ -271,15 +279,15 @@ export default function DashboardPage() {
                     <AlertTriangle
                       className={`w-4 h-4 ${
                         stats.totalRejectRate > 5
-                          ? "text-red-600"
-                          : "text-green-600"
+                          ? "text-destructive"
+                          : "text-success"
                       }`}
                     />
                     <span
                       className={`text-sm font-semibold ${
                         stats.totalRejectRate > 5
-                          ? "text-red-900"
-                          : "text-green-900"
+                          ? "text-destructive"
+                          : "text-success"
                       }`}
                     >
                       Total Reject Rate
@@ -288,8 +296,8 @@ export default function DashboardPage() {
                   <span
                     className={`text-2xl font-bold ${
                       stats.totalRejectRate > 5
-                        ? "text-red-700"
-                        : "text-green-700"
+                        ? "text-destructive"
+                        : "text-success"
                     }`}
                   >
                     {stats.totalRejectRate}%
@@ -298,8 +306,8 @@ export default function DashboardPage() {
                 <div
                   className={`flex items-center gap-1 text-xs ${
                     stats.totalRejectRate > 5
-                      ? "text-red-700"
-                      : "text-green-700"
+                      ? "text-destructive"
+                      : "text-success"
                   }`}
                 >
                   <span>
@@ -311,19 +319,19 @@ export default function DashboardPage() {
               </div>
 
               {/* Average Delivery Time */}
-              <div className="bg-linear-to-r from-indigo-50 to-indigo-100 rounded-xl p-4 border border-indigo-200">
+              <div className="bg-indigo-500/10 rounded-xl p-4 border border-indigo-500/30">
                 <div className="flex items-center justify-between mb-2">
                   <div className="flex items-center gap-2">
                     <Truck className="w-4 h-4 text-indigo-600" />
-                    <span className="text-sm font-semibold text-indigo-900">
+                    <span className="text-sm font-semibold text-indigo-600">
                       Avg. Delivery Time
                     </span>
                   </div>
-                  <span className="text-2xl font-bold text-indigo-700">
+                  <span className="text-2xl font-bold text-indigo-600">
                     {stats.avgDeliveryTime}
                   </span>
                 </div>
-                <div className="flex items-center gap-1 text-xs text-indigo-700">
+                <div className="flex items-center gap-1 text-xs text-indigo-600">
                   <span>days to complete delivery</span>
                 </div>
               </div>
@@ -332,11 +340,11 @@ export default function DashboardPage() {
         </Card>
 
         {/* Work In Progress Card */}
-        <Card className="border-2 border-gray-200">
+        <Card className="border-2 border-border">
           <CardHeader>
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-3">
-                <div className="bg-orange-100 rounded-lg p-2">
+                <div className="bg-orange-500/15 rounded-lg p-2">
                   <Factory className="w-5 h-5 text-orange-600" />
                 </div>
                 <CardTitle className="text-lg">Work In Progress</CardTitle>
@@ -347,46 +355,46 @@ export default function DashboardPage() {
           <CardContent>
             <div className="space-y-4">
               {/* WIP Production */}
-              <div className="bg-linear-to-r from-orange-50 to-orange-100 rounded-xl p-6 border border-orange-200">
+              <div className="bg-orange-500/10 rounded-xl p-6 border border-orange-500/30">
                 <div className="flex items-center justify-between mb-3">
                   <div>
-                    <p className="text-sm font-semibold text-orange-900 mb-1">
+                    <p className="text-sm font-semibold text-orange-600 mb-1">
                       Production WIP
                     </p>
-                    <p className="text-xs text-orange-700">
+                    <p className="text-xs text-orange-600">
                       Units in manufacturing
                     </p>
                   </div>
                   <Factory className="w-8 h-8 text-orange-600" />
                 </div>
-                <p className="text-4xl font-bold text-orange-700">
+                <p className="text-4xl font-bold text-orange-600">
                   {formatNumber(stats.wipProduction)}
                 </p>
-                <div className="mt-3 pt-3 border-t border-orange-200">
-                  <p className="text-xs text-orange-700">
+                <div className="mt-3 pt-3 border-t border-orange-500/30">
+                  <p className="text-xs text-orange-600">
                     Total units currently in production phase
                   </p>
                 </div>
               </div>
 
               {/* WIP Delivery */}
-              <div className="bg-linear-to-r from-indigo-50 to-indigo-100 rounded-xl p-6 border border-indigo-200">
+              <div className="bg-indigo-500/10 rounded-xl p-6 border border-indigo-500/30">
                 <div className="flex items-center justify-between mb-3">
                   <div>
-                    <p className="text-sm font-semibold text-indigo-900 mb-1">
+                    <p className="text-sm font-semibold text-indigo-600 mb-1">
                       Delivery WIP
                     </p>
-                    <p className="text-xs text-indigo-700">
+                    <p className="text-xs text-indigo-600">
                       Units in delivery process
                     </p>
                   </div>
                   <Truck className="w-8 h-8 text-indigo-600" />
                 </div>
-                <p className="text-4xl font-bold text-indigo-700">
+                <p className="text-4xl font-bold text-indigo-600">
                   {formatNumber(stats.wipDelivery)}
                 </p>
-                <div className="mt-3 pt-3 border-t border-indigo-200">
-                  <p className="text-xs text-indigo-700">
+                <div className="mt-3 pt-3 border-t border-indigo-500/30">
+                  <p className="text-xs text-indigo-600">
                     Total units currently in delivery phase
                   </p>
                 </div>
@@ -400,11 +408,11 @@ export default function DashboardPage() {
       <div>
         <div className="flex items-center justify-between mb-6">
           <div>
-            <h2 className="text-2xl font-bold text-gray-900 flex items-center gap-3">
+            <h2 className="text-2xl font-bold text-foreground flex items-center gap-3">
               <Package className="w-7 h-7 text-blue-600" />
               Active Orders
             </h2>
-            <p className="text-sm text-gray-600 mt-1">
+            <p className="text-sm text-muted-foreground mt-1">
               Currently in production or delivery
             </p>
           </div>
@@ -418,15 +426,15 @@ export default function DashboardPage() {
         </div>
 
         {activeOrders.length === 0 ? (
-          <Card className="border-2 border-dashed border-gray-300">
+          <Card className="border-2 border-dashed border-border">
             <CardContent className="py-16 text-center">
-              <div className="bg-gray-100 rounded-full w-16 h-16 flex items-center justify-center mx-auto mb-4">
-                <Package className="w-8 h-8 text-gray-400" />
+              <div className="bg-muted rounded-full w-16 h-16 flex items-center justify-center mx-auto mb-4">
+                <Package className="w-8 h-8 text-muted-foreground" />
               </div>
-              <p className="text-gray-600 font-semibold text-lg mb-2">
+              <p className="text-muted-foreground font-semibold text-lg mb-2">
                 No Active Orders
               </p>
-              <p className="text-sm text-gray-500">
+              <p className="text-sm text-muted-foreground">
                 All orders have been completed or none in progress
               </p>
             </CardContent>
@@ -445,11 +453,11 @@ export default function DashboardPage() {
         <div>
           <div className="flex items-center justify-between mb-6">
             <div>
-              <h2 className="text-2xl font-bold text-gray-900 flex items-center gap-3">
+              <h2 className="text-2xl font-bold text-foreground flex items-center gap-3">
                 <CheckCircle2 className="w-7 h-7 text-green-600" />
                 Recently Completed
               </h2>
-              <p className="text-sm text-gray-600 mt-1">
+              <p className="text-sm text-muted-foreground mt-1">
                 Latest successfully finished orders
               </p>
             </div>

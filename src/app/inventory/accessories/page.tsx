@@ -130,14 +130,14 @@ export default function AccessoriesPage() {
       <div className="flex items-center gap-3 mb-8">
         <button
           onClick={() => router.back()}
-          className="text-gray-600 hover:text-gray-900"
+          className="text-muted-foreground hover:text-foreground"
         >
           <ArrowLeft className="w-6 h-6" />
         </button>
 
         <div className="flex-1">
-          <h1 className="text-3xl font-bold text-gray-900 mb-2">Aksesoris</h1>
-          <p className="text-gray-600">Manage accessories and trims</p>
+          <h1 className="text-3xl font-bold text-foreground mb-2">Aksesoris</h1>
+          <p className="text-muted-foreground">Manage accessories and trims</p>
         </div>
 
         <div className="flex items-center gap-3">
@@ -172,7 +172,7 @@ export default function AccessoriesPage() {
               <div className="flex items-start justify-between">
                 <div className="flex-1">
                   <CardTitle className="text-lg">{accessory.name}</CardTitle>
-                  <p className="text-sm text-gray-600 mt-1">
+                  <p className="text-sm text-muted-foreground mt-1">
                     {accessory.accessoryCode}
                   </p>
                 </div>
@@ -186,13 +186,17 @@ export default function AccessoriesPage() {
             <CardContent>
               <div className="space-y-3">
                 <div className="flex justify-between items-center">
-                  <span className="text-sm text-gray-600">Kategori</span>
+                  <span className="text-sm text-muted-foreground">
+                    Kategori
+                  </span>
                   <Badge variant="info" size="sm">
                     {accessory.category}
                   </Badge>
                 </div>
                 <div className="flex justify-between items-center">
-                  <span className="text-sm text-gray-600">Stok Sekarag</span>
+                  <span className="text-sm text-muted-foreground">
+                    Stok Sekarag
+                  </span>
                   <span
                     className={`text-2xl font-bold ${
                       accessory.isLowStock ? "text-red-600" : "text-green-600"
@@ -202,22 +206,22 @@ export default function AccessoriesPage() {
                   </span>
                 </div>
                 <div className="flex justify-between items-center text-sm">
-                  <span className="text-gray-600">Stok Minimum</span>
-                  <span className="font-semibold text-gray-600">
+                  <span className="text-muted-foreground">Stok Minimum</span>
+                  <span className="font-semibold text-muted-foreground">
                     {accessory.minimumStock} {accessory.unit}
                   </span>
                 </div>
                 {accessory.unitPrice && (
                   <div className="flex justify-between items-center text-sm">
-                    <span className="text-gray-600">Harga Satuan</span>
-                    <span className="font-semibold text-gray-600">
+                    <span className="text-muted-foreground">Harga Satuan</span>
+                    <span className="font-semibold text-muted-foreground">
                       Rp {formatNumber(accessory.unitPrice)}
                     </span>
                   </div>
                 )}
               </div>
 
-              <div className="mt-4 pt-4 border-t border-gray-200 grid grid-cols-2 gap-2">
+              <div className="mt-4 pt-4 border-t border-border grid grid-cols-2 gap-2">
                 <Button
                   variant="success"
                   size="sm"
@@ -254,8 +258,8 @@ export default function AccessoriesPage() {
       {accessories.length === 0 && (
         <Card>
           <CardContent className="py-12 text-center">
-            <Package className="w-16 h-16 mx-auto mb-4 text-gray-400" />
-            <p className="text-gray-600 mb-4">
+            <Package className="w-16 h-16 mx-auto mb-4 text-muted-foreground" />
+            <p className="text-muted-foreground mb-4">
               {showLowStockOnly
                 ? "No low stock accessories"
                 : "No accessories found"}
@@ -309,12 +313,12 @@ export default function AccessoriesPage() {
         size="sm"
       >
         <div className="space-y-4">
-          <p className="text-gray-700">
+          <p className="text-foreground">
             Are you sure you want to delete{" "}
             <span className="font-bold">{deleteAccessory?.name}</span>?
           </p>
-          <div className="bg-red-50 border border-red-200 rounded p-3">
-            <p className="text-sm text-red-800">
+          <div className="bg-red-500/10 border border-red-500/30 rounded p-3">
+            <p className="text-sm text-red-600">
               ⚠️ This action cannot be undone. All transaction history will be
               deleted.
             </p>

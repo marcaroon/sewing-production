@@ -110,7 +110,7 @@ export const MaterialAccessorySelector: React.FC<
     <div className="space-y-6">
       {/* Materials Section */}
       <div>
-        <h4 className="font-semibold text-gray-900 mb-3">Bahan</h4>
+        <h4 className="font-semibold text-foreground mb-3">Bahan</h4>
 
         {/* Selected Materials */}
         <div className="space-y-3 mb-4">
@@ -121,11 +121,13 @@ export const MaterialAccessorySelector: React.FC<
             return (
               <div
                 key={sm.materialId}
-                className="flex items-center gap-3 p-3 bg-blue-50 border border-blue-200 rounded-lg"
+                className="flex items-center gap-3 p-3 bg-blue-500/10 border border-blue-500/30 rounded-lg"
               >
                 <div className="flex-1">
-                  <p className="font-semibold text-gray-900">{material.name}</p>
-                  <p className="text-sm text-gray-600">
+                  <p className="font-semibold text-foreground">
+                    {material.name}
+                  </p>
+                  <p className="text-sm text-muted-foreground">
                     {material.materialCode} • {material.category} • Stock:{" "}
                     {material.currentStock} {material.unit}
                   </p>
@@ -140,10 +142,12 @@ export const MaterialAccessorySelector: React.FC<
                     )
                   }
                   placeholder="Qty"
-                  className="w-24 px-3 py-2 text-gray-900 border border-gray-300 rounded-lg"
+                  className="w-24 px-3 py-2 text-foreground border border-border rounded-lg"
                   step="0.01"
                 />
-                <span className="text-sm text-gray-600">{material.unit}</span>
+                <span className="text-sm text-muted-foreground">
+                  {material.unit}
+                </span>
                 <Button
                   type="button"
                   variant="danger"
@@ -165,7 +169,7 @@ export const MaterialAccessorySelector: React.FC<
               e.target.value = "";
             }
           }}
-          className="w-full px-4 py-2 border text-gray-600 border-gray-300 rounded-lg"
+          className="w-full px-4 py-2 border text-muted-foreground border-border rounded-lg"
         >
           <option value="">+ Tambah Bahan</option>
           {materials
@@ -183,7 +187,7 @@ export const MaterialAccessorySelector: React.FC<
 
       {/* Accessories Section */}
       <div>
-        <h4 className="font-semibold text-gray-900 mb-3">Aksesoris</h4>
+        <h4 className="font-semibold text-foreground mb-3">Aksesoris</h4>
         {/* Selected Accessories */}
         <div className="space-y-3 mb-4">
           {selectedAccessories.map((sa) => {
@@ -193,13 +197,13 @@ export const MaterialAccessorySelector: React.FC<
             return (
               <div
                 key={sa.accessoryId}
-                className="flex items-center gap-3 p-3 bg-green-50 border border-green-200 rounded-lg"
+                className="flex items-center gap-3 p-3 bg-green-500/10 border border-green-500/30 rounded-lg"
               >
                 <div className="flex-1">
-                  <p className="font-semibold text-gray-900">
+                  <p className="font-semibold text-foreground">
                     {accessory.name}
                   </p>
-                  <p className="text-sm text-gray-600">
+                  <p className="text-sm text-muted-foreground">
                     {accessory.accessoryCode} • {accessory.category} • Stok:{" "}
                     {accessory.currentStock} {accessory.unit}
                   </p>
@@ -214,9 +218,11 @@ export const MaterialAccessorySelector: React.FC<
                     )
                   }
                   placeholder="Qty"
-                  className="w-24 px-3 py-2 text-gray-900 border border-gray-300 rounded-lg"
+                  className="w-24 px-3 py-2 text-foreground border border-border rounded-lg"
                 />
-                <span className="text-sm text-gray-600">{accessory.unit}</span>
+                <span className="text-sm text-muted-foreground">
+                  {accessory.unit}
+                </span>
                 <Button
                   type="button"
                   variant="danger"
@@ -238,7 +244,7 @@ export const MaterialAccessorySelector: React.FC<
               e.target.value = "";
             }
           }}
-          className="w-full px-4 py-2 border text-gray-600 border-gray-300 rounded-lg"
+          className="w-full px-4 py-2 border text-muted-foreground border-border rounded-lg"
         >
           <option value="">+ Tambah Aksesoris</option>
           {accessories
@@ -256,13 +262,13 @@ export const MaterialAccessorySelector: React.FC<
 
       {/* Summary */}
       {(selectedMaterials.length > 0 || selectedAccessories.length > 0) && (
-        <div className="bg-purple-50 border border-purple-200 rounded-lg p-4">
-          <h4 className="font-semibold text-purple-900 mb-2">Summary</h4>
-          <p className="text-sm text-purple-800">
+        <div className="bg-purple-500/10 border border-purple-500/30 rounded-lg p-4">
+          <h4 className="font-semibold text-purple-600 mb-2">Summary</h4>
+          <p className="text-sm text-purple-600">
             Bahan: {selectedMaterials.length} items • Aksesoris:{" "}
             {selectedAccessories.length} items
           </p>
-          <p className="text-xs text-purple-700 mt-1">
+          <p className="text-xs text-purple-600 mt-1">
             Pastikan semua jumlah sesuai sebelum order dibuat
           </p>
         </div>

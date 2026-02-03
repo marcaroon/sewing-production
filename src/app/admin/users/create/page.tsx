@@ -115,11 +115,13 @@ export default function CreateUserPage() {
     <div className="p-6">
       <div className="max-w-4xl mx-auto">
         <div className="flex items-center gap-4 mb-6">
-          <h1 className="text-2xl font-bold text-gray-900">User Management</h1>
+          <h1 className="text-2xl font-bold text-foreground">
+            User Management
+          </h1>
         </div>
 
-        <Card className="shadow-md border border-gray-200">
-          <CardHeader className="bg-gray-50 border-b border-gray-200">
+        <Card className="shadow-md border border-border">
+          <CardHeader className="bg-muted border-b border-border">
             <div className="flex items-center gap-2">
               <UserPlus className="w-5 h-5 text-blue-600" />
               <CardTitle>Create New Employee Account</CardTitle>
@@ -128,14 +130,14 @@ export default function CreateUserPage() {
           <CardContent className="pt-6">
             <form onSubmit={handleSubmit} className="space-y-6">
               {error && (
-                <div className="bg-red-50 border border-red-200 rounded-lg p-4 flex items-center gap-3 text-red-700">
+                <div className="bg-destructive/10 border border-destructive/40 rounded-lg p-4 flex items-center gap-3 text-destructive">
                   <AlertCircle className="w-5 h-5" />
                   <p className="font-medium">{error}</p>
                 </div>
               )}
 
               {success && (
-                <div className="bg-green-50 border border-green-200 rounded-lg p-4 flex items-center gap-3 text-green-700">
+                <div className="bg-success/10 border border-success/40 rounded-lg p-4 flex items-center gap-3 text-success">
                   <UserPlus className="w-5 h-5" />
                   <p className="font-medium">
                     User successfully created! You can create another.
@@ -148,15 +150,15 @@ export default function CreateUserPage() {
                 {/* Kolom Kiri */}
                 <div className="space-y-4">
                   <div>
-                    <label className="block text-sm font-semibold text-gray-700 mb-1">
+                    <label className="block text-sm font-semibold text-foreground mb-1">
                       Full Name *
                     </label>
                     <div className="relative">
-                      <User className="absolute left-3 top-2.5 w-5 h-5 text-gray-400" />
+                      <User className="absolute left-3 top-2.5 w-5 h-5 text-muted-foreground" />
                       <input
                         type="text"
                         required
-                        className="w-full pl-10 pr-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500"
+                        className="w-full pl-10 pr-4 py-2 border border-border rounded-lg bg-background text-foreground placeholder:text-muted-foreground focus:ring-2 focus:ring-primary focus:border-primary"
                         placeholder="Employee Name"
                         value={formData.name}
                         onChange={(e) =>
@@ -167,15 +169,15 @@ export default function CreateUserPage() {
                   </div>
 
                   <div>
-                    <label className="block text-sm font-semibold text-gray-700 mb-1">
+                    <label className="block text-sm font-semibold text-foreground mb-1">
                       Email Address *
                     </label>
                     <div className="relative">
-                      <Mail className="absolute left-3 top-2.5 w-5 h-5 text-gray-400" />
+                      <Mail className="absolute left-3 top-2.5 w-5 h-5 text-muted-foreground" />
                       <input
                         type="email"
                         required
-                        className="w-full pl-10 pr-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500"
+                        className="w-full pl-10 pr-4 py-2 border border-border rounded-lg bg-background text-foreground placeholder:text-muted-foreground focus:ring-2 focus:ring-primary focus:border-primary"
                         placeholder="email@company.com"
                         value={formData.email}
                         onChange={(e) =>
@@ -186,14 +188,14 @@ export default function CreateUserPage() {
                   </div>
 
                   <div>
-                    <label className="block text-sm font-semibold text-gray-700 mb-1">
+                    <label className="block text-sm font-semibold text-foreground mb-1">
                       Department *
                     </label>
                     <div className="relative">
-                      <Building className="absolute left-3 top-2.5 w-5 h-5 text-gray-400" />
+                      <Building className="absolute left-3 top-2.5 w-5 h-5 text-muted-foreground" />
                       <select
                         required
-                        className="w-full pl-10 pr-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 appearance-none bg-white"
+                        className="w-full pl-10 pr-4 py-2 border border-border rounded-lg bg-background text-foreground placeholder:text-muted-foreground focus:ring-2 focus:ring-primary focus:border-primary appearance-none"
                         value={formData.department}
                         onChange={(e) =>
                           setFormData({
@@ -216,16 +218,16 @@ export default function CreateUserPage() {
                 {/* Kolom Kanan */}
                 <div className="space-y-4">
                   <div>
-                    <label className="block text-sm font-semibold text-gray-700 mb-1">
+                    <label className="block text-sm font-semibold text-foreground mb-1">
                       Password *
                     </label>
                     <div className="relative">
-                      <Lock className="absolute left-3 top-2.5 w-5 h-5 text-gray-400" />
+                      <Lock className="absolute left-3 top-2.5 w-5 h-5 text-muted-foreground" />
                       <input
                         type="password"
                         required
                         minLength={6}
-                        className="w-full pl-10 pr-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500"
+                        className="w-full pl-10 pr-4 py-2 border border-border rounded-lg bg-background text-foreground placeholder:text-muted-foreground focus:ring-2 focus:ring-primary focus:border-primary"
                         placeholder="Initial Password"
                         value={formData.password}
                         onChange={(e) =>
@@ -236,15 +238,15 @@ export default function CreateUserPage() {
                   </div>
 
                   <div>
-                    <label className="block text-sm font-semibold text-gray-700 mb-1">
+                    <label className="block text-sm font-semibold text-foreground mb-1">
                       Confirm Password *
                     </label>
                     <div className="relative">
-                      <Lock className="absolute left-3 top-2.5 w-5 h-5 text-gray-400" />
+                      <Lock className="absolute left-3 top-2.5 w-5 h-5 text-muted-foreground" />
                       <input
                         type="password"
                         required
-                        className="w-full pl-10 pr-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500"
+                        className="w-full pl-10 pr-4 py-2 border border-border rounded-lg bg-background text-foreground placeholder:text-muted-foreground focus:ring-2 focus:ring-primary focus:border-primary"
                         placeholder="Confirm Password"
                         value={formData.confirmPassword}
                         onChange={(e) =>
@@ -258,12 +260,12 @@ export default function CreateUserPage() {
                   </div>
 
                   <div>
-                    <label className="block text-sm font-semibold text-gray-700 mb-1">
+                    <label className="block text-sm font-semibold text-foreground mb-1">
                       System Role *
                     </label>
                     <select
                       required
-                      className="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 bg-white"
+                      className="w-full px-4 py-2 border border-border rounded-lg bg-background text-foreground placeholder:text-muted-foreground focus:ring-2 focus:ring-primary focus:border-primary"
                       value={formData.role}
                       onChange={(e) =>
                         setFormData({ ...formData, role: e.target.value })

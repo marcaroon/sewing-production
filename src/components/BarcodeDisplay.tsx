@@ -152,17 +152,17 @@ export const BarcodeDisplay: React.FC<BarcodeDisplayProps> = ({
       <CardContent>
         <div className="flex flex-col items-center space-y-4">
           {/* Barcode */}
-          <div className="bg-white p-5 rounded-lg border-4 border-gray-300 shadow-sm">
+          <div className="bg-card p-5 rounded-lg border-4 border-border shadow-sm">
             <svg ref={barcodeRef}></svg>
           </div>
 
           {/* Labels */}
           <div className="text-center w-full">
-            <p className="font-mono text-sm font-bold text-gray-900 bg-gray-100 border-2 border-gray-300 rounded px-3 py-2">
+            <p className="font-mono text-sm font-bold text-foreground bg-muted border-2 border-border rounded px-3 py-2">
               {barcodeValue}
             </p>
             {subtitle && (
-              <p className="text-xs font-semibold text-gray-700 mt-2 bg-blue-50 border border-blue-200 rounded px-2 py-1">
+              <p className="text-xs font-semibold text-foreground mt-2 bg-blue-500/10 border border-blue-500/30 rounded px-2 py-1">
                 {subtitle}
               </p>
             )}

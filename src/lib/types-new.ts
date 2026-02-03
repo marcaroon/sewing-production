@@ -115,6 +115,7 @@ export interface Order {
   processFlow?: string;
   id: string;
   orderNumber: string;
+  article?: string;
   buyer: Buyer;
   style: Style;
   orderDate: Date;

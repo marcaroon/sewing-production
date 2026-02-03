@@ -137,14 +137,16 @@ export default function MaterialsPage() {
       <div className="flex items-center gap-3 mb-8">
         <button
           onClick={() => router.back()}
-          className="text-gray-600 hover:text-gray-900"
+          className="text-muted-foreground hover:text-foreground"
         >
           <ArrowLeft className="w-6 h-6" />
         </button>
 
         <div className="flex-1">
-          <h1 className="text-3xl font-bold text-gray-900 mb-2">Bahan</h1>
-          <p className="text-gray-600">Manage raw materials and fabrics</p>
+          <h1 className="text-3xl font-bold text-foreground mb-2">Bahan</h1>
+          <p className="text-muted-foreground">
+            Manage raw materials and fabrics
+          </p>
         </div>
 
         <div className="flex items-center gap-3">
@@ -179,7 +181,7 @@ export default function MaterialsPage() {
               <div className="flex items-start justify-between">
                 <div className="flex-1">
                   <CardTitle className="text-lg">{material.name}</CardTitle>
-                  <p className="text-sm text-gray-600 mt-1">
+                  <p className="text-sm text-muted-foreground mt-1">
                     {material.materialCode}
                   </p>
                 </div>
@@ -193,13 +195,17 @@ export default function MaterialsPage() {
             <CardContent>
               <div className="space-y-3">
                 <div className="flex justify-between items-center">
-                  <span className="text-sm text-gray-600">Kategori</span>
+                  <span className="text-sm text-muted-foreground">
+                    Kategori
+                  </span>
                   <Badge variant="info" size="sm">
                     {material.category}
                   </Badge>
                 </div>
                 <div className="flex justify-between items-center">
-                  <span className="text-sm text-gray-600">Stock Sekarang</span>
+                  <span className="text-sm text-muted-foreground">
+                    Stock Sekarang
+                  </span>
                   <span
                     className={`text-2xl font-bold ${
                       material.isLowStock ? "text-red-600" : "text-green-600"
@@ -209,22 +215,22 @@ export default function MaterialsPage() {
                   </span>
                 </div>
                 <div className="flex justify-between items-center text-sm">
-                  <span className="text-gray-600">Stok Minimum</span>
-                  <span className="font-semibold text-gray-600">
+                  <span className="text-muted-foreground">Stok Minimum</span>
+                  <span className="font-semibold text-muted-foreground">
                     {material.minimumStock} {material.unit}
                   </span>
                 </div>
                 {material.unitPrice && (
                   <div className="flex justify-between items-center text-sm">
-                    <span className="text-gray-600">Harga Satuan</span>
-                    <span className="font-semibold text-gray-600">
+                    <span className="text-muted-foreground">Harga Satuan</span>
+                    <span className="font-semibold text-muted-foreground">
                       Rp {formatNumber(material.unitPrice)}
                     </span>
                   </div>
                 )}
               </div>
 
-              <div className="mt-4 pt-4 border-t border-gray-200 grid grid-cols-2 gap-2">
+              <div className="mt-4 pt-4 border-t border-border grid grid-cols-2 gap-2">
                 <Button
                   variant="success"
                   size="sm"
@@ -261,8 +267,8 @@ export default function MaterialsPage() {
       {materials.length === 0 && (
         <Card>
           <CardContent className="py-12 text-center">
-            <Package className="w-16 h-16 mx-auto mb-4 text-gray-400" />
-            <p className="text-gray-600 mb-4">
+            <Package className="w-16 h-16 mx-auto mb-4 text-muted-foreground" />
+            <p className="text-muted-foreground mb-4">
               {showLowStockOnly
                 ? "No low stock materials"
                 : "No materials found"}
@@ -316,12 +322,12 @@ export default function MaterialsPage() {
         size="sm"
       >
         <div className="space-y-4">
-          <p className="text-gray-700">
+          <p className="text-foreground">
             Anda yakin ingin menghapus?{" "}
             <span className="font-bold">{deleteMaterial?.name}</span>?
           </p>
-          <div className="bg-red-50 border border-red-200 rounded p-3">
-            <p className="text-sm text-red-800">
+          <div className="bg-red-500/10 border border-red-500/30 rounded p-3">
+            <p className="text-sm text-red-600">
               ⚠️ Tindakan ini bersifat permanen. Semua riwayat transaksi akan
               dihapus.
             </p>

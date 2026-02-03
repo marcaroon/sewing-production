@@ -366,10 +366,10 @@ export default function AdvancedOrdersPage() {
 
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+      <div className="min-h-screen bg-muted flex items-center justify-center">
         <div className="text-center">
           <Loader2 className="w-12 h-12 text-blue-600 animate-spin mx-auto mb-4" />
-          <p className="text-gray-700 font-semibold">Loading orders...</p>
+          <p className="text-foreground font-semibold">Loading orders...</p>
         </div>
       </div>
     );
@@ -377,16 +377,16 @@ export default function AdvancedOrdersPage() {
 
   if (error) {
     return (
-      <div className="min-h-screen bg-gray-50 p-6">
+      <div className="min-h-screen bg-muted p-6">
         <div className="max-w-2xl mx-auto">
-          <div className="bg-red-50 border-2 border-red-200 rounded-2xl p-8 text-center">
-            <div className="bg-red-100 rounded-full w-16 h-16 flex items-center justify-center mx-auto mb-4">
+          <div className="bg-red-500/10 border-2 border-red-500/30 rounded-2xl p-8 text-center">
+            <div className="bg-red-500/15 rounded-full w-16 h-16 flex items-center justify-center mx-auto mb-4">
               <AlertTriangle className="w-8 h-8 text-red-600" />
             </div>
-            <h3 className="text-xl font-bold text-red-900 mb-2">
+            <h3 className="text-xl font-bold text-red-600 mb-2">
               Error Loading Orders
             </h3>
-            <p className="text-red-700 mb-6">{error}</p>
+            <p className="text-red-600 mb-6">{error}</p>
             <button
               onClick={loadOrders}
               className="bg-red-600 text-white px-6 py-3 rounded-xl hover:bg-red-700 transition-all font-semibold"
@@ -400,15 +400,15 @@ export default function AdvancedOrdersPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 rounded-2xl p-6">
+    <div className="min-h-screen bg-muted rounded-2xl p-6">
       {/* Header Section */}
       <div className="max-w-7xl mx-auto mb-8">
         <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4 mb-6">
           <div>
-            <h1 className="text-3xl font-bold text-gray-900 mb-2">
+            <h1 className="text-3xl font-bold text-foreground mb-2">
               All Orders
             </h1>
-            <p className="text-gray-600">
+            <p className="text-muted-foreground">
               Manage and track all production orders
             </p>
           </div>
@@ -416,7 +416,7 @@ export default function AdvancedOrdersPage() {
             <button
               onClick={exportData}
               disabled={filteredOrders.length === 0}
-              className="inline-flex items-center gap-2 bg-white text-gray-700 px-6 py-3 rounded-xl hover:bg-gray-50 transition-all font-semibold border-2 border-gray-200 disabled:opacity-50 disabled:cursor-not-allowed"
+              className="inline-flex items-center gap-2 bg-card text-foreground px-6 py-3 rounded-xl hover:bg-muted transition-all font-semibold border-2 border-border disabled:opacity-50 disabled:cursor-not-allowed"
             >
               <Download className="w-5 h-5" />
               Export CSV
@@ -424,7 +424,7 @@ export default function AdvancedOrdersPage() {
             {canCreateOrder && (
               <Link
                 href="/orders/new"
-                className="inline-flex items-center gap-2 bg-white text-blue-700 px-6 py-3 rounded-xl hover:bg-blue-50 transition-all font-semibold shadow-lg"
+                className="inline-flex items-center gap-2 bg-card text-blue-600 px-6 py-3 rounded-xl hover:bg-blue-500/10 transition-all font-semibold shadow-lg"
               >
                 <Plus className="w-5 h-5" />
                 Create New Order
@@ -434,11 +434,11 @@ export default function AdvancedOrdersPage() {
         </div>
 
         {/* Search & Filter Section */}
-        <div className="bg-white rounded-2xl border-2 border-gray-200 shadow-sm overflow-hidden">
+        <div className="bg-card rounded-2xl border-2 border-border shadow-sm overflow-hidden">
           <div className="p-6 space-y-6">
             {/* Search Bar */}
             <div className="relative">
-              <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
+              <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
               <input
                 type="text"
                 placeholder="Search by order number, buyer, style, or style code..."
@@ -446,7 +446,7 @@ export default function AdvancedOrdersPage() {
                 onChange={(e) =>
                   setFilters({ ...filters, searchTerm: e.target.value })
                 }
-                className="w-full pl-12 pr-4 py-3.5 border-2 border-gray-200 rounded-xl focus:border-blue-500 focus:outline-none text-gray-900 font-medium placeholder:text-gray-500"
+                className="w-full pl-12 pr-4 py-3.5 border-2 border-border rounded-xl focus:border-blue-500 focus:outline-none text-foreground font-medium placeholder:text-muted-foreground"
               />
             </div>
 
@@ -454,7 +454,7 @@ export default function AdvancedOrdersPage() {
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
               {/* Phase Filter */}
               <div>
-                <label className="block text-sm font-bold text-gray-700 mb-2">
+                <label className="block text-sm font-bold text-foreground mb-2">
                   Phase
                 </label>
                 <select
@@ -465,7 +465,7 @@ export default function AdvancedOrdersPage() {
                       phaseFilter: e.target.value as any,
                     })
                   }
-                  className="w-full px-4 py-2.5 border-2 border-gray-200 rounded-lg focus:border-blue-500 focus:outline-none font-medium"
+                  className="w-full px-4 py-2.5 border-2 border-border rounded-lg focus:border-blue-500 focus:outline-none font-medium"
                 >
                   <option value="all">All Phases</option>
                   <option value="production">Production</option>
@@ -475,7 +475,7 @@ export default function AdvancedOrdersPage() {
 
               {/* Process Filter */}
               <div>
-                <label className="block text-sm font-bold text-gray-700 mb-2">
+                <label className="block text-sm font-bold text-foreground mb-2">
                   Process
                 </label>
                 <select
@@ -486,7 +486,7 @@ export default function AdvancedOrdersPage() {
                       processFilter: e.target.value as any,
                     })
                   }
-                  className="w-full px-4 py-2.5 border-2 border-gray-200 rounded-lg focus:border-blue-500 focus:outline-none font-medium"
+                  className="w-full px-4 py-2.5 border-2 border-border rounded-lg focus:border-blue-500 focus:outline-none font-medium"
                 >
                   <option value="all">All Processes</option>
                   {availableProcesses.map((process) => (
@@ -499,7 +499,7 @@ export default function AdvancedOrdersPage() {
 
               {/* State Filter */}
               <div>
-                <label className="block text-sm font-bold text-gray-700 mb-2">
+                <label className="block text-sm font-bold text-foreground mb-2">
                   State
                 </label>
                 <select
@@ -510,7 +510,7 @@ export default function AdvancedOrdersPage() {
                       stateFilter: e.target.value as any,
                     })
                   }
-                  className="w-full px-4 py-2.5 border-2 border-gray-200 rounded-lg focus:border-blue-500 focus:outline-none font-medium"
+                  className="w-full px-4 py-2.5 border-2 border-border rounded-lg focus:border-blue-500 focus:outline-none font-medium"
                 >
                   <option value="all">All States</option>
                   <option value="at_ppic">At PPIC</option>
@@ -523,10 +523,10 @@ export default function AdvancedOrdersPage() {
             </div>
 
             {/* Advanced Filters Toggle */}
-            <div className="pt-4 border-t-2 border-gray-200">
+            <div className="pt-4 border-t-2 border-border">
               <button
                 onClick={() => setShowAdvancedFilters(!showAdvancedFilters)}
-                className="inline-flex items-center gap-2 text-blue-600 hover:text-blue-700 font-semibold text-sm"
+                className="inline-flex items-center gap-2 text-blue-600 hover:text-blue-600 font-semibold text-sm"
               >
                 {/* <Filter className="w-4 h-4" /> */}
                 {showAdvancedFilters ? "Hide" : "Show"} Advanced Filters
@@ -540,11 +540,11 @@ export default function AdvancedOrdersPage() {
 
             {/* Advanced Filters */}
             {showAdvancedFilters && (
-              <div className="pt-4 border-t-2 border-gray-200 space-y-4">
+              <div className="pt-4 border-t-2 border-border space-y-4">
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   {/* Buyer Filter */}
                   <div>
-                    <label className="block text-sm font-bold text-gray-700 mb-2">
+                    <label className="block text-sm font-bold text-foreground mb-2">
                       Buyer
                     </label>
                     <select
@@ -552,7 +552,7 @@ export default function AdvancedOrdersPage() {
                       onChange={(e) =>
                         setFilters({ ...filters, buyerFilter: e.target.value })
                       }
-                      className="w-full px-4 py-2.5 border-2 border-gray-200 rounded-lg focus:border-blue-500 focus:outline-none font-medium"
+                      className="w-full px-4 py-2.5 border-2 border-border rounded-lg focus:border-blue-500 focus:outline-none font-medium"
                     >
                       <option value="all">All Buyers</option>
                       {uniqueBuyers.map((buyer) => (
@@ -565,7 +565,7 @@ export default function AdvancedOrdersPage() {
 
                   {/* Date Range Type */}
                   <div>
-                    <label className="block text-sm font-bold text-gray-700 mb-2">
+                    <label className="block text-sm font-bold text-foreground mb-2">
                       Date Range
                     </label>
                     <select
@@ -579,7 +579,7 @@ export default function AdvancedOrdersPage() {
                           },
                         })
                       }
-                      className="w-full px-4 py-2.5 border-2 border-gray-200 rounded-lg focus:border-blue-500 focus:outline-none font-medium"
+                      className="w-full px-4 py-2.5 border-2 border-border rounded-lg focus:border-blue-500 focus:outline-none font-medium"
                     >
                       <option value="all">All Time</option>
                       <option value="today">Today</option>
@@ -595,7 +595,7 @@ export default function AdvancedOrdersPage() {
                 {filters.dateRange.type === "custom" && (
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div>
-                      <label className="block text-sm font-bold text-gray-700 mb-2">
+                      <label className="block text-sm font-bold text-foreground mb-2">
                         Start Date
                       </label>
                       <input
@@ -610,11 +610,11 @@ export default function AdvancedOrdersPage() {
                             },
                           })
                         }
-                        className="w-full px-4 py-2.5 border-2 border-gray-200 rounded-lg focus:border-blue-500 focus:outline-none font-medium"
+                        className="w-full px-4 py-2.5 border-2 border-border rounded-lg focus:border-blue-500 focus:outline-none font-medium"
                       />
                     </div>
                     <div>
-                      <label className="block text-sm font-bold text-gray-700 mb-2">
+                      <label className="block text-sm font-bold text-foreground mb-2">
                         End Date
                       </label>
                       <input
@@ -629,7 +629,7 @@ export default function AdvancedOrdersPage() {
                             },
                           })
                         }
-                        className="w-full px-4 py-2.5 border-2 border-gray-200 rounded-lg focus:border-blue-500 focus:outline-none font-medium"
+                        className="w-full px-4 py-2.5 border-2 border-border rounded-lg focus:border-blue-500 focus:outline-none font-medium"
                       />
                     </div>
                   </div>
@@ -637,7 +637,7 @@ export default function AdvancedOrdersPage() {
 
                 {/* Deadline Status */}
                 <div>
-                  <label className="block text-sm font-bold text-gray-700 mb-2">
+                  <label className="block text-sm font-bold text-foreground mb-2">
                     Deadline Status
                   </label>
                   <select
@@ -648,7 +648,7 @@ export default function AdvancedOrdersPage() {
                         deadlineStatus: e.target.value as any,
                       })
                     }
-                    className="w-full px-4 py-2.5 border-2 border-gray-200 rounded-lg focus:border-blue-500 focus:outline-none font-medium"
+                    className="w-full px-4 py-2.5 border-2 border-border rounded-lg focus:border-blue-500 focus:outline-none font-medium"
                   >
                     <option value="all">All Orders</option>
                     <option value="on-time">On Time</option>
@@ -658,13 +658,13 @@ export default function AdvancedOrdersPage() {
 
                 {/* Completion Range */}
                 <div>
-                  <label className="block text-sm font-bold text-gray-700 mb-2">
+                  <label className="block text-sm font-bold text-foreground mb-2">
                     Completion Range: {filters.completionRange.min}% -{" "}
                     {filters.completionRange.max}%
                   </label>
                   <div className="flex items-center gap-4">
                     <div className="flex-1">
-                      <label className="text-xs text-gray-600 mb-1 block">
+                      <label className="text-xs text-muted-foreground mb-1 block">
                         Min
                       </label>
                       <input
@@ -685,7 +685,7 @@ export default function AdvancedOrdersPage() {
                       />
                     </div>
                     <div className="flex-1">
-                      <label className="text-xs text-gray-600 mb-1 block">
+                      <label className="text-xs text-muted-foreground mb-1 block">
                         Max
                       </label>
                       <input
@@ -712,7 +712,7 @@ export default function AdvancedOrdersPage() {
 
             {/* Sort Options */}
             <div>
-              <label className="block text-sm font-bold text-gray-700 mb-3 items-center gap-2">
+              <label className="block text-sm font-bold text-foreground mb-3 items-center gap-2">
                 {/* <ArrowUpDown className="w-4 h-4" /> */}
                 Sort By
               </label>
@@ -734,7 +734,7 @@ export default function AdvancedOrdersPage() {
                       className={`flex items-center justify-center gap-2 px-4 py-2.5 rounded-lg font-semibold text-sm transition-all ${
                         isActive
                           ? "bg-blue-600 text-white shadow-md"
-                          : "bg-gray-100 text-gray-700 hover:bg-gray-200"
+                          : "bg-muted text-foreground hover:bg-muted"
                       }`}
                     >
                       <span className="truncate">{option.label}</span>
@@ -751,9 +751,9 @@ export default function AdvancedOrdersPage() {
 
             {/* Active Filters Summary */}
             {activeFilterCount > 0 && (
-              <div className="pt-4 border-t-2 border-gray-200">
+              <div className="pt-4 border-t-2 border-border">
                 <div className="flex flex-wrap items-center gap-2 mb-3">
-                  <span className="text-sm font-bold text-gray-700">
+                  <span className="text-sm font-bold text-foreground">
                     Active filters ({activeFilterCount}):
                   </span>
 
@@ -764,7 +764,7 @@ export default function AdvancedOrdersPage() {
                         onClick={() =>
                           setFilters({ ...filters, searchTerm: "" })
                         }
-                        className="hover:text-blue-900"
+                        className="hover:text-blue-600"
                       >
                         <X className="w-3 h-3" />
                       </button>
@@ -779,7 +779,7 @@ export default function AdvancedOrdersPage() {
                         onClick={() =>
                           setFilters({ ...filters, processFilter: "all" })
                         }
-                        className="hover:text-blue-900"
+                        className="hover:text-blue-600"
                       >
                         <X className="w-3 h-3" />
                       </button>
@@ -793,7 +793,7 @@ export default function AdvancedOrdersPage() {
                         onClick={() =>
                           setFilters({ ...filters, phaseFilter: "all" })
                         }
-                        className="hover:text-blue-900"
+                        className="hover:text-blue-600"
                       >
                         <X className="w-3 h-3" />
                       </button>
@@ -807,7 +807,7 @@ export default function AdvancedOrdersPage() {
                         onClick={() =>
                           setFilters({ ...filters, stateFilter: "all" })
                         }
-                        className="hover:text-blue-900"
+                        className="hover:text-blue-600"
                       >
                         <X className="w-3 h-3" />
                       </button>
@@ -825,7 +825,7 @@ export default function AdvancedOrdersPage() {
                         onClick={() =>
                           setFilters({ ...filters, buyerFilter: "all" })
                         }
-                        className="hover:text-blue-900"
+                        className="hover:text-blue-600"
                       >
                         <X className="w-3 h-3" />
                       </button>
@@ -842,7 +842,7 @@ export default function AdvancedOrdersPage() {
                             dateRange: { ...filters.dateRange, type: "all" },
                           })
                         }
-                        className="hover:text-blue-900"
+                        className="hover:text-blue-600"
                       >
                         <X className="w-3 h-3" />
                       </button>
@@ -856,7 +856,7 @@ export default function AdvancedOrdersPage() {
                         onClick={() =>
                           setFilters({ ...filters, deadlineStatus: "all" })
                         }
-                        className="hover:text-blue-900"
+                        className="hover:text-blue-600"
                       >
                         <X className="w-3 h-3" />
                       </button>
@@ -875,7 +875,7 @@ export default function AdvancedOrdersPage() {
                             completionRange: { min: 0, max: 100 },
                           })
                         }
-                        className="hover:text-blue-900"
+                        className="hover:text-blue-600"
                       >
                         <X className="w-3 h-3" />
                       </button>
@@ -885,7 +885,7 @@ export default function AdvancedOrdersPage() {
 
                 <button
                   onClick={clearAllFilters}
-                  className="w-full md:w-auto inline-flex items-center justify-center gap-2 bg-red-50 text-red-700 px-6 py-3 rounded-lg hover:bg-red-100 transition-all font-semibold border-2 border-red-200"
+                  className="w-full md:w-auto inline-flex items-center justify-center gap-2 bg-red-500/10 text-red-600 px-6 py-3 rounded-lg hover:bg-red-500/15 transition-all font-semibold border-2 border-red-500/30"
                 >
                   <X className="w-5 h-5" />
                   Clear All Filters
@@ -898,18 +898,18 @@ export default function AdvancedOrdersPage() {
 
       {/* Results Summary */}
       <div className="max-w-7xl mx-auto mb-6">
-        <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4 bg-gray-50 rounded-xl p-4 border-2 border-gray-200">
+        <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4 bg-muted rounded-xl p-4 border-2 border-border">
           <div className="flex items-center gap-2">
-            <div className="bg-white rounded-lg p-2 border border-gray-200">
-              <Package className="w-5 h-5 text-gray-600" />
+            <div className="bg-card rounded-lg p-2 border border-border">
+              <Package className="w-5 h-5 text-muted-foreground" />
             </div>
             <div>
-              <p className="text-sm font-bold text-gray-900">
+              <p className="text-sm font-bold text-foreground">
                 Showing{" "}
                 <span className="text-blue-600">{filteredOrders.length}</span>{" "}
                 of <span className="text-blue-600">{totalOrders}</span> orders
               </p>
-              <p className="text-xs text-gray-600">
+              <p className="text-xs text-muted-foreground">
                 {isFiltered ? "Filtered results" : "All orders displayed"}
               </p>
             </div>
@@ -920,18 +920,18 @@ export default function AdvancedOrdersPage() {
             {isFiltered && (
               <button
                 onClick={clearAllFilters}
-                className="text-sm text-blue-600 hover:text-blue-700 font-semibold underline"
+                className="text-sm text-blue-600 hover:text-blue-600 font-semibold underline"
               >
                 Clear all filters
               </button>
             )}
-            <div className="flex items-center gap-2 bg-white rounded-lg p-1 border-2 border-gray-200">
+            <div className="flex items-center gap-2 bg-card rounded-lg p-1 border-2 border-border">
               <button
                 onClick={() => setViewMode("grid")}
                 className={`px-4 py-2 rounded-lg font-semibold text-sm transition-all ${
                   viewMode === "grid"
                     ? "bg-blue-600 text-white shadow-sm"
-                    : "text-gray-600 hover:text-gray-900"
+                    : "text-muted-foreground hover:text-foreground"
                 }`}
               >
                 Grid
@@ -941,7 +941,7 @@ export default function AdvancedOrdersPage() {
                 className={`px-4 py-2 rounded-lg font-semibold text-sm transition-all ${
                   viewMode === "list"
                     ? "bg-blue-600 text-white shadow-sm"
-                    : "text-gray-600 hover:text-gray-900"
+                    : "text-muted-foreground hover:text-foreground"
                 }`}
               >
                 List
@@ -954,14 +954,14 @@ export default function AdvancedOrdersPage() {
       {/* Orders Grid */}
       <div className="max-w-7xl mx-auto">
         {filteredOrders.length === 0 ? (
-          <div className="bg-white rounded-2xl border-2 border-dashed border-gray-300 p-16 text-center">
-            <div className="bg-gray-100 rounded-full w-20 h-20 flex items-center justify-center mx-auto mb-4">
-              <Package className="w-10 h-10 text-gray-400" />
+          <div className="bg-card rounded-2xl border-2 border-dashed border-border p-16 text-center">
+            <div className="bg-muted rounded-full w-20 h-20 flex items-center justify-center mx-auto mb-4">
+              <Package className="w-10 h-10 text-muted-foreground" />
             </div>
-            <h3 className="text-xl font-bold text-gray-900 mb-2">
+            <h3 className="text-xl font-bold text-foreground mb-2">
               No Orders Found
             </h3>
-            <p className="text-gray-600 mb-6">
+            <p className="text-muted-foreground mb-6">
               {isFiltered
                 ? "No orders match your filter criteria. Try adjusting your filters."
                 : "Start by creating your first order"}

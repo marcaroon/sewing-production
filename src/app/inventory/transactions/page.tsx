@@ -108,7 +108,7 @@ export default function TransactionsPage() {
       <div className="max-w-7xl mx-auto px-4 py-8">
         <div className="text-center">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
-          <p className="text-gray-600">Loading transactions...</p>
+          <p className="text-muted-foreground">Loading transactions...</p>
         </div>
       </div>
     );
@@ -125,7 +125,7 @@ export default function TransactionsPage() {
               variant="ghost"
               size="sm"
               onClick={() => router.back()}
-              className="text-gray-600 hover:text-gray-900 pl-0"
+              className="text-muted-foreground hover:text-foreground pl-0"
             >
               <ArrowLeft className="w-4 h-4 mr-2" />
               Kembali
@@ -134,10 +134,10 @@ export default function TransactionsPage() {
 
           <div className="flex items-center justify-between">
             <div>
-              <h1 className="text-3xl font-bold text-gray-900 mb-2">
+              <h1 className="text-3xl font-bold text-foreground mb-2">
                 Transaksi Stok
               </h1>
-              <p className="text-gray-600">
+              <p className="text-muted-foreground">
                 Riwayat pergerakan bahan dan aksesoris
               </p>
             </div>
@@ -153,7 +153,7 @@ export default function TransactionsPage() {
           <CardContent className="pt-6">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
+                <label className="block text-sm font-medium text-foreground mb-2">
                   Jenis Item
                 </label>
                 <select
@@ -161,7 +161,7 @@ export default function TransactionsPage() {
                   onChange={(e) =>
                     setFilter({ ...filter, type: e.target.value })
                   }
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                  className="w-full px-4 py-2 border border-border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                 >
                   <option value="all">Semua Jenis</option>
                   <option value="material">Hanya Bahan</option>
@@ -169,7 +169,7 @@ export default function TransactionsPage() {
                 </select>
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
+                <label className="block text-sm font-medium text-foreground mb-2">
                   Jenis Transaksi
                 </label>
                 <select
@@ -177,7 +177,7 @@ export default function TransactionsPage() {
                   onChange={(e) =>
                     setFilter({ ...filter, transactionType: e.target.value })
                   }
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                  className="w-full px-4 py-2 border border-border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                 >
                   <option value="all">Semua Transaksi</option>
                   <option value="in">Stok Masuk</option>
@@ -198,10 +198,10 @@ export default function TransactionsPage() {
             <div className="flex items-center gap-3">
               <History className="w-8 h-8 text-blue-600" />
               <div>
-                <p className="text-xs font-semibold text-gray-600 uppercase">
+                <p className="text-xs font-semibold text-muted-foreground uppercase">
                   Total
                 </p>
-                <p className="text-2xl font-bold text-gray-900">
+                <p className="text-2xl font-bold text-foreground">
                   {filteredTransactions.length}
                 </p>
               </div>
@@ -213,10 +213,10 @@ export default function TransactionsPage() {
             <div className="flex items-center gap-3">
               <ArrowDownToLine className="w-8 h-8 text-green-600" />
               <div>
-                <p className="text-xs font-semibold text-gray-600 uppercase">
+                <p className="text-xs font-semibold text-muted-foreground uppercase">
                   Stok Masuk
                 </p>
-                <p className="text-2xl font-bold text-green-900">
+                <p className="text-2xl font-bold text-green-600">
                   {
                     filteredTransactions.filter(
                       (tx) => tx.transactionType === "in"
@@ -232,10 +232,10 @@ export default function TransactionsPage() {
             <div className="flex items-center gap-3">
               <ArrowUpFromLine className="w-8 h-8 text-red-600" />
               <div>
-                <p className="text-xs font-semibold text-gray-600 uppercase">
+                <p className="text-xs font-semibold text-muted-foreground uppercase">
                   Stok Keluar
                 </p>
-                <p className="text-2xl font-bold text-red-900">
+                <p className="text-2xl font-bold text-red-600">
                   {
                     filteredTransactions.filter(
                       (tx) => tx.transactionType === "out"
@@ -251,10 +251,10 @@ export default function TransactionsPage() {
             <div className="flex items-center gap-3">
               <Filter className="w-8 h-8 text-purple-600" />
               <div>
-                <p className="text-xs font-semibold text-gray-600 uppercase">
+                <p className="text-xs font-semibold text-muted-foreground uppercase">
                   Lain-lain
                 </p>
-                <p className="text-2xl font-bold text-purple-900">
+                <p className="text-2xl font-bold text-purple-600">
                   {
                     filteredTransactions.filter(
                       (tx) =>
@@ -276,33 +276,33 @@ export default function TransactionsPage() {
         </CardHeader>
         <CardContent>
           {filteredTransactions.length === 0 ? (
-            <p className="text-center py-8 text-gray-500">
+            <p className="text-center py-8 text-muted-foreground">
               Tidak ditemukan transaksi
             </p>
           ) : (
             <div className="overflow-x-auto">
               <table className="min-w-full">
                 <thead>
-                  <tr className="border-b border-gray-200">
-                    <th className="text-left py-3 px-4 text-sm font-semibold text-gray-700">
+                  <tr className="border-b border-border">
+                    <th className="text-left py-3 px-4 text-sm font-semibold text-foreground">
                       Tanggal & Waktu
                     </th>
-                    <th className="text-left py-3 px-4 text-sm font-semibold text-gray-700">
+                    <th className="text-left py-3 px-4 text-sm font-semibold text-foreground">
                       Item
                     </th>
-                    <th className="text-left py-3 px-4 text-sm font-semibold text-gray-700">
+                    <th className="text-left py-3 px-4 text-sm font-semibold text-foreground">
                       Jenis
                     </th>
-                    <th className="text-left py-3 px-4 text-sm font-semibold text-gray-700">
+                    <th className="text-left py-3 px-4 text-sm font-semibold text-foreground">
                       Transaksi
                     </th>
-                    <th className="text-right py-3 px-4 text-sm font-semibold text-gray-700">
+                    <th className="text-right py-3 px-4 text-sm font-semibold text-foreground">
                       Jumlah
                     </th>
-                    <th className="text-left py-3 px-4 text-sm font-semibold text-gray-700">
+                    <th className="text-left py-3 px-4 text-sm font-semibold text-foreground">
                       Reference
                     </th>
-                    <th className="text-left py-3 px-4 text-sm font-semibold text-gray-700">
+                    <th className="text-left py-3 px-4 text-sm font-semibold text-foreground">
                       Oleh
                     </th>
                   </tr>
@@ -311,16 +311,18 @@ export default function TransactionsPage() {
                   {filteredTransactions.map((tx) => (
                     <tr
                       key={tx.id}
-                      className="border-b border-gray-100 hover:bg-gray-50"
+                      className="border-b border-border hover:bg-muted"
                     >
-                      <td className="py-3 px-4 text-sm text-gray-900">
+                      <td className="py-3 px-4 text-sm text-foreground">
                         {formatDateTime(tx.transactionDate)}
                       </td>
                       <td className="py-3 px-4">
-                        <p className="font-semibold text-gray-900 text-sm">
+                        <p className="font-semibold text-foreground text-sm">
                           {tx.itemName}
                         </p>
-                        <p className="text-xs text-gray-600">{tx.itemCode}</p>
+                        <p className="text-xs text-muted-foreground">
+                          {tx.itemCode}
+                        </p>
                       </td>
                       <td className="py-3 px-4">
                         <Badge
@@ -360,10 +362,10 @@ export default function TransactionsPage() {
                       </td>
 
                       {/* MODIFIKASI: Kolom Reference */}
-                      <td className="py-3 px-4 text-sm text-gray-700">
+                      <td className="py-3 px-4 text-sm text-foreground">
                         {tx.referenceType === "order" ? (
                           <div className="flex flex-col">
-                            <span className="font-bold text-gray-500">
+                            <span className="font-bold text-muted-foreground">
                               {/* Ambil teks setelah 'order ' dari remarks */}
                               {tx.remarks?.includes("order ")
                                 ? tx.remarks.split("order ")[1]
@@ -379,7 +381,7 @@ export default function TransactionsPage() {
                               </span>
                             )}
                             {tx.remarks && (
-                              <p className="text-xs text-gray-500 mt-1">
+                              <p className="text-xs text-muted-foreground mt-1">
                                 {tx.remarks}
                               </p>
                             )}
@@ -387,7 +389,7 @@ export default function TransactionsPage() {
                         )}
                       </td>
 
-                      <td className="py-3 px-4 text-sm text-gray-700">
+                      <td className="py-3 px-4 text-sm text-foreground">
                         {tx.performedBy}
                       </td>
                     </tr>

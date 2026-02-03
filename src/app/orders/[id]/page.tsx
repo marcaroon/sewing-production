@@ -153,7 +153,7 @@ export default function OrderDetailPage() {
         <div className="flex items-center justify-center min-h-100">
           <div className="text-center">
             <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
-            <p className="text-gray-600">Memuat detail order...</p>
+            <p className="text-muted-foreground">Memuat detail order...</p>
           </div>
         </div>
       </div>
@@ -163,7 +163,7 @@ export default function OrderDetailPage() {
   if (error || !order) {
     return (
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <div className="bg-red-50 border border-red-200 rounded-lg p-6">
+        <div className="bg-red-500/10 border border-red-500/30 rounded-lg p-6">
           <div className="flex items-start">
             <svg
               className="w-6 h-6 text-red-600 mr-3 mt-0.5"
@@ -179,13 +179,13 @@ export default function OrderDetailPage() {
               />
             </svg>
             <div>
-              <p className="text-sm font-medium text-red-800">Error</p>
-              <p className="text-sm text-red-700 mt-1">
+              <p className="text-sm font-medium text-red-600">Error</p>
+              <p className="text-sm text-red-600 mt-1">
                 {error || "Order not found"}
               </p>
               <button
                 onClick={() => router.push("/orders")}
-                className="mt-3 text-sm text-red-800 underline hover:text-red-900"
+                className="mt-3 text-sm text-red-600 underline hover:text-red-600"
               >
                 Kembali ke order
               </button>
@@ -208,7 +208,7 @@ export default function OrderDetailPage() {
         <div className="flex items-center gap-3 mb-4">
           <button
             onClick={() => router.push("/orders")}
-            className="text-gray-600 hover:text-gray-900"
+            className="text-muted-foreground hover:text-foreground"
           >
             <svg
               className="w-6 h-6"
@@ -225,10 +225,10 @@ export default function OrderDetailPage() {
             </svg>
           </button>
           <div className="flex-1">
-            <h1 className="text-3xl font-bold text-gray-900">
+            <h1 className="text-3xl font-bold text-foreground">
               {order.orderNumber}
             </h1>
-            <p className="text-gray-600 mt-1">
+            <p className="text-muted-foreground mt-1">
               {order.buyer.name} - {order.style.name}
             </p>
           </div>
@@ -290,7 +290,7 @@ export default function OrderDetailPage() {
 
       {/* Tabs */}
       <div className="mb-6">
-        <div className="border-b border-gray-200">
+        <div className="border-b border-border">
           <nav className="flex gap-8">
             {["overview", "process-steps", "transfers", "details", "qr"].map(
               (tab) => (
@@ -300,7 +300,7 @@ export default function OrderDetailPage() {
                   className={`py-4 px-1 border-b-2 font-medium text-sm transition-colors ${
                     activeTab === tab
                       ? "border-blue-600 text-blue-600"
-                      : "border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300"
+                      : "border-transparent text-muted-foreground hover:text-foreground hover:border-border"
                   }`}
                 >
                   {tab === "overview" && "Overview"}
@@ -328,32 +328,42 @@ export default function OrderDetailPage() {
               <CardContent>
                 <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
                   <div>
-                    <p className="text-sm text-gray-600 mb-1">Jumlah Total</p>
-                    <p className="text-2xl font-bold text-gray-900">
+                    <p className="text-sm text-muted-foreground mb-1">
+                      Jumlah Total
+                    </p>
+                    <p className="text-2xl font-bold text-foreground">
                       {formatNumber(order.totalQuantity)}
                     </p>
-                    <p className="text-xs text-gray-500">pieces</p>
+                    <p className="text-xs text-muted-foreground">pieces</p>
                   </div>
                   <div>
-                    <p className="text-sm text-gray-600 mb-1">Completed</p>
+                    <p className="text-sm text-muted-foreground mb-1">
+                      Completed
+                    </p>
                     <p className="text-2xl font-bold text-green-600">
                       {formatNumber(order.totalCompleted)}
                     </p>
-                    <p className="text-xs text-gray-500">{completionRate}%</p>
+                    <p className="text-xs text-muted-foreground">
+                      {completionRate}%
+                    </p>
                   </div>
                   <div>
-                    <p className="text-sm text-gray-600 mb-1">Rejected</p>
+                    <p className="text-sm text-muted-foreground mb-1">
+                      Rejected
+                    </p>
                     <p className="text-2xl font-bold text-red-600">
                       {formatNumber(order.totalRejected)}
                     </p>
-                    <p className="text-xs text-gray-500">{rejectRate}%</p>
+                    <p className="text-xs text-muted-foreground">
+                      {rejectRate}%
+                    </p>
                   </div>
                   <div>
-                    <p className="text-sm text-gray-600 mb-1">Rework</p>
+                    <p className="text-sm text-muted-foreground mb-1">Rework</p>
                     <p className="text-2xl font-bold text-yellow-600">
                       {formatNumber(order.totalRework)}
                     </p>
-                    <p className="text-xs text-gray-500">pieces</p>
+                    <p className="text-xs text-muted-foreground">pieces</p>
                   </div>
                 </div>
               </CardContent>
@@ -368,37 +378,34 @@ export default function OrderDetailPage() {
                 <div className="overflow-x-auto">
                   <table className="min-w-full">
                     <thead>
-                      <tr className="border-b border-gray-200">
-                        <th className="text-left py-3 px-4 text-sm font-medium text-gray-700">
+                      <tr className="border-b border-border">
+                        <th className="text-left py-3 px-4 text-sm font-medium text-foreground">
                           Size
                         </th>
-                        <th className="text-right py-3 px-4 text-sm font-medium text-gray-700">
+                        <th className="text-right py-3 px-4 text-sm font-medium text-foreground">
                           Quantity
                         </th>
-                        <th className="text-right py-3 px-4 text-sm font-medium text-gray-700">
+                        <th className="text-right py-3 px-4 text-sm font-medium text-foreground">
                           Completed
                         </th>
-                        <th className="text-right py-3 px-4 text-sm font-medium text-gray-700">
+                        <th className="text-right py-3 px-4 text-sm font-medium text-foreground">
                           Rejected
                         </th>
-                        <th className="text-right py-3 px-4 text-sm font-medium text-gray-700">
+                        <th className="text-right py-3 px-4 text-sm font-medium text-foreground">
                           Bundles
                         </th>
-                        <th className="text-right py-3 px-4 text-sm font-medium text-gray-700">
+                        <th className="text-right py-3 px-4 text-sm font-medium text-foreground">
                           Progress
                         </th>
                       </tr>
                     </thead>
                     <tbody>
                       {order.sizeBreakdown.map((size) => (
-                        <tr
-                          key={size.size}
-                          className="border-b border-gray-100"
-                        >
-                          <td className="py-3 px-4 font-medium text-gray-900">
+                        <tr key={size.size} className="border-b border-border">
+                          <td className="py-3 px-4 font-medium text-foreground">
                             {size.size}
                           </td>
-                          <td className="py-3 px-4 text-right text-gray-900">
+                          <td className="py-3 px-4 text-right text-foreground">
                             {size.quantity}
                           </td>
                           <td className="py-3 px-4 text-right text-green-600 font-medium">
@@ -407,12 +414,12 @@ export default function OrderDetailPage() {
                           <td className="py-3 px-4 text-right text-red-600 font-medium">
                             {size.rejected}
                           </td>
-                          <td className="py-3 px-4 text-right text-gray-900">
+                          <td className="py-3 px-4 text-right text-foreground">
                             {size.bundleCount || 0}
                           </td>
                           <td className="py-3 px-4 text-right">
                             <div className="flex items-center justify-end gap-2">
-                              <div className="w-16 bg-gray-200 rounded-full h-2">
+                              <div className="w-16 bg-muted rounded-full h-2">
                                 <div
                                   className="bg-blue-600 h-2 rounded-full"
                                   style={{
@@ -424,7 +431,7 @@ export default function OrderDetailPage() {
                                   }}
                                 />
                               </div>
-                              <span className="text-sm text-gray-600 w-10 text-right">
+                              <span className="text-sm text-muted-foreground w-10 text-right">
                                 {size.quantity > 0
                                   ? Math.round(
                                       (size.completed / size.quantity) * 100
@@ -488,35 +495,37 @@ export default function OrderDetailPage() {
               </CardHeader>
               <CardContent className="space-y-4">
                 <div>
-                  <p className="text-sm text-gray-600">Tanggal Order</p>
-                  <p className="font-semibold text-gray-900">
+                  <p className="text-sm text-muted-foreground">Tanggal Order</p>
+                  <p className="font-semibold text-foreground">
                     {formatDate(order.orderDate)}
                   </p>
                 </div>
                 <div>
-                  <p className="text-sm text-gray-600">
+                  <p className="text-sm text-muted-foreground">
                     Tanggal Mulai Produksi
                   </p>
                   {order.productionStartedAt ? (
                     <div>
-                      <p className="font-semibold text-blue-700">
+                      <p className="font-semibold text-blue-600">
                         {formatDate(new Date(order.productionStartedAt))}{" "}
                       </p>
                     </div>
                   ) : (
                     <Badge
                       variant="info"
-                      className="mt-1 bg-gray-50 text-gray-600 border-gray-300"
+                      className="mt-1 bg-muted text-muted-foreground border-border"
                     >
                       Order Belum Dimulai
                     </Badge>
                   )}
                 </div>
                 <div>
-                  <p className="text-sm text-gray-600">Batas Waktu Produksi</p>
+                  <p className="text-sm text-muted-foreground">
+                    Batas Waktu Produksi
+                  </p>
                   <p
                     className={`font-semibold ${
-                      delayed ? "text-red-600" : "text-gray-900"
+                      delayed ? "text-red-600" : "text-foreground"
                     }`}
                   >
                     {formatDate(order.productionDeadline)}
@@ -526,56 +535,66 @@ export default function OrderDetailPage() {
                   </p>
                 </div>
                 <div>
-                  <p className="text-sm text-gray-600">
+                  <p className="text-sm text-muted-foreground">
                     Batas Waktu Pengiriman
                   </p>
-                  <p className="font-semibold text-gray-900">
+                  <p className="font-semibold text-foreground">
                     {formatDate(order.deliveryDeadline)}
                   </p>
                 </div>
                 <div>
-                  <p className="text-sm text-gray-600 mb-2">Fase Sekarang</p>
+                  <p className="text-sm text-muted-foreground mb-2">
+                    Fase Sekarang
+                  </p>
                   <Badge variant="info">
                     {PHASE_LABELS[order.currentPhase]}
                   </Badge>
                 </div>
                 <div>
-                  <p className="text-sm text-gray-600">Proses Sekarang</p>
-                  <p className="font-semibold text-gray-900">
+                  <p className="text-sm text-muted-foreground">
+                    Proses Sekarang
+                  </p>
+                  <p className="font-semibold text-foreground">
                     {PROCESS_LABELS[order.currentProcess]}
                   </p>
                 </div>
                 <div>
-                  <p className="text-sm text-gray-600 mb-2">State Sekarang</p>
+                  <p className="text-sm text-muted-foreground mb-2">
+                    State Sekarang
+                  </p>
                   <Badge variant="default">
                     {PROCESS_STATE_LABELS[order.currentState]}
                   </Badge>
                 </div>
                 {order.assignedLine && (
                   <div>
-                    <p className="text-sm text-gray-600">Sewing Line</p>
-                    <p className="font-semibold text-gray-900">
+                    <p className="text-sm text-muted-foreground">Sewing Line</p>
+                    <p className="font-semibold text-foreground">
                       {order.assignedLine}
                     </p>
                   </div>
                 )}
                 {order.assignedTo && (
                   <div>
-                    <p className="text-sm text-gray-600">Ditugaskan ke</p>
-                    <p className="font-semibold text-gray-900">
+                    <p className="text-sm text-muted-foreground">
+                      Ditugaskan ke
+                    </p>
+                    <p className="font-semibold text-foreground">
                       {order.assignedTo}
                     </p>
                   </div>
                 )}
                 <div>
-                  <p className="text-sm text-gray-600">Dibuat oleh</p>
-                  <p className="font-semibold text-gray-900">
+                  <p className="text-sm text-muted-foreground">Dibuat oleh</p>
+                  <p className="font-semibold text-foreground">
                     {order.createdBy}
                   </p>
                 </div>
                 <div>
-                  <p className="text-sm text-gray-600">Terakhir Diperbarui</p>
-                  <p className="font-semibold text-gray-900">
+                  <p className="text-sm text-muted-foreground">
+                    Terakhir Diperbarui
+                  </p>
+                  <p className="font-semibold text-foreground">
                     {formatDateTime(order.updatedAt)}
                   </p>
                 </div>
@@ -589,19 +608,25 @@ export default function OrderDetailPage() {
               </CardHeader>
               <CardContent className="space-y-4">
                 <div>
-                  <p className="text-sm text-gray-600">Nama</p>
-                  <p className="font-semibold text-gray-900">
+                  <p className="text-sm text-muted-foreground">Nama</p>
+                  <p className="font-semibold text-foreground">
                     {order.buyer.name}
                   </p>
                 </div>
                 <div>
-                  <p className="text-sm text-gray-600">Kokde</p>
-                  <p className="font-semibold text-gray-900">
+                  <p className="text-sm text-muted-foreground">Artikel</p>
+                  <p className="font-semibold text-foreground">
+                    {order.article}
+                  </p>
+                </div>
+                <div>
+                  <p className="text-sm text-muted-foreground">Kokde</p>
+                  <p className="font-semibold text-foreground">
                     {order.buyer.code}
                   </p>
                 </div>
                 <div>
-                  <p className="text-sm text-gray-600 mb-2">Tipe</p>
+                  <p className="text-sm text-muted-foreground mb-2">Tipe</p>
                   <Badge
                     variant={
                       order.buyer.type === "repeat" ? "success" : "warning"
@@ -611,8 +636,10 @@ export default function OrderDetailPage() {
                   </Badge>
                 </div>
                 <div>
-                  <p className="text-sm text-gray-600">Aturan Pengembalian</p>
-                  <p className="text-sm text-gray-900">
+                  <p className="text-sm text-muted-foreground">
+                    Aturan Pengembalian
+                  </p>
+                  <p className="text-sm text-foreground">
                     {order.buyer.leftoverPolicy?.canReuse
                       ? "✓ Can be reused"
                       : "✗ Must be returned"}
@@ -620,12 +647,12 @@ export default function OrderDetailPage() {
                 </div>
                 {order.buyer.contactPerson && (
                   <div>
-                    <p className="text-sm text-gray-600">Kontak</p>
-                    <p className="font-semibold text-gray-900">
+                    <p className="text-sm text-muted-foreground">Kontak</p>
+                    <p className="font-semibold text-foreground">
                       {order.buyer.contactPerson}
                     </p>
                     {order.buyer.phone && (
-                      <p className="text-sm text-gray-600">
+                      <p className="text-sm text-muted-foreground">
                         {order.buyer.phone}
                       </p>
                     )}
@@ -641,21 +668,21 @@ export default function OrderDetailPage() {
               </CardHeader>
               <CardContent className="space-y-4">
                 <div>
-                  <p className="text-sm text-gray-600">Kode Style</p>
-                  <p className="font-semibold text-gray-900">
+                  <p className="text-sm text-muted-foreground">Kode Style</p>
+                  <p className="font-semibold text-foreground">
                     {order.style.styleCode}
                   </p>
                 </div>
                 <div>
-                  <p className="text-sm text-gray-600">Kategori</p>
-                  <p className="font-semibold text-gray-900">
+                  <p className="text-sm text-muted-foreground">Kategori</p>
+                  <p className="font-semibold text-foreground">
                     {GARMENT_CATEGORIES[order.style.category]}
                   </p>
                 </div>
                 {order.style.description && (
                   <div>
-                    <p className="text-sm text-gray-600">Deskripsi</p>
-                    <p className="text-sm text-gray-900">
+                    <p className="text-sm text-muted-foreground">Deskripsi</p>
+                    <p className="text-sm text-foreground">
                       {order.style.description}
                     </p>
                   </div>
@@ -670,7 +697,7 @@ export default function OrderDetailPage() {
                   <CardTitle>Catatan</CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <p className="text-sm text-gray-700">{order.notes}</p>
+                  <p className="text-sm text-foreground">{order.notes}</p>
                 </CardContent>
               </Card>
             )}
@@ -685,7 +712,7 @@ export default function OrderDetailPage() {
               <CardTitle>Surat Jalan / Transfer Logs</CardTitle>
             </CardHeader>
             <CardContent>
-              <p className="text-sm text-gray-600 mb-4">
+              <p className="text-sm text-muted-foreground mb-4">
                 Riwayat perpindahan antar proses dengan detail lengkap termasuk
                 reject dan durasi.
               </p>
@@ -706,34 +733,34 @@ export default function OrderDetailPage() {
               <div className="overflow-x-auto">
                 <table className="min-w-full">
                   <thead>
-                    <tr className="border-b border-gray-200">
-                      <th className="text-left py-3 px-4 text-sm font-medium text-gray-700">
+                    <tr className="border-b border-border">
+                      <th className="text-left py-3 px-4 text-sm font-medium text-foreground">
                         Size
                       </th>
-                      <th className="text-right py-3 px-4 text-sm font-medium text-gray-700">
+                      <th className="text-right py-3 px-4 text-sm font-medium text-foreground">
                         Quantity
                       </th>
-                      <th className="text-right py-3 px-4 text-sm font-medium text-gray-700">
+                      <th className="text-right py-3 px-4 text-sm font-medium text-foreground">
                         Completed
                       </th>
-                      <th className="text-right py-3 px-4 text-sm font-medium text-gray-700">
+                      <th className="text-right py-3 px-4 text-sm font-medium text-foreground">
                         Rejected
                       </th>
-                      <th className="text-right py-3 px-4 text-sm font-medium text-gray-700">
+                      <th className="text-right py-3 px-4 text-sm font-medium text-foreground">
                         Bundles
                       </th>
-                      <th className="text-right py-3 px-4 text-sm font-medium text-gray-700">
+                      <th className="text-right py-3 px-4 text-sm font-medium text-foreground">
                         %
                       </th>
                     </tr>
                   </thead>
                   <tbody>
                     {order.sizeBreakdown.map((size) => (
-                      <tr key={size.size} className="border-b border-gray-100">
-                        <td className="py-3 px-4 font-medium text-gray-900">
+                      <tr key={size.size} className="border-b border-border">
+                        <td className="py-3 px-4 font-medium text-foreground">
                           {size.size}
                         </td>
-                        <td className="py-3 px-4 text-right text-gray-900">
+                        <td className="py-3 px-4 text-right text-foreground">
                           {size.quantity}
                         </td>
                         <td className="py-3 px-4 text-right text-green-600 font-medium">
@@ -742,10 +769,10 @@ export default function OrderDetailPage() {
                         <td className="py-3 px-4 text-right text-red-600 font-medium">
                           {size.rejected}
                         </td>
-                        <td className="py-3 px-4 text-right text-gray-900">
+                        <td className="py-3 px-4 text-right text-foreground">
                           {size.bundleCount || 0}
                         </td>
-                        <td className="py-3 px-4 text-right text-gray-600">
+                        <td className="py-3 px-4 text-right text-muted-foreground">
                           {size.quantity > 0
                             ? Math.round((size.completed / size.quantity) * 100)
                             : 0}
@@ -753,9 +780,9 @@ export default function OrderDetailPage() {
                         </td>
                       </tr>
                     ))}
-                    <tr className="font-bold bg-gray-50">
-                      <td className="py-3 px-4 text-gray-600">Total</td>
-                      <td className="py-3 px-4 text-gray-600 text-right">
+                    <tr className="font-bold bg-muted">
+                      <td className="py-3 px-4 text-muted-foreground">Total</td>
+                      <td className="py-3 px-4 text-muted-foreground text-right">
                         {order.totalQuantity}
                       </td>
                       <td className="py-3 px-4 text-right text-green-600">
@@ -764,13 +791,13 @@ export default function OrderDetailPage() {
                       <td className="py-3 px-4 text-right text-red-600">
                         {order.totalRejected}
                       </td>
-                      <td className="py-3 px-4 text-gray-600 text-right">
+                      <td className="py-3 px-4 text-muted-foreground text-right">
                         {order.sizeBreakdown.reduce(
                           (sum, s) => sum + (s.bundleCount || 0),
                           0
                         )}
                       </td>
-                      <td className="py-3 px-4 text-gray-600 text-right">
+                      <td className="py-3 px-4 text-muted-foreground text-right">
                         {completionRate}%
                       </td>
                     </tr>
@@ -786,8 +813,8 @@ export default function OrderDetailPage() {
               <CardTitle>Status Bahan & Produksi</CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
-              <div className="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
-                <span className="font-medium text-gray-900">
+              <div className="flex items-center justify-between p-4 bg-muted rounded-lg">
+                <span className="font-medium text-foreground">
                   Materials Issued
                 </span>
                 {order.materialsIssued ? (
@@ -796,8 +823,10 @@ export default function OrderDetailPage() {
                   <Badge variant="warning">Pending</Badge>
                 )}
               </div>
-              <div className="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
-                <span className="font-medium text-gray-900">Pengembalian</span>
+              <div className="flex items-center justify-between p-4 bg-muted rounded-lg">
+                <span className="font-medium text-foreground">
+                  Pengembalian
+                </span>
                 {order.hasLeftover ? (
                   <Badge variant="info">Ya</Badge>
                 ) : (
@@ -814,19 +843,19 @@ export default function OrderDetailPage() {
             </CardHeader>
             <CardContent className="space-y-3">
               <div>
-                <p className="text-sm text-gray-600">Nama</p>
-                <p className="font-semibold text-gray-900">
+                <p className="text-sm text-muted-foreground">Nama</p>
+                <p className="font-semibold text-foreground">
                   {order.buyer.name}
                 </p>
               </div>
               <div>
-                <p className="text-sm text-gray-600">Kode</p>
-                <p className="font-semibold text-gray-900">
+                <p className="text-sm text-muted-foreground">Kode</p>
+                <p className="font-semibold text-foreground">
                   {order.buyer.code}
                 </p>
               </div>
               <div>
-                <p className="text-sm text-gray-600 mb-2">Tipe</p>
+                <p className="text-sm text-muted-foreground mb-2">Tipe</p>
                 <Badge
                   variant={
                     order.buyer.type === "repeat" ? "success" : "warning"
@@ -837,17 +866,19 @@ export default function OrderDetailPage() {
               </div>
               {order.buyer.contactPerson && (
                 <div>
-                  <p className="text-sm text-gray-600">Kontak</p>
-                  <p className="font-semibold text-gray-900">
+                  <p className="text-sm text-muted-foreground">Kontak</p>
+                  <p className="font-semibold text-foreground">
                     {order.buyer.contactPerson}
                   </p>
                   {order.buyer.phone && (
-                    <p className="text-sm text-gray-600">{order.buyer.phone}</p>
+                    <p className="text-sm text-muted-foreground">
+                      {order.buyer.phone}
+                    </p>
                   )}
                 </div>
               )}
               <div>
-                <p className="text-sm text-gray-600 mb-2">
+                <p className="text-sm text-muted-foreground mb-2">
                   Aturan Pengembalian
                 </p>
                 <div className="space-y-2 text-sm">
@@ -868,14 +899,14 @@ export default function OrderDetailPage() {
                         ⚠ Perlu pengembalian
                       </span>
                     ) : (
-                      <span className="text-gray-600">
+                      <span className="text-muted-foreground">
                         Tidak perlu pengembalian
                       </span>
                     )}
                   </div>
                   {order.buyer.leftoverPolicy?.storageLocation && (
                     <div>
-                      <p className="text-gray-600">
+                      <p className="text-muted-foreground">
                         Penyimpanan:{" "}
                         {order.buyer.leftoverPolicy.storageLocation}
                       </p>
@@ -893,27 +924,27 @@ export default function OrderDetailPage() {
             </CardHeader>
             <CardContent className="space-y-3">
               <div>
-                <p className="text-sm text-gray-600">Kode Style</p>
-                <p className="font-semibold text-gray-900">
+                <p className="text-sm text-muted-foreground">Kode Style</p>
+                <p className="font-semibold text-foreground">
                   {order.style.styleCode}
                 </p>
               </div>
               <div>
-                <p className="text-sm text-gray-600">Nama</p>
-                <p className="font-semibold text-gray-900">
+                <p className="text-sm text-muted-foreground">Nama</p>
+                <p className="font-semibold text-foreground">
                   {order.style.name}
                 </p>
               </div>
               <div>
-                <p className="text-sm text-gray-600">Kategori</p>
-                <p className="font-semibold text-gray-900 capitalize">
+                <p className="text-sm text-muted-foreground">Kategori</p>
+                <p className="font-semibold text-foreground capitalize">
                   {GARMENT_CATEGORIES[order.style.category]}
                 </p>
               </div>
               {order.style.description && (
                 <div>
-                  <p className="text-sm text-gray-600">Deskripsi</p>
-                  <p className="text-sm text-gray-900">
+                  <p className="text-sm text-muted-foreground">Deskripsi</p>
+                  <p className="text-sm text-foreground">
                     {order.style.description}
                   </p>
                 </div>
@@ -921,20 +952,22 @@ export default function OrderDetailPage() {
               {(order.style.estimatedCuttingTime ||
                 order.style.estimatedSewingTime) && (
                 <div>
-                  <p className="text-sm text-gray-600 mb-2">Estimasi Waktu</p>
+                  <p className="text-sm text-muted-foreground mb-2">
+                    Estimasi Waktu
+                  </p>
                   <div className="grid grid-cols-2 gap-4 text-sm">
                     {order.style.estimatedCuttingTime && (
                       <div>
-                        <p className="text-gray-600">Cutting</p>
-                        <p className="font-semibold text-gray-600">
+                        <p className="text-muted-foreground">Cutting</p>
+                        <p className="font-semibold text-muted-foreground">
                           {order.style.estimatedCuttingTime} min
                         </p>
                       </div>
                     )}
                     {order.style.estimatedSewingTime && (
                       <div>
-                        <p className="text-gray-600">Sewing</p>
-                        <p className="font-semibold text-gray-600">
+                        <p className="text-muted-foreground">Sewing</p>
+                        <p className="font-semibold text-muted-foreground">
                           {order.style.estimatedSewingTime} min/pc
                         </p>
                       </div>
@@ -959,7 +992,7 @@ export default function OrderDetailPage() {
                 {!qrCodes ? (
                   <div className="text-center py-8">
                     <svg
-                      className="w-16 h-16 mx-auto mb-4 text-gray-400"
+                      className="w-16 h-16 mx-auto mb-4 text-muted-foreground"
                       fill="none"
                       stroke="currentColor"
                       viewBox="0 0 24 24"
@@ -971,7 +1004,7 @@ export default function OrderDetailPage() {
                         d="M12 4v1m6 11h2m-6 0h-2v4m0-11v3m0 0h.01M12 12h4.01M16 20h4M4 12h4m12 0h.01M5 8h2a1 1 0 001-1V5a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1zm12 0h2a1 1 0 001-1V5a1 1 0 00-1-1h-2a1 1 0 00-1 1v2a1 1 0 001 1zM5 20h2a1 1 0 001-1v-2a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1z"
                       />
                     </svg>
-                    <p className="text-gray-600 mb-4">
+                    <p className="text-muted-foreground mb-4">
                       Belum ada barcode dibuat
                     </p>
                     <Button
@@ -1013,7 +1046,7 @@ export default function OrderDetailPage() {
 
                     {/* Order QR Code */}
                     <div className="mb-6">
-                      <h3 className="text-lg font-semibold text-gray-900 mb-4">
+                      <h3 className="text-lg font-semibold text-foreground mb-4">
                         Order Barcode
                       </h3>
                       <BarcodeDisplay
@@ -1028,7 +1061,7 @@ export default function OrderDetailPage() {
                     {qrCodes.bundleQRs && qrCodes.bundleQRs.length > 0 && (
                       <div>
                         <div className="flex items-center justify-between mb-4">
-                          <h3 className="text-lg font-semibold text-gray-900">
+                          <h3 className="text-lg font-semibold text-foreground">
                             Bundle Barcode ({qrCodes.bundleQRs.length})
                           </h3>
                           <Button
@@ -1077,13 +1110,13 @@ export default function OrderDetailPage() {
               <CardTitle>Pelacakan Alur Proses</CardTitle>
             </CardHeader>
             <CardContent>
-              <p className="text-sm text-gray-600 mb-4">
+              <p className="text-sm text-muted-foreground mb-4">
                 Pantau setiap langkah proses dari PPIC hingga selesai, lengkap
                 dengan detail waktu dan perubahan status.
               </p>
               <div className="space-y-4">
                 {processSteps.length === 0 ? (
-                  <div className="text-center py-8 text-gray-500">
+                  <div className="text-center py-8 text-muted-foreground">
                     <p>Tidak ada proses ditemukan</p>
                   </div>
                 ) : (

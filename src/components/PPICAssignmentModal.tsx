@@ -171,28 +171,28 @@ export const PPICAssignmentModal: React.FC<PPICAssignmentModalProps> = ({
       <form onSubmit={handleSubmit}>
         <div className="space-y-6">
           {error && (
-            <div className="bg-red-50 border border-red-200 rounded p-3 text-sm text-red-800">
+            <div className="bg-red-500/10 border border-red-500/30 rounded p-3 text-sm text-red-600">
               {error}
             </div>
           )}
 
           {/* Current Process Info */}
-          <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
-            <h4 className="font-semibold text-blue-900 mb-2">
+          <div className="bg-blue-500/10 border border-blue-500/30 rounded-lg p-4">
+            <h4 className="font-semibold text-blue-600 mb-2">
               Current Situation
             </h4>
             <div className="text-sm space-y-1">
-              <p className="text-blue-800">
+              <p className="text-blue-600">
                 <span className="font-medium">Telah Selesai:</span>{" "}
                 {PROCESS_LABELS[currentProcess as ProcessName]}
               </p>
-              <p className="text-blue-800">
+              <p className="text-blue-600">
                 <span className="font-medium">Status:</span> Menunggu PPIC
               </p>
 
               {orderProcessFlow.length > 0 && (
-                <div className="mt-3 pt-3 border-t border-blue-200">
-                  <p className="text-blue-900 font-medium mb-2">
+                <div className="mt-3 pt-3 border-t border-blue-500/30">
+                  <p className="text-blue-600 font-medium mb-2">
                     📋 Order Template ({orderProcessFlow.length} steps):
                   </p>
                   <div className="flex flex-wrap gap-1">
@@ -201,10 +201,10 @@ export const PPICAssignmentModal: React.FC<PPICAssignmentModalProps> = ({
                         key={p}
                         className={`text-xs px-2 py-1 rounded ${
                           completedProcesses.includes(p)
-                            ? "bg-green-100 text-green-800 line-through"
+                            ? "bg-green-500/15 text-green-600 line-through"
                             : inProgressProcesses.includes(p)
-                            ? "bg-orange-100 text-orange-800"
-                            : "bg-gray-100 text-gray-800"
+                            ? "bg-orange-500/15 text-orange-600"
+                            : "bg-muted text-foreground"
                         }`}
                       >
                         {idx + 1}. {PROCESS_LABELS[p]}
@@ -219,15 +219,15 @@ export const PPICAssignmentModal: React.FC<PPICAssignmentModalProps> = ({
 
               {/* Show completed processes */}
               {completedProcesses.length > 0 && (
-                <div className="mt-3 pt-3 border-t border-blue-200">
-                  <p className="text-blue-900 font-medium mb-1">
+                <div className="mt-3 pt-3 border-t border-blue-500/30">
+                  <p className="text-blue-600 font-medium mb-1">
                     ✅ Completed Processes ({completedProcesses.length}):
                   </p>
                   <div className="flex flex-wrap gap-1">
                     {completedProcesses.map((p) => (
                       <span
                         key={p}
-                        className="text-xs bg-green-100 text-green-800 px-2 py-1 rounded"
+                        className="text-xs bg-green-500/15 text-green-600 px-2 py-1 rounded"
                       >
                         {PROCESS_LABELS[p]}
                       </span>
@@ -239,20 +239,20 @@ export const PPICAssignmentModal: React.FC<PPICAssignmentModalProps> = ({
               {/* Show in-progress processes */}
               {inProgressProcesses.length > 0 && (
                 <div className="mt-2">
-                  <p className="text-orange-900 font-medium mb-1">
+                  <p className="text-orange-600 font-medium mb-1">
                     ⏳ In Progress/Pending ({inProgressProcesses.length}):
                   </p>
                   <div className="flex flex-wrap gap-1">
                     {inProgressProcesses.map((p) => (
                       <span
                         key={p}
-                        className="text-xs bg-orange-100 text-orange-800 px-2 py-1 rounded"
+                        className="text-xs bg-orange-500/15 text-orange-600 px-2 py-1 rounded"
                       >
                         {PROCESS_LABELS[p]}
                       </span>
                     ))}
                   </div>
-                  <p className="text-xs text-orange-700 mt-2">
+                  <p className="text-xs text-orange-600 mt-2">
                     ℹ️ Process di atas tidak bisa di-assign lagi karena sedang
                     berjalan
                   </p>
@@ -263,7 +263,7 @@ export const PPICAssignmentModal: React.FC<PPICAssignmentModalProps> = ({
 
           {/* Process Selection */}
           <div>
-            <label className="block text-sm font-medium text-gray-900 mb-2">
+            <label className="block text-sm font-medium text-foreground mb-2">
               Pilih Proses Selanjutnya *
             </label>
             <select
@@ -271,7 +271,7 @@ export const PPICAssignmentModal: React.FC<PPICAssignmentModalProps> = ({
               onChange={(e) =>
                 setSelectedProcess(e.target.value as ProcessName)
               }
-              className="w-full px-4 py-2.5 text-gray-900 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-base"
+              className="w-full px-4 py-2.5 text-foreground border border-border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-base"
               required
               disabled={isSubmitting}
             >
@@ -317,25 +317,25 @@ export const PPICAssignmentModal: React.FC<PPICAssignmentModalProps> = ({
 
           {/* Selected Process Info */}
           {selectedProcess && (
-            <div className="bg-purple-50 border border-purple-200 rounded-lg p-4">
-              <h4 className="font-semibold text-purple-900 mb-3">
+            <div className="bg-purple-500/10 border border-purple-500/30 rounded-lg p-4">
+              <h4 className="font-semibold text-purple-600 mb-3">
                 Detail Assignment
               </h4>
               <div className="space-y-2 text-sm">
                 <div className="flex justify-between">
-                  <span className="text-purple-800">Proses:</span>
-                  <span className="font-semibold text-purple-900">
+                  <span className="text-purple-600">Proses:</span>
+                  <span className="font-semibold text-purple-600">
                     {PROCESS_LABELS[selectedProcess]}
                   </span>
                 </div>
                 <div className="flex justify-between">
-                  <span className="text-purple-800">Departemen:</span>
-                  <span className="font-semibold text-purple-900">
+                  <span className="text-purple-600">Departemen:</span>
+                  <span className="font-semibold text-purple-600">
                     {selectedDepartment}
                   </span>
                 </div>
                 <div className="flex justify-between">
-                  <span className="text-purple-800">Fase:</span>
+                  <span className="text-purple-600">Fase:</span>
                   <Badge variant={isProductionProcess ? "info" : "success"}>
                     {isProductionProcess ? "Production" : "Delivery"}
                   </Badge>
@@ -346,29 +346,29 @@ export const PPICAssignmentModal: React.FC<PPICAssignmentModalProps> = ({
 
           {/* Assigned By */}
           <div>
-            <label className="block text-sm font-medium text-gray-900 mb-2">
+            <label className="block text-sm font-medium text-foreground mb-2">
               Nama (Staf PPIC) *
             </label>
             <input
               type="text"
               value={assignedBy}
-              className="w-full px-4 py-2.5 border border-gray-300 rounded-lg bg-gray-100 font-medium text-gray-900"
+              className="w-full px-4 py-2.5 border border-border rounded-lg bg-muted font-medium text-foreground"
               disabled
             />
-            <p className="text-xs text-gray-600 mt-1">
+            <p className="text-xs text-muted-foreground mt-1">
               Otomatis terisi dengan nama anda
             </p>
           </div>
 
           {/* Notes */}
           <div>
-            <label className="block text-sm font-medium text-gray-900 mb-2">
+            <label className="block text-sm font-medium text-foreground mb-2">
               Catatan (Opsional)
             </label>
             <textarea
               value={notes}
               onChange={(e) => setNotes(e.target.value)}
-              className="w-full px-4 py-2.5 text-gray-900 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              className="w-full px-4 py-2.5 text-foreground border border-border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
               rows={3}
               placeholder="Any special instructions or notes for this assignment..."
               disabled={isSubmitting}

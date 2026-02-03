@@ -24,20 +24,21 @@ export const Button: React.FC<ButtonProps> = ({
   ...props
 }) => {
   const baseStyles =
-    "inline-flex items-center justify-center rounded-lg font-semibold transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:shadow-none";
+    "inline-flex items-center justify-center rounded-lg font-semibold transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-background disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:shadow-none";
 
   const variantStyles = {
     primary:
-      "bg-blue-600 text-white hover:bg-blue-700 focus:ring-blue-500 shadow-sm hover:shadow-md",
+      "bg-primary text-primary-foreground hover:bg-primary/90 focus:ring-primary shadow-sm hover:shadow-md",
     secondary:
-      "bg-gray-600 text-white hover:bg-gray-700 focus:ring-gray-500 shadow-sm hover:shadow-md",
+      "bg-secondary text-secondary-foreground hover:bg-secondary/80 focus:ring-secondary shadow-sm hover:shadow-md",
     outline:
-      "border-2 border-gray-300 text-gray-900 bg-white hover:bg-gray-50 focus:ring-gray-500 hover:border-gray-400",
-    ghost: "text-gray-900 hover:bg-gray-100 focus:ring-gray-500",
+      "border-2 border-input text-foreground bg-background hover:bg-accent hover:text-accent-foreground focus:ring-ring",
+    ghost:
+      "text-foreground hover:bg-accent hover:text-accent-foreground focus:ring-ring",
     danger:
-      "bg-red-600 text-white hover:bg-red-700 focus:ring-red-500 shadow-sm hover:shadow-md",
+      "bg-destructive text-destructive-foreground hover:bg-destructive/90 focus:ring-destructive shadow-sm hover:shadow-md",
     success:
-      "bg-green-600 text-white hover:bg-green-700 focus:ring-green-500 shadow-sm hover:shadow-md",
+      "bg-success text-success-foreground hover:bg-success/90 focus:ring-success shadow-sm hover:shadow-md",
   };
 
   const sizeStyles = {

@@ -555,16 +555,18 @@ export default function NewOrderPage() {
         <div className="flex items-center gap-3 mb-4">
           <button
             onClick={() => router.push("/orders")}
-            className="text-gray-600 hover:text-gray-900"
+            className="text-muted-foreground hover:text-foreground"
             disabled={isSubmitting}
           >
             <ArrowLeft className="w-6 h-6" />
           </button>
           <div>
-            <h1 className="text-3xl font-bold text-gray-900">
+            <h1 className="text-3xl font-bold text-foreground">
               Buat Order Baru
             </h1>
-            <p className="text-gray-600 mt-1">Buat order produksi baru</p>
+            <p className="text-muted-foreground mt-1">
+              Buat order produksi baru
+            </p>
           </div>
         </div>
       </div>
@@ -576,7 +578,7 @@ export default function NewOrderPage() {
           </CardHeader>
           <CardContent>
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
+              <label className="block text-sm font-medium text-foreground mb-2">
                 Nomor Order *
               </label>
               <input
@@ -584,8 +586,8 @@ export default function NewOrderPage() {
                 value={formData.orderNumber}
                 onChange={(e) => handleOrderNumberChange(e.target.value)}
                 onBlur={handleOrderNumberBlur}
-                className={`w-full px-4 py-2 text-gray-600 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent font-mono text-lg ${
-                  errors.orderNumber ? "border-red-500" : "border-gray-300"
+                className={`w-full px-4 py-2 text-muted-foreground border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent font-mono text-lg ${
+                  errors.orderNumber ? "border-destructive" : "border-border"
                 }`}
                 placeholder="e.g., ORD-2025-00001 or ANY-FORMAT-YOU-WANT"
                 disabled={isSubmitting}
@@ -593,7 +595,7 @@ export default function NewOrderPage() {
               />
 
               {errors.orderNumber && (
-                <p className="text-sm text-red-600 mt-1 flex items-center gap-1">
+                <p className="text-sm text-destructive mt-1 flex items-center gap-1">
                   <AlertCircle className="w-4 h-4" />
                   {errors.orderNumber}
                 </p>
@@ -616,7 +618,7 @@ export default function NewOrderPage() {
           </CardHeader>
           <CardContent>
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
+              <label className="block text-sm font-medium text-foreground mb-2">
                 Article Name
               </label>
               <input
@@ -628,12 +630,12 @@ export default function NewOrderPage() {
                     article: e.target.value,
                   }))
                 }
-                className="w-full px-4 py-2 text-gray-600 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                className="w-full px-4 py-2 text-muted-foreground border border-border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                 placeholder="e.g., Spring 2025, Summer Collection, Article A"
                 disabled={isSubmitting}
                 maxLength={100}
               />
-              <p className="mt-2 text-xs text-gray-500">
+              <p className="mt-2 text-xs text-muted-foreground">
                 Optional: Specify article name or collection for this order
               </p>
             </div>
@@ -661,7 +663,7 @@ export default function NewOrderPage() {
               {!showBuyerForm && (
                 <>
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                    <label className="block text-sm font-medium text-foreground mb-2">
                       Buyer *
                     </label>
                     <select
@@ -669,8 +671,8 @@ export default function NewOrderPage() {
                       onChange={(e) =>
                         setFormData({ ...formData, buyerId: e.target.value })
                       }
-                      className={`w-full px-4 py-2 text-gray-600 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent ${
-                        errors.buyerId ? "border-red-500" : "border-gray-300"
+                      className={`w-full px-4 py-2 text-muted-foreground border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent ${
+                        errors.buyerId ? "border-destructive" : "border-border"
                       }`}
                       disabled={isSubmitting}
                     >
@@ -683,17 +685,17 @@ export default function NewOrderPage() {
                       ))}
                     </select>
                     {errors.buyerId && (
-                      <p className="text-sm text-red-600 mt-1">
+                      <p className="text-sm text-destructive mt-1">
                         {errors.buyerId}
                       </p>
                     )}
                   </div>
 
                   {selectedBuyer && (
-                    <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+                    <div className="bg-blue-500/10 border border-blue-500/30 rounded-lg p-4">
                       <div className="grid grid-cols-2 gap-4 text-sm">
                         <div>
-                          <p className="text-blue-900 font-medium">
+                          <p className="text-blue-600 font-medium">
                             Jenis Buyer
                           </p>
                           <Badge
@@ -707,10 +709,10 @@ export default function NewOrderPage() {
                           </Badge>
                         </div>
                         <div>
-                          <p className="text-blue-900 font-medium">
+                          <p className="text-blue-600 font-medium">
                             Aturan Pengembalian
                           </p>
-                          <p className="text-blue-800 text-sm">
+                          <p className="text-blue-600 text-sm">
                             {selectedBuyer.leftoverPolicy?.canReuse
                               ? "✓ Material dapat digunakan kembali"
                               : "✗ Material harus diretur"}
@@ -724,14 +726,14 @@ export default function NewOrderPage() {
 
               {/* New Buyer Form */}
               {showBuyerForm && (
-                <div className="bg-purple-50 border-2 border-purple-300 rounded-lg p-4 space-y-4">
-                  <h4 className="font-bold text-purple-900">
+                <div className="bg-purple-500/10 border-2 border-purple-500/40 rounded-lg p-4 space-y-4">
+                  <h4 className="font-bold text-purple-600">
                     Create New Buyer
                   </h4>
 
                   <div className="grid grid-cols-2 gap-4">
                     <div>
-                      <label className="block text-sm font-medium text-gray-900 mb-2">
+                      <label className="block text-sm font-medium text-foreground mb-2">
                         Buyer Name *
                       </label>
                       <input
@@ -740,12 +742,12 @@ export default function NewOrderPage() {
                         onChange={(e) =>
                           setNewBuyer({ ...newBuyer, name: e.target.value })
                         }
-                        className="w-full px-4 py-2 text-gray-900 border border-gray-300 rounded-lg"
+                        className="w-full px-4 py-2 text-foreground border border-border rounded-lg"
                         placeholder="e.g., Nike Indonesia"
                       />
                     </div>
                     <div>
-                      <label className="block text-sm font-medium text-gray-900 mb-2">
+                      <label className="block text-sm font-medium text-foreground mb-2">
                         Buyer Code *
                       </label>
                       <input
@@ -754,14 +756,14 @@ export default function NewOrderPage() {
                         onChange={(e) =>
                           setNewBuyer({ ...newBuyer, code: e.target.value })
                         }
-                        className="w-full px-4 py-2 text-gray-900 border border-gray-300 rounded-lg"
+                        className="w-full px-4 py-2 text-foreground border border-border rounded-lg"
                         placeholder="e.g., NIKE-ID"
                       />
                     </div>
                   </div>
 
                   <div>
-                    <label className="block text-sm font-medium text-gray-900 mb-2">
+                    <label className="block text-sm font-medium text-foreground mb-2">
                       Buyer Type *
                     </label>
                     <select
@@ -772,7 +774,7 @@ export default function NewOrderPage() {
                           type: e.target.value as "repeat" | "one-time",
                         })
                       }
-                      className="w-full px-4 py-2 text-gray-900 border border-gray-300 rounded-lg"
+                      className="w-full px-4 py-2 text-foreground border border-border rounded-lg"
                     >
                       <option value="repeat">Repeat</option>
                       <option value="one-time">One-Time</option>
@@ -781,7 +783,7 @@ export default function NewOrderPage() {
 
                   <div className="grid grid-cols-2 gap-4">
                     <div>
-                      <label className="block text-sm font-medium text-gray-900 mb-2">
+                      <label className="block text-sm font-medium text-foreground mb-2">
                         Contact Person
                       </label>
                       <input
@@ -793,11 +795,11 @@ export default function NewOrderPage() {
                             contactPerson: e.target.value,
                           })
                         }
-                        className="w-full px-4 py-2 text-gray-900 border border-gray-300 rounded-lg"
+                        className="w-full px-4 py-2 text-foreground border border-border rounded-lg"
                       />
                     </div>
                     <div>
-                      <label className="block text-sm font-medium text-gray-900 mb-2">
+                      <label className="block text-sm font-medium text-foreground mb-2">
                         Phone
                       </label>
                       <input
@@ -806,7 +808,7 @@ export default function NewOrderPage() {
                         onChange={(e) =>
                           setNewBuyer({ ...newBuyer, phone: e.target.value })
                         }
-                        className="w-full px-4 py-2 text-gray-900 border border-gray-300 rounded-lg"
+                        className="w-full px-4 py-2 text-foreground border border-border rounded-lg"
                       />
                     </div>
                   </div>
@@ -845,7 +847,7 @@ export default function NewOrderPage() {
               {!showStyleForm && (
                 <>
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                    <label className="block text-sm font-medium text-foreground mb-2">
                       Style *
                     </label>
                     <select
@@ -853,8 +855,8 @@ export default function NewOrderPage() {
                       onChange={(e) =>
                         setFormData({ ...formData, styleId: e.target.value })
                       }
-                      className={`w-full px-4 py-2 text-gray-600 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent ${
-                        errors.styleId ? "border-red-500" : "border-gray-300"
+                      className={`w-full px-4 py-2 text-muted-foreground border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent ${
+                        errors.styleId ? "border-destructive" : "border-border"
                       }`}
                       disabled={isSubmitting}
                     >
@@ -866,26 +868,26 @@ export default function NewOrderPage() {
                       ))}
                     </select>
                     {errors.styleId && (
-                      <p className="text-sm text-red-600 mt-1">
+                      <p className="text-sm text-destructive mt-1">
                         {errors.styleId}
                       </p>
                     )}
                   </div>
 
                   {selectedStyle && (
-                    <div className="bg-green-50 border border-green-200 rounded-lg p-4">
+                    <div className="bg-green-500/10 border border-green-500/30 rounded-lg p-4">
                       <div className="grid grid-cols-2 gap-4 text-sm">
                         <div>
-                          <p className="text-green-900 font-medium">Category</p>
+                          <p className="text-green-600 font-medium">Category</p>
                           <Badge variant="success">
                             {selectedStyle.category}
                           </Badge>
                         </div>
                         <div>
-                          <p className="text-green-900 font-medium">
+                          <p className="text-green-600 font-medium">
                             Est. Time
                           </p>
-                          <p className="text-green-800">
+                          <p className="text-green-600">
                             Cutting: {selectedStyle.estimatedCuttingTime}h |
                             Sewing: {selectedStyle.estimatedSewingTime}h
                           </p>
@@ -897,14 +899,14 @@ export default function NewOrderPage() {
               )}
 
               {showStyleForm && (
-                <div className="bg-purple-50 border-2 border-purple-300 rounded-lg p-4 space-y-4">
-                  <h4 className="font-bold text-purple-900">
+                <div className="bg-purple-500/10 border-2 border-purple-500/40 rounded-lg p-4 space-y-4">
+                  <h4 className="font-bold text-purple-600">
                     Create New Style
                   </h4>
 
                   <div className="grid grid-cols-2 gap-4">
                     <div>
-                      <label className="block text-sm font-medium text-gray-900 mb-2">
+                      <label className="block text-sm font-medium text-foreground mb-2">
                         Style Code *
                       </label>
                       <input
@@ -916,12 +918,12 @@ export default function NewOrderPage() {
                             styleCode: e.target.value,
                           })
                         }
-                        className="w-full px-4 py-2 text-gray-900 border border-gray-300 rounded-lg"
+                        className="w-full px-4 py-2 text-foreground border border-border rounded-lg"
                         placeholder="e.g., SH-2025-001"
                       />
                     </div>
                     <div>
-                      <label className="block text-sm font-medium text-gray-900 mb-2">
+                      <label className="block text-sm font-medium text-foreground mb-2">
                         Style Name *
                       </label>
                       <input
@@ -930,14 +932,14 @@ export default function NewOrderPage() {
                         onChange={(e) =>
                           setNewStyle({ ...newStyle, name: e.target.value })
                         }
-                        className="w-full px-4 py-2 text-gray-900 border border-gray-300 rounded-lg"
+                        className="w-full px-4 py-2 text-foreground border border-border rounded-lg"
                         placeholder="e.g., Classic Blue Shirt"
                       />
                     </div>
                   </div>
 
                   <div>
-                    <label className="block text-sm font-medium text-gray-900 mb-2">
+                    <label className="block text-sm font-medium text-foreground mb-2">
                       Category *
                     </label>
                     <select
@@ -953,7 +955,7 @@ export default function NewOrderPage() {
                             | "other",
                         })
                       }
-                      className="w-full px-4 py-2 text-gray-900 border border-gray-300 rounded-lg"
+                      className="w-full px-4 py-2 text-foreground border border-border rounded-lg"
                     >
                       <option value="shirt">Shirt</option>
                       <option value="pants">Pants</option>
@@ -964,7 +966,7 @@ export default function NewOrderPage() {
                   </div>
 
                   <div>
-                    <label className="block text-sm font-medium text-gray-900 mb-2">
+                    <label className="block text-sm font-medium text-foreground mb-2">
                       Description
                     </label>
                     <textarea
@@ -975,14 +977,14 @@ export default function NewOrderPage() {
                           description: e.target.value,
                         })
                       }
-                      className="w-full px-4 py-2 text-gray-900 border border-gray-300 rounded-lg"
+                      className="w-full px-4 py-2 text-foreground border border-border rounded-lg"
                       rows={3}
                     />
                   </div>
 
                   <div className="grid grid-cols-2 gap-4">
                     <div>
-                      <label className="block text-sm font-medium text-gray-900 mb-2">
+                      <label className="block text-sm font-medium text-foreground mb-2">
                         Est. Cutting Time (hours)
                       </label>
                       <input
@@ -996,11 +998,11 @@ export default function NewOrderPage() {
                               parseFloat(e.target.value) || 0,
                           })
                         }
-                        className="w-full px-4 py-2 text-gray-900 border border-gray-300 rounded-lg"
+                        className="w-full px-4 py-2 text-foreground border border-border rounded-lg"
                       />
                     </div>
                     <div>
-                      <label className="block text-sm font-medium text-gray-900 mb-2">
+                      <label className="block text-sm font-medium text-foreground mb-2">
                         Est. Sewing Time (hours)
                       </label>
                       <input
@@ -1014,7 +1016,7 @@ export default function NewOrderPage() {
                               parseFloat(e.target.value) || 0,
                           })
                         }
-                        className="w-full px-4 py-2 text-gray-900 border border-gray-300 rounded-lg"
+                        className="w-full px-4 py-2 text-foreground border border-border rounded-lg"
                       />
                     </div>
                   </div>
@@ -1053,13 +1055,13 @@ export default function NewOrderPage() {
               {!showLineForm && (
                 <>
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                    <label className="block text-sm font-medium text-foreground mb-2">
                       Sewing Line
                     </label>
                     <select
                       value={selectedLine}
                       onChange={(e) => setSelectedLine(e.target.value)}
-                      className="w-full px-4 py-2 text-gray-600 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                      className="w-full px-4 py-2 text-muted-foreground border border-border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                       disabled={isSubmitting}
                     >
                       <option value="">-- Pilih Line --</option>
@@ -1069,25 +1071,25 @@ export default function NewOrderPage() {
                         </option>
                       ))}
                     </select>
-                    <p className="text-xs text-gray-500 mt-1">
+                    <p className="text-xs text-muted-foreground mt-1">
                       Line produksi yang akan mengerjakan order ini.
                     </p>
                   </div>
 
                   {selectedLine && (
-                    <div className="bg-orange-50 border border-orange-200 rounded-lg p-4">
+                    <div className="bg-orange-500/10 border border-orange-500/30 rounded-lg p-4">
                       <div className="grid grid-cols-2 gap-4 text-sm">
                         <div>
-                          <p className="text-orange-900 font-medium">
+                          <p className="text-orange-600 font-medium">
                             Line Terpilih
                           </p>
                           <Badge variant="warning">{selectedLine}</Badge>
                         </div>
                         <div>
-                          <p className="text-orange-900 font-medium">
+                          <p className="text-orange-600 font-medium">
                             Kapasitas
                           </p>
-                          <p className="text-orange-800">
+                          <p className="text-orange-600">
                             {
                               sewingLines.find(
                                 (l) => l.lineName === selectedLine
@@ -1103,12 +1105,12 @@ export default function NewOrderPage() {
               )}
 
               {showLineForm && (
-                <div className="bg-purple-50 border-2 border-purple-300 rounded-lg p-4 space-y-4">
-                  <h4 className="font-bold text-purple-900">Create New Line</h4>
+                <div className="bg-purple-500/10 border-2 border-purple-500/40 rounded-lg p-4 space-y-4">
+                  <h4 className="font-bold text-purple-600">Create New Line</h4>
 
                   <div className="grid grid-cols-2 gap-4">
                     <div>
-                      <label className="block text-sm font-medium text-gray-900 mb-2">
+                      <label className="block text-sm font-medium text-foreground mb-2">
                         Line Name *
                       </label>
                       <input
@@ -1117,12 +1119,12 @@ export default function NewOrderPage() {
                         onChange={(e) =>
                           setNewLine({ ...newLine, lineName: e.target.value })
                         }
-                        className="w-full px-4 py-2 text-gray-900 border border-gray-300 rounded-lg"
+                        className="w-full px-4 py-2 text-foreground border border-border rounded-lg"
                         placeholder="e.g., Line A, Line 1"
                       />
                     </div>
                     <div>
-                      <label className="block text-sm font-medium text-gray-900 mb-2">
+                      <label className="block text-sm font-medium text-foreground mb-2">
                         Capacity (pcs/day) *
                       </label>
                       <input
@@ -1135,7 +1137,7 @@ export default function NewOrderPage() {
                             capacity: parseInt(e.target.value) || 0,
                           })
                         }
-                        className="w-full px-4 py-2 text-gray-900 border border-gray-300 rounded-lg"
+                        className="w-full px-4 py-2 text-foreground border border-border rounded-lg"
                         placeholder="e.g., 500"
                       />
                     </div>
@@ -1143,7 +1145,7 @@ export default function NewOrderPage() {
 
                   <div className="grid grid-cols-2 gap-4">
                     <div>
-                      <label className="block text-sm font-medium text-gray-900 mb-2">
+                      <label className="block text-sm font-medium text-foreground mb-2">
                         Department *
                       </label>
                       <select
@@ -1157,7 +1159,7 @@ export default function NewOrderPage() {
                               | "finishing",
                           })
                         }
-                        className="w-full px-4 py-2 text-gray-900 border border-gray-300 rounded-lg"
+                        className="w-full px-4 py-2 text-foreground border border-border rounded-lg"
                       >
                         <option value="cutting">Cutting</option>
                         <option value="sewing">Sewing</option>
@@ -1165,7 +1167,7 @@ export default function NewOrderPage() {
                       </select>
                     </div>
                     <div>
-                      <label className="block text-sm font-medium text-gray-900 mb-2">
+                      <label className="block text-sm font-medium text-foreground mb-2">
                         Status *
                       </label>
                       <select
@@ -1176,7 +1178,7 @@ export default function NewOrderPage() {
                             status: e.target.value as "active" | "inactive",
                           })
                         }
-                        className="w-full px-4 py-2 text-gray-900 border border-gray-300 rounded-lg"
+                        className="w-full px-4 py-2 text-foreground border border-border rounded-lg"
                       >
                         <option value="active">Active</option>
                         <option value="inactive">Inactive</option>
@@ -1206,7 +1208,7 @@ export default function NewOrderPage() {
           <CardContent>
             <div className="space-y-4">
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
+                <label className="block text-sm font-medium text-foreground mb-2">
                   Template Alur Proses *
                 </label>
                 <select
@@ -1218,10 +1220,10 @@ export default function NewOrderPage() {
                     });
                     setIsCustomizing(false); // Reset customization when changing template
                   }}
-                  className={`w-full px-4 py-2 text-gray-600 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent ${
+                  className={`w-full px-4 py-2 text-muted-foreground border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent ${
                     errors.processTemplateId
-                      ? "border-red-500"
-                      : "border-gray-300"
+                      ? "border-destructive"
+                      : "border-border"
                   }`}
                   disabled={isSubmitting}
                 >
@@ -1234,16 +1236,16 @@ export default function NewOrderPage() {
                   ))}
                 </select>
                 {errors.processTemplateId && (
-                  <p className="text-sm text-red-600 mt-1">
+                  <p className="text-sm text-destructive mt-1">
                     {errors.processTemplateId}
                   </p>
                 )}
               </div>
 
               {selectedTemplate && customProcessFlow.length > 0 && (
-                <div className="bg-purple-50 border-2 border-purple-300 rounded-lg p-4">
+                <div className="bg-purple-500/10 border-2 border-purple-500/40 rounded-lg p-4">
                   <div className="flex items-center justify-between mb-4">
-                    <h4 className="font-semibold text-purple-900 flex items-center gap-2">
+                    <h4 className="font-semibold text-purple-600 flex items-center gap-2">
                       {selectedTemplate.name}
                       {isCustomizing && (
                         <Badge variant="warning" className="text-xs">
@@ -1266,29 +1268,29 @@ export default function NewOrderPage() {
                   </div>
 
                   {/* Template Info */}
-                  <div className="grid grid-cols-2 gap-4 text-sm mb-4 p-3 bg-white rounded-lg border border-purple-200">
+                  <div className="grid grid-cols-2 gap-4 text-sm mb-4 p-3 bg-card rounded-lg border border-purple-500/30">
                     <div>
-                      <p className="text-purple-700 font-semibold">
+                      <p className="text-purple-600 font-semibold">
                         Total Tahapan
                       </p>
-                      <p className="text-2xl font-bold text-purple-900">
+                      <p className="text-2xl font-bold text-purple-600">
                         {customProcessFlow.length}
                       </p>
                     </div>
                     <div>
-                      <p className="text-purple-700 font-semibold">Est. Days</p>
-                      <p className="text-2xl font-bold text-purple-900">
+                      <p className="text-purple-600 font-semibold">Est. Days</p>
+                      <p className="text-2xl font-bold text-purple-600">
                         ~{selectedTemplate.estimatedDays}
                       </p>
                     </div>
                   </div>
 
                   {/* Process Flow List - EDITABLE */}
-                  <div className="bg-white rounded-lg p-3 space-y-2 max-h-96 overflow-y-auto border-2 border-purple-200">
+                  <div className="bg-card rounded-lg p-3 space-y-2 max-h-96 overflow-y-auto border-2 border-purple-500/30">
                     {customProcessFlow.map((process, idx) => (
                       <div
                         key={`${process}-${idx}`}
-                        className="flex items-center gap-2 p-2 bg-purple-50 rounded border border-purple-200 hover:bg-purple-100 transition-colors"
+                        className="flex items-center gap-2 p-2 bg-purple-500/10 rounded border border-purple-500/30 hover:bg-purple-500/15 transition-colors"
                       >
                         {/* Move Buttons */}
                         <div className="flex flex-col gap-1">
@@ -1296,7 +1298,7 @@ export default function NewOrderPage() {
                             type="button"
                             onClick={() => moveProcessUp(idx)}
                             disabled={idx === 0}
-                            className="text-purple-600 hover:text-purple-800 disabled:text-gray-400 disabled:cursor-not-allowed"
+                            className="text-purple-600 hover:text-purple-600 disabled:text-muted-foreground disabled:cursor-not-allowed"
                             title="Move up"
                           >
                             <svg
@@ -1317,7 +1319,7 @@ export default function NewOrderPage() {
                             type="button"
                             onClick={() => moveProcessDown(idx)}
                             disabled={idx === customProcessFlow.length - 1}
-                            className="text-purple-600 hover:text-purple-800 disabled:text-gray-400 disabled:cursor-not-allowed"
+                            className="text-purple-600 hover:text-purple-600 disabled:text-muted-foreground disabled:cursor-not-allowed"
                             title="Move down"
                           >
                             <svg
@@ -1342,7 +1344,7 @@ export default function NewOrderPage() {
                             #{idx + 1}
                           </span>
                           <div>
-                            <p className="font-semibold text-purple-900">
+                            <p className="font-semibold text-purple-600">
                               {PROCESS_LABELS[process]}
                             </p>
                             <p className="text-xs text-purple-600">
@@ -1355,7 +1357,7 @@ export default function NewOrderPage() {
                         <button
                           type="button"
                           onClick={() => removeProcessFromFlow(process)}
-                          className="text-red-500 hover:text-red-700 hover:bg-red-50 rounded p-1"
+                          className="text-destructive hover:text-destructive hover:bg-destructive/10 rounded p-1"
                           title="Remove process"
                         >
                           <Trash2 className="w-4 h-4" />
@@ -1366,7 +1368,7 @@ export default function NewOrderPage() {
 
                   {/* Add More Processes */}
                   <div className="mt-4">
-                    <label className="block text-sm font-semibold text-purple-900 mb-2">
+                    <label className="block text-sm font-semibold text-purple-600 mb-2">
                       Add More Processes:
                     </label>
                     <select
@@ -1377,7 +1379,7 @@ export default function NewOrderPage() {
                           e.target.value = "";
                         }
                       }}
-                      className="w-full px-4 py-2 border-2 border-purple-300 rounded-lg focus:ring-2 focus:ring-purple-500 text-gray-900 font-medium"
+                      className="w-full px-4 py-2 border-2 border-purple-500/40 rounded-lg focus:ring-2 focus:ring-purple-500 text-foreground font-medium"
                       disabled={isSubmitting} // Tambahkan ini jika perlu, tapi default false
                     >
                       <option value="">-- Add Process --</option>
@@ -1406,7 +1408,7 @@ export default function NewOrderPage() {
                       DELIVERY_PROCESSES.filter(
                         (p) => !customProcessFlow.includes(p)
                       ).length === 0 && (
-                        <p className="text-sm text-red-600 mt-2">
+                        <p className="text-sm text-destructive mt-2">
                           All processes already added. No more available.
                         </p>
                       )}
@@ -1422,7 +1424,7 @@ export default function NewOrderPage() {
           <CardHeader className="flex flex-row items-center justify-between">
             <CardTitle>Size Breakdown</CardTitle>
             <div className="text-right">
-              <span className="text-sm text-gray-500 mr-2">
+              <span className="text-sm text-muted-foreground mr-2">
                 Total Quantity:
               </span>
               <span className="text-xl font-bold text-blue-600">
@@ -1433,7 +1435,7 @@ export default function NewOrderPage() {
           <CardContent>
             <div className="space-y-4">
               {/* Header Tabel */}
-              <div className="grid grid-cols-12 gap-4 mb-2 font-medium text-gray-700 text-sm">
+              <div className="grid grid-cols-12 gap-4 mb-2 font-medium text-foreground text-sm">
                 <div className="col-span-5">Ukuran (Size)</div>
                 <div className="col-span-5">Jumlah (Qty)</div>
                 <div className="col-span-2 text-center">Aksi</div>
@@ -1453,7 +1455,7 @@ export default function NewOrderPage() {
                         handleSizeChange(index, "size", e.target.value)
                       }
                       placeholder="Contoh: XL, 32, All Size"
-                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 text-gray-700"
+                      className="w-full px-4 py-2 border border-border rounded-lg focus:ring-2 focus:ring-blue-500 text-foreground"
                       required
                       disabled={isSubmitting}
                     />
@@ -1470,7 +1472,7 @@ export default function NewOrderPage() {
                           parseInt(e.target.value) || 0
                         )
                       }
-                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 text-gray-700"
+                      className="w-full px-4 py-2 border border-border rounded-lg focus:ring-2 focus:ring-blue-500 text-foreground"
                       required
                       disabled={isSubmitting}
                     />
@@ -1481,7 +1483,7 @@ export default function NewOrderPage() {
                         type="button"
                         variant="ghost"
                         onClick={() => removeSizeRow(index)}
-                        className="text-red-500 hover:text-red-700 hover:bg-red-50"
+                        className="text-destructive hover:text-destructive hover:bg-destructive/10"
                         title="Hapus baris"
                         disabled={isSubmitting}
                       >
@@ -1493,7 +1495,7 @@ export default function NewOrderPage() {
               ))}
 
               {errors.sizes && (
-                <p className="text-sm text-red-600">{errors.sizes}</p>
+                <p className="text-sm text-destructive">{errors.sizes}</p>
               )}
 
               {/* Tombol Tambah Baris */}
@@ -1535,7 +1537,7 @@ export default function NewOrderPage() {
           <CardContent>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
+                <label className="block text-sm font-medium text-foreground mb-2">
                   Tanggal Order *
                 </label>
                 <input
@@ -1544,13 +1546,13 @@ export default function NewOrderPage() {
                   onChange={(e) =>
                     setFormData({ ...formData, orderDate: e.target.value })
                   }
-                  className="w-full px-4 py-2 text-gray-500 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  className="w-full px-4 py-2 text-muted-foreground border border-border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                   disabled={isSubmitting}
                 />
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
+                <label className="block text-sm font-medium text-foreground mb-2">
                   Batas Waktu Produksi *
                 </label>
                 <input
@@ -1562,22 +1564,22 @@ export default function NewOrderPage() {
                       productionDeadline: e.target.value,
                     })
                   }
-                  className={`w-full px-4 py-2 text-gray-500 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent ${
+                  className={`w-full px-4 py-2 text-muted-foreground border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent ${
                     errors.productionDeadline
-                      ? "border-red-500"
-                      : "border-gray-300"
+                      ? "border-destructive"
+                      : "border-border"
                   }`}
                   disabled={isSubmitting}
                 />
                 {errors.productionDeadline && (
-                  <p className="text-sm text-red-600 mt-1">
+                  <p className="text-sm text-destructive mt-1">
                     {errors.productionDeadline}
                   </p>
                 )}
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
+                <label className="block text-sm font-medium text-foreground mb-2">
                   Batas Waktu Pengiriman *
                 </label>
                 <input
@@ -1589,15 +1591,15 @@ export default function NewOrderPage() {
                       deliveryDeadline: e.target.value,
                     })
                   }
-                  className={`w-full px-4 py-2 text-gray-500 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent ${
+                  className={`w-full px-4 py-2 text-muted-foreground border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent ${
                     errors.deliveryDeadline
-                      ? "border-red-500"
-                      : "border-gray-300"
+                      ? "border-destructive"
+                      : "border-border"
                   }`}
                   disabled={isSubmitting}
                 />
                 {errors.deliveryDeadline && (
-                  <p className="text-sm text-red-600 mt-1">
+                  <p className="text-sm text-destructive mt-1">
                     {errors.deliveryDeadline}
                   </p>
                 )}
@@ -1613,7 +1615,7 @@ export default function NewOrderPage() {
           </CardHeader>
           <CardContent className="space-y-4">
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
+              <label className="block text-sm font-medium text-foreground mb-2">
                 Dibuat oleh *
               </label>
               <input
@@ -1622,18 +1624,20 @@ export default function NewOrderPage() {
                 onChange={(e) =>
                   setFormData({ ...formData, createdBy: e.target.value })
                 }
-                className={`w-full px-4 py-2 text-gray-600 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent ${
-                  errors.createdBy ? "border-red-500" : "border-gray-300"
+                className={`w-full px-4 py-2 text-muted-foreground border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent ${
+                  errors.createdBy ? "border-destructive" : "border-border"
                 }`}
                 placeholder="Your name"
                 disabled={isSubmitting}
               />
               {errors.createdBy && (
-                <p className="text-sm text-red-600 mt-1">{errors.createdBy}</p>
+                <p className="text-sm text-destructive mt-1">
+                  {errors.createdBy}
+                </p>
               )}
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
+              <label className="block text-sm font-medium text-foreground mb-2">
                 Catatan (Opsional)
               </label>
               <textarea
@@ -1642,7 +1646,7 @@ export default function NewOrderPage() {
                   setFormData({ ...formData, notes: e.target.value })
                 }
                 rows={4}
-                className="w-full px-4 py-2 border text-gray-600 border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                className="w-full px-4 py-2 border text-muted-foreground border-border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                 placeholder="Any special instructions or notes..."
                 disabled={isSubmitting}
               />

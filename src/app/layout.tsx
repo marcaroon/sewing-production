@@ -42,6 +42,7 @@ export default async function RootLayout({
           defaultTheme="system"
           enableSystem
           disableTransitionOnChange
+          enableColorScheme
         >
           <AuthProvider>
             {showLayout && user && !isFullscreenPage ? (
