@@ -1,7 +1,7 @@
 // components/TransferLogCard.tsx
 "use client";
 
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { useAuth } from "@/context/AuthContext";
 import { TransferLog, ProcessName } from "@/lib/types-new";
 import { Card, CardContent, CardHeader, CardTitle } from "./ui/Card";
@@ -47,6 +47,12 @@ export const TransferLogCard: React.FC<TransferLogCardProps> = ({
   const rejects = transferLog.rejectSummary
     ? JSON.parse(transferLog.rejectSummary)
     : [];
+
+  useEffect(() => {
+    if (isReceiveModalOpen && user?.name) {
+      setReceiveData((prev) => ({ ...prev, receivedBy: user.name }));
+    }
+  }, [isReceiveModalOpen, user?.name]);
 
   const getProcessLabel = (processName: ProcessName): string => {
     return PROCESS_LABELS[processName] || processName;
@@ -441,10 +447,8 @@ export const TransferLogCard: React.FC<TransferLogCardProps> = ({
               <input
                 type="text"
                 value={receiveData.receivedBy}
-                onChange={(e) =>
-                  setReceiveData({ ...receiveData, receivedBy: e.target.value })
-                }
-                className="w-full px-4 py-2.5 border-2 border-border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 font-medium text-foreground"
+                readOnly
+                className="w-full px-4 py-2.5 border-2 border-border rounded-lg font-medium text-foreground"
                 required
                 disabled={isSubmitting}
               />

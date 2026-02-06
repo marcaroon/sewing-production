@@ -16,75 +16,75 @@
   --popover: 0 0% 100%;
   --popover-foreground: 240 10% 3.9%;
 
-  --primary: 240 5.9% 10%; /* Warna utama (tombol, link aktif) - Gelap elegan */
+  --primary: 222 18% 20%; /* Warna utama lebih kalem */
   --primary-foreground: 0 0% 98%;
 
-  --secondary: 240 4.8% 95.9%; /* Warna sekunder (tombol ghost, background halus) */
-  --secondary-foreground: 240 5.9% 10%;
+  --secondary: 220 14% 96%; /* Warna sekunder lebih lembut */
+  --secondary-foreground: 222 18% 20%;
 
-  --muted: 240 4.8% 95.9%; /* Teks/elemen yang tidak terlalu penting */
-  --muted-foreground: 240 3.8% 46.1%;
+  --muted: 220 14% 96%; /* Teks/elemen yang tidak terlalu penting */
+  --muted-foreground: 222 8% 46%;
 
-  --accent: 240 4.8% 95.9%; /* Warna hover */
-  --accent-foreground: 240 5.9% 10%;
+  --accent: 220 14% 94%; /* Warna hover lebih soft */
+  --accent-foreground: 222 18% 20%;
 
-  --destructive: 0 84.2% 60.2%; /* Warna error/hapus (Merah soft) */
+  --destructive: 0 60% 52%; /* Warna error/hapus lebih kalem */
   --destructive-foreground: 0 0% 98%;
 
-  --border: 240 5.9% 90%; /* Warna garis border yang tipis & modern */
-  --input: 240 5.9% 90%;
-  --ring: 240 10% 3.9%; /* Warna outline focus */
+  --border: 220 10% 90%; /* Warna garis border yang tipis & modern */
+  --input: 220 10% 90%;
+  --ring: 222 14% 20%; /* Warna outline focus */
 
   --radius: 0.5rem; /* Radius sudut elemen (rounded-lg) */
 
-  --success: 142 76% 36%;
+  --success: 142 45% 42%;
   --success-foreground: 0 0% 98%;
-  --warning: 38 92% 50%;
-  --warning-foreground: 240 10% 3.9%;
-  --info: 217 91% 60%;
+  --warning: 38 55% 52%;
+  --warning-foreground: 222 18% 20%;
+  --info: 215 45% 52%;
   --info-foreground: 0 0% 98%;
-  --purple: 262 83% 58%;
+  --purple: 260 45% 58%;
   --purple-foreground: 0 0% 98%;
 }
 
 .dark {
   /* --- DARK MODE --- */
-  --background: 240 10% 3.9%; /* Abu-abu sangat gelap (bukan hitam pekat #000) */
-  --foreground: 0 0% 98%; /* Putih lembut */
+  --background: 222 18% 12%; /* Abu-abu gelap lembut (bukan hitam pekat) */
+  --foreground: 210 20% 96%; /* Putih lembut */
 
-  --card: 240 10% 3.9%;
-  --card-foreground: 0 0% 98%;
+  --card: 222 18% 14%;
+  --card-foreground: 210 20% 96%;
 
-  --popover: 240 10% 3.9%;
-  --popover-foreground: 0 0% 98%;
+  --popover: 222 18% 14%;
+  --popover-foreground: 210 20% 96%;
 
-  --primary: 0 0% 98%; /* Di dark mode, primary jadi terang */
-  --primary-foreground: 240 5.9% 10%;
+  --primary: 215 30% 78%; /* Primary lebih kalem */
+  --primary-foreground: 222 18% 16%;
 
-  --secondary: 240 3.7% 15.9%;
-  --secondary-foreground: 0 0% 98%;
+  --secondary: 222 16% 20%;
+  --secondary-foreground: 210 20% 96%;
 
-  --muted: 240 3.7% 15.9%;
-  --muted-foreground: 240 5% 64.9%;
+  --muted: 222 16% 20%;
+  --muted-foreground: 215 12% 68%;
 
-  --accent: 240 3.7% 15.9%;
-  --accent-foreground: 0 0% 98%;
+  --accent: 222 16% 22%;
+  --accent-foreground: 210 20% 96%;
 
-  --destructive: 0 62.8% 30.6%;
-  --destructive-foreground: 0 0% 98%;
+  --destructive: 0 45% 38%;
+  --destructive-foreground: 210 20% 96%;
 
-  --border: 240 3.7% 15.9%; /* Border lebih gelap agar menyatu */
-  --input: 240 3.7% 15.9%;
-  --ring: 240 4.9% 83.9%;
+  --border: 222 14% 24%; /* Border lebih gelap agar menyatu */
+  --input: 222 14% 24%;
+  --ring: 215 18% 75%;
 
-  --success: 142 70% 45%;
-  --success-foreground: 0 0% 98%;
-  --warning: 38 92% 55%;
-  --warning-foreground: 240 10% 3.9%;
-  --info: 217 91% 65%;
-  --info-foreground: 0 0% 98%;
-  --purple: 262 83% 70%;
-  --purple-foreground: 0 0% 98%;
+  --success: 142 38% 45%;
+  --success-foreground: 210 20% 96%;
+  --warning: 38 45% 55%;
+  --warning-foreground: 210 20% 96%;
+  --info: 215 40% 62%;
+  --info-foreground: 210 20% 96%;
+  --purple: 260 35% 68%;
+  --purple-foreground: 210 20% 96%;
 }
 
 @theme inline {
