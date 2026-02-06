@@ -1,6 +1,6 @@
-# Garment Production System - Prototype
+# Production Control Management System
 
-Sistem manajemen produksi garment yang komprehensif dengan tracking lengkap dari cutting hingga packing, termasuk pencatatan surat jalan dan log aktivitas produksi.
+Sistem manajemen produksi yang komprehensif dengan tracking lengkap untuk pencatatan log aktivitas produksi.
 
 ## Fitur Utama
 
